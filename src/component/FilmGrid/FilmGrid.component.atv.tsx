@@ -176,6 +176,7 @@ function FilmGridList({
   ListEmptyComponent,
   centerEmptyComponent,
   disableAutofocus,
+  tabPosition = 'bottom',
   gridFocusKey,
   cardsFocusKey,
   handleOnPress,
@@ -414,13 +415,16 @@ function FilmGridList({
   const scrollContextValue = useMemo(() => ({ scrollTo }), [scrollTo]);
 
   const menuScrollContextValue = useMemo(() => ({
-    // The menu rides in the list header and scrolls away with the content, so
-    // focus entering it only makes sense with the list back at the very top.
-    // Reaching it from the first row leaves it there already; this covers the
-    // rest (a touch scroll, an autofocused menu on a screen just opened).
-    scrollTo: () => scrollToOffset(0),
-  }), [scrollToOffset]);
+    scrollTo: () => {
+      if (tabPosition === 'top') {
+        scrollToOffset(0);
 
+        return;
+      }
+
+      listRef.current?.scrollToEnd({ animated: isScrollAnimated });
+    },
+  }), [scrollToOffset, tabPosition, isScrollAnimated]);
   /**
    * The menu belongs above the first row but inside the list, so that it scrolls
    * away with the content instead of collapsing above it. Re-parenting it to the
@@ -428,7 +432,7 @@ function FilmGridList({
    * them -- see `FilmGridComponent` for why that split is what makes this work.
    */
   const listHeader = useMemo(() => {
-    if (!ListMenuComponent) {
+    if (!ListMenuComponent || tabPosition !== 'top') {
       return ListHeaderComponent;
     }
 
@@ -444,8 +448,14 @@ function FilmGridList({
         </FocusContext.Provider>
       </>
     );
-  }, [ListMenuComponent, ListHeaderComponent, gridFocusKey, menuScrollContextValue, styles]);
-
+  }, [
+    ListMenuComponent,
+    ListHeaderComponent,
+    gridFocusKey,
+    menuScrollContextValue,
+    styles,
+    tabPosition,
+  ]);
   // A row focused near the end cannot be pulled up to its usual position -- the
   // list has nothing below it left to scroll -- so it stays wherever the clamped
   // scroll left it, typically at the very bottom of the screen. Once the page
@@ -453,6 +463,21 @@ function FilmGridList({
   // focused row belongs instead of leaving the user reading from the bottom
   // edge. Re-aligning an already aligned row is a no-op, so this only ever moves
   // the list when the scroll really was clamped.
+  const listFooter = useMemo(() => {
+    if (!ListMenuComponent || tabPosition !== 'bottom') {
+      return null;
+    }
+
+    return (
+      <FocusContext.Provider value={ gridFocusKey }>
+        <ScrollContext.Provider value={ menuScrollContextValue }>
+          <View style={ styles.menu }>
+            { ListMenuComponent }
+          </View>
+        </ScrollContext.Provider>
+      </FocusContext.Provider>
+    );
+  }, [ListMenuComponent, gridFocusKey, menuScrollContextValue, styles, tabPosition]);
   const prevLengthRef = useRef(data.length);
 
   useEffect(() => {
@@ -558,6 +583,7 @@ function FilmGridList({
             contentContainerStyle={ contentContainerStyle }
             ItemSeparatorComponent={ ItemSeparator }
             ListHeaderComponent={ listHeader }
+            ListFooterComponent={ listFooter }
             ListEmptyComponent={ disableEmptyComponent || hideGrid ? null : ListEmptyComponent }
             showsVerticalScrollIndicator={ false }
           />
@@ -588,27 +614,35 @@ function FilmGridList({
  */
 export function FilmGridComponent(props: FilmGridComponentProps) {
   const styles = useThemedStyles(componentStyles);
+  const { tabPosition = 'bottom' } = props;
   // Focus keys are global, and several grids can be mounted at once (one per
   // screen kept alive by the navigator), so they are namespaced per instance.
   const gridId = useId();
   const cardsFocusKey = `${gridId}-cards`;
 
   const resolveSectionFocus = useCallback<NextFocusResolver>((direction, currentFocusKey, siblings) => {
-    // Only the first row bubbles up this far -- the cards container answers
-    // every other row from its own geometry-free grid arithmetic.
-    if (direction === 'up' && currentFocusKey === cardsFocusKey) {
-      return siblings.find((sibling) => sibling.focusKey !== cardsFocusKey) ?? null;
+    if (currentFocusKey === cardsFocusKey) {
+      if (
+        (tabPosition === 'top' && direction === 'up')
+        || (tabPosition === 'bottom' && direction === 'down')
+      ) {
+        return siblings.find((sibling) => sibling.focusKey !== cardsFocusKey) ?? null;
+      }
     }
 
-    if (direction === 'down' && currentFocusKey !== cardsFocusKey) {
-      return siblings.find((sibling) => sibling.focusKey === cardsFocusKey) ?? null;
+    if (currentFocusKey !== cardsFocusKey) {
+      if (
+        (tabPosition === 'top' && direction === 'down')
+        || (tabPosition === 'bottom' && direction === 'up')
+      ) {
+        return siblings.find((sibling) => sibling.focusKey === cardsFocusKey) ?? null;
+      }
     }
 
-    // Everything else leaves the grid: `null` bubbles up to the screen, which is
+    // Everything else leaves the grid: null bubbles up to the screen, which is
     // what reaches the sidebar.
     return null;
-  }, [cardsFocusKey]);
-
+  }, [cardsFocusKey, tabPosition]);
   const { ref, focusKey } = useFocusable<object, View>({
     // Safe only because `nextFocusResolver` answers without needing geometry.
     measureChildrenLayout: false,

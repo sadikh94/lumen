@@ -87,6 +87,7 @@ import { openLinkInBrowser } from 'Util/Link';
 import {
   APP_LANGUAGE_OPTIONS,
   COLUMNS_MOBILE_OPTIONS,
+  TAB_POSITION_OPTIONS,
   FILM_COUNTRY_OPTIONS,
   GITHUB_LINK,
   MOBILE_NAVIGATION_OPTIONS,
@@ -117,6 +118,7 @@ import { useTripleTap } from './useTripleTap';
 export function SettingsScreenComponent({
   initialRoute,
   homeDefaultTab,
+  tabPosition,
   numberOfColumnsMobile,
   hiddenCountries,
   playerRewindSeconds,
@@ -346,6 +348,13 @@ export function SettingsScreenComponent({
         value={ homeDefaultTab || homeMenuOptions[0]?.value || '' }
         options={ homeMenuOptions }
         onChange={ (value) => onConfigUpdate('homeDefaultTab', value) }
+      />
+      <SettingSelect
+        title={ t('Tab position') }
+        IconComponent={ MoveVertical }
+        value={ tabPosition }
+        options={ TAB_POSITION_OPTIONS }
+        onChange={ (value) => onConfigUpdate('tabPosition', value) }
       />
       <SettingSelect
         title={ t('Columns in list') }

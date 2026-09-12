@@ -11,6 +11,7 @@ export function HomeScreenComponent({
       <FilmPager
         { ...pagerHandlers }
         menuDefaultFocus
+        tabPosition={ tabPosition }
       />
     </Page>
   );

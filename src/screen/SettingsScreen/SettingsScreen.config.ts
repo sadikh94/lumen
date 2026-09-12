@@ -319,6 +319,20 @@ export const FILM_COUNTRY_OPTIONS = [
   'Ямайка',
 ].map((country) => ({ value: country, label: country }));
 
+export const TAB_POSITION_OPTIONS = [
+  {
+    value: 'bottom',
+    get label() {
+      return t('Bottom');
+    },
+  },
+  {
+    value: 'top',
+    get label() {
+      return t('Top');
+    },
+  },
+];
 export const COLUMNS_MOBILE_OPTIONS = Array.from({ length: 9 }, (_, index) => ({
   value: (index + 2).toString(),
   label: (index + 2).toString(),

@@ -187,6 +187,7 @@ export function FilmPagerComponent({
   initialPage = 0,
   menuDefaultFocus,
   menuTrailingComponent,
+  tabPosition = 'bottom',
   onPreLoad,
   onNextLoad,
   handleSelectSorting,
@@ -350,7 +351,7 @@ export function FilmPagerComponent({
 
   return (
     <View style={ styles.container }>
-      { pagerItems.length > 1 && (
+      { tabPosition === 'top' && pagerItems.length > 1 && (
         <TopMenu
           pagerItems={ pagerItems }
           styles={ styles }
@@ -375,6 +376,20 @@ export function FilmPagerComponent({
       >
         { pages }
       </AnimatedPagerView>
+
+      { tabPosition === 'bottom' && pagerItems.length > 1 && (
+        <TopMenu
+          pagerItems={ pagerItems }
+          styles={ styles }
+          sorting={ sorting }
+          selectedSorting={ selectedSorting }
+          menuDefaultFocus={ menuDefaultFocus }
+          activeIndex={ activeIndex }
+          menuTrailingComponent={ menuTrailingComponent }
+          onTabSelect={ handleTabSelect }
+          handleSelectSorting={ handleSelectSorting }
+        />
+      ) }
     </View>
   );
 }

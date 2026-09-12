@@ -24,6 +24,7 @@ const MANAGE_CATEGORIES_FOCUS_KEY = 'BOOKMARKS_MANAGE_CATEGORIES';
 export function BookmarksScreenComponent({
   isLoading,
   isLocalLibrary,
+  tabPosition,
   manageCategoriesOverlayRef,
   openManageCategories,
   pagerItems,
@@ -89,6 +90,7 @@ export function BookmarksScreenComponent({
         <FilmPager
           { ...pagerHandlers }
           pagerItems={ pagerItems }
+          tabPosition={ tabPosition }
           isEmpty={ isLocalLibrary }
           ListEmptyComponent={ renderEmptyCategory() }
           centerEmptyComponent

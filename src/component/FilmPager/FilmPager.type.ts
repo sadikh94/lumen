@@ -1,4 +1,5 @@
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
+import { TabPosition } from '../../config';
 import { ComponentType, ReactElement, ReactNode } from 'react';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { MenuItemInterface } from 'Type/MenuItem.interface';
@@ -26,6 +27,7 @@ export interface FilmPagerContainerProps extends FilmPagerHandlers {
   disableStatusbarSafeArea?: boolean;
   // TV related
   menuDefaultFocus?: boolean;
+  tabPosition?: TabPosition;
   /** Optional focusable control rendered after the TV tab list. */
   menuTrailingComponent?: ReactNode;
   // Fires when grid focus enters/leaves the first row, so the screen can

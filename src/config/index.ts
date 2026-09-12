@@ -16,6 +16,8 @@ import { DEFAULT_MAX_PARALLEL_DOWNLOADS } from 'Util/Download';
 import { AccentColor } from 'Theme/accentColors';
 
 
+export type TabPosition = 'top' | 'bottom';
+
 export type DeviceConfigType = {
   isConfigured: boolean;
   isTV: boolean;
@@ -34,6 +36,7 @@ export type DeviceConfigType = {
   hiddenCountries: string[];
   initialRoute: string;
   homeDefaultTab: string;
+  tabPosition: TabPosition;
   playerRewindSeconds: number;
   playerBackwardRewindSeconds: number;
   playerShowBufferTime: boolean;
@@ -107,6 +110,7 @@ export const defaultConfig: DeviceConfigType = {
   hiddenCountries: [],
   initialRoute: HOME_SCREEN,
   homeDefaultTab: '',
+  tabPosition: 'bottom',
   playerRewindSeconds: 10,
   playerBackwardRewindSeconds: 10,
   playerShowBufferTime: false,
@@ -174,6 +178,7 @@ export const CONFIG_KEY_SECTIONS = {
   hiddenMobileNavigationTabs: BACKUP_SECTION.SETTINGS_APPEARANCE,
   initialRoute: BACKUP_SECTION.SETTINGS_APPEARANCE,
   homeDefaultTab: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  tabPosition: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsTV: BACKUP_SECTION.SETTINGS_APPEARANCE,
   recentTwoColumnsTV: BACKUP_SECTION.SETTINGS_APPEARANCE,
