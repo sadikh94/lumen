@@ -1,6 +1,6 @@
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
 import { TabPosition } from '../../config';
-import { ComponentType, ReactElement } from 'react';
+import { ComponentType, ReactElement, ReactNode } from 'react';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { MenuItemInterface } from 'Type/MenuItem.interface';
 import { PaginationInterface } from 'Type/Pagination.interface';
@@ -26,6 +26,8 @@ export interface FilmPagerContainerProps extends FilmPagerHandlers {
   // Mobile related
   disableStatusbarSafeArea?: boolean;
   tabPosition?: TabPosition;
+  /** Optional action rendered alongside the pager tabs. */
+  TabBarActionComponent?: ReactNode;
   // TV related
   menuDefaultFocus?: boolean;
   // Fires when grid focus enters/leaves the first row, so the screen can

@@ -109,9 +109,10 @@ const TopMenu = memo(({
   initialPage,
   handlePageChange,
   handleSelectSorting,
+  TabBarActionComponent,
 }: Pick<
   FilmPagerComponentProps,
-  'pagerItems' | 'sorting' | 'selectedSorting' | 'menuDefaultFocus' | 'handleSelectSorting'
+  'pagerItems' | 'sorting' | 'selectedSorting' | 'menuDefaultFocus' | 'handleSelectSorting' | 'TabBarActionComponent'
 > & {
   initialPage: number;
   handlePageChange: (page: number, pagerItem: PagerItemInterface) => void;
@@ -183,6 +184,7 @@ const TopMenu = memo(({
           handleSelectSorting={ handleSelectSorting }
         />
       )) }
+      { TabBarActionComponent }
     </ThemedScrollView>
   );
 });
@@ -194,6 +196,7 @@ export function FilmPagerComponent({
   hideGrid,
   menuDefaultFocus,
   tabPosition = 'bottom',
+  TabBarActionComponent,
   sorting,
   selectedSorting,
   initialPage = 0,
@@ -220,7 +223,7 @@ export function FilmPagerComponent({
   }, [onPreLoad]);
 
   const renderMenu = () => {
-    if (pagerItems.length <= 1) {
+    if (pagerItems.length <= 1 && !TabBarActionComponent) {
       return null;
     }
 
@@ -232,6 +235,7 @@ export function FilmPagerComponent({
         menuDefaultFocus={ menuDefaultFocus }
         initialPage={ initialPage }
         handleSelectSorting={ handleSelectSorting }
+        TabBarActionComponent={ TabBarActionComponent }
         handlePageChange={ handlePageChange }
         styles={ styles }
       />
@@ -251,8 +255,8 @@ export function FilmPagerComponent({
         hideGrid={ hideGrid }
         tabPosition={ tabPosition }
         ListHeaderComponent={ ListHeaderComponent }
-        // The menu scrolls away with the grid rather than collapsing above it,
-        // so it is rendered inside the list -- as a focus sibling of the cards.
+        // The menu stays fixed outside the FlashList while remaining a focus sibling
+        // of the cards under the enclosing FilmGrid focus context.
         ListMenuComponent={ menu }
         ListEmptyComponent={ ListEmptyComponent }
         centerEmptyComponent={ centerEmptyComponent }

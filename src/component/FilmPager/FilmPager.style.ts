@@ -1,6 +1,13 @@
 import { Theme, ThemedStyles } from 'Theme/types';
 
 export const componentStyles = ({ scale, colors, text }: Theme) => ({
+  tabBarOuter: {
+    width: '100%',
+  },
+  tabBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   tabBarContainer: {
     position: 'relative',
     alignItems: 'center',

@@ -7,6 +7,7 @@ import { ThemedText } from 'Component/ThemedText';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { ComponentType, memo, ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from 'Theme/context';
 import { ThemedStyles } from 'Theme/types';
 
@@ -81,9 +82,11 @@ export function FilmGridComponent({
   handleOnPress,
   handleScrollEnd,
   handleRefresh,
+  tabPosition = 'bottom',
 }: FilmGridComponentProps) {
   const styles = useThemedStyles(componentStyles);
   const { scale } = useAppTheme();
+  const { top: safeAreaTop } = useSafeAreaInsets();
 
   const renderItem = useCallback(({ item }: { item: FilmGridItem }) => {
     if (item.type === FilmGridItemType.HEADER) {
@@ -143,8 +146,8 @@ export function FilmGridComponent({
   // A caller-supplied header replaces the status bar spacer -- it is expected
   // to carry the inset itself.
   const listHeader = useMemo(
-    () => renderSafeArea(ListHeaderComponent),
-    [ListHeaderComponent, renderSafeArea]
+    () => ListHeaderComponent ? renderSafeArea(ListHeaderComponent) : undefined,
+    [ListHeaderComponent, renderSafeArea],
   );
 
   // Tells a list that is still growing apart from one that has ended: a long
@@ -169,9 +172,27 @@ export function FilmGridComponent({
     );
   }, [handleScrollEnd, hasFilms, hasMorePages, isLoadingNext, styles]);
 
-  const contentContainerStyle = useMemo(() => (
-    centerEmptyComponent && !data.length ? styles.centeredEmpty : undefined
-  ), [centerEmptyComponent, data.length, styles]);
+  const contentContainerStyle = useMemo(() => {
+    const topInset = tabPosition === 'bottom' && !disableStatusbarSafeArea
+      ? safeAreaTop
+      : 0;
+
+    if (centerEmptyComponent && !data.length) {
+      return [
+        styles.centeredEmpty,
+        topInset > 0 && { paddingTop: topInset },
+      ];
+    }
+
+    return topInset > 0 ? { paddingTop: topInset } : undefined;
+  }, [
+    centerEmptyComponent,
+    data.length,
+    disableStatusbarSafeArea,
+    safeAreaTop,
+    styles,
+    tabPosition,
+  ]);
 
   const refreshControl = useMemo(() => (handleRefresh ? (
     <RefreshControl

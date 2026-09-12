@@ -172,11 +172,9 @@ function FilmGridList({
   disableEmptyComponent,
   hideGrid,
   ListHeaderComponent,
-  ListMenuComponent,
   ListEmptyComponent,
   centerEmptyComponent,
   disableAutofocus,
-  tabPosition = 'bottom',
   gridFocusKey,
   cardsFocusKey,
   handleOnPress,
@@ -414,70 +412,11 @@ function FilmGridList({
 
   const scrollContextValue = useMemo(() => ({ scrollTo }), [scrollTo]);
 
-  const menuScrollContextValue = useMemo(() => ({
-    scrollTo: () => {
-      if (tabPosition === 'top') {
-        scrollToOffset(0);
+  const listHeader = useMemo(
+    () => renderListComponent(ListHeaderComponent),
+    [ListHeaderComponent],
+  );
 
-        return;
-      }
-
-      listRef.current?.scrollToEnd({ animated: isScrollAnimated });
-    },
-  }), [scrollToOffset, tabPosition, isScrollAnimated]);
-  /**
-   * The menu belongs above the first row but inside the list, so that it scrolls
-   * away with the content instead of collapsing above it. Re-parenting it to the
-   * grid container makes it a focus *sibling* of the cards rather than one of
-   * them -- see `FilmGridComponent` for why that split is what makes this work.
-   */
-  const listHeader = useMemo(() => {
-    if (!ListMenuComponent || tabPosition !== 'top') {
-      return ListHeaderComponent;
-    }
-
-    return (
-      <>
-        { renderListComponent(ListHeaderComponent) }
-        <FocusContext.Provider value={ gridFocusKey }>
-          <ScrollContext.Provider value={ menuScrollContextValue }>
-            <View style={ styles.menu }>
-              { ListMenuComponent }
-            </View>
-          </ScrollContext.Provider>
-        </FocusContext.Provider>
-      </>
-    );
-  }, [
-    ListMenuComponent,
-    ListHeaderComponent,
-    gridFocusKey,
-    menuScrollContextValue,
-    styles,
-    tabPosition,
-  ]);
-  // A row focused near the end cannot be pulled up to its usual position -- the
-  // list has nothing below it left to scroll -- so it stays wherever the clamped
-  // scroll left it, typically at the very bottom of the screen. Once the page
-  // that was loading adds rows underneath, put the focused row back where a
-  // focused row belongs instead of leaving the user reading from the bottom
-  // edge. Re-aligning an already aligned row is a no-op, so this only ever moves
-  // the list when the scroll really was clamped.
-  const listFooter = useMemo(() => {
-    if (!ListMenuComponent || tabPosition !== 'bottom') {
-      return null;
-    }
-
-    return (
-      <FocusContext.Provider value={ gridFocusKey }>
-        <ScrollContext.Provider value={ menuScrollContextValue }>
-          <View style={ styles.menu }>
-            { ListMenuComponent }
-          </View>
-        </ScrollContext.Provider>
-      </FocusContext.Provider>
-    );
-  }, [ListMenuComponent, gridFocusKey, menuScrollContextValue, styles, tabPosition]);
   const prevLengthRef = useRef(data.length);
 
   useEffect(() => {
@@ -583,7 +522,6 @@ function FilmGridList({
             contentContainerStyle={ contentContainerStyle }
             ItemSeparatorComponent={ ItemSeparator }
             ListHeaderComponent={ listHeader }
-            ListFooterComponent={ listFooter }
             ListEmptyComponent={ disableEmptyComponent || hideGrid ? null : ListEmptyComponent }
             showsVerticalScrollIndicator={ false }
           />
@@ -594,23 +532,12 @@ function FilmGridList({
 }
 
 /**
- * The grid's outer focus container, with exactly two focus children: the menu
- * that rides in the list header, and the container that owns every card.
+ * The grid's outer focus container. The menu and the cards container are
+ * direct focus children, so the menu remains fixed outside the FlashList.
  *
- * Two levels rather than one flat one is what makes a menu inside the list
- * workable at all:
- *
- * - Norigin restores focus to the *parent* of a focused component that
- *   unmounts, and resolves it to the child closest to the origin once the last
- *   focused one has gone with it. Cards unmount under the user routinely (a page
- *   swap, a refresh, recycling), and in a flat tree the child closest to the
- *   origin is the menu -- every such unmount would throw the user back to the
- *   top of the list. Cards in a container of their own leave a restore nothing
- *   to land on but another card, and only the drawn ones are registered, so it
- *   lands near where the user already was.
- * - Leaving the first row upwards is answered here by identity rather than by
- *   coordinates -- which could not answer it: the menu sits physically *inside*
- *   the cards container's box, so no measurement would ever place it above.
+ * The explicit resolver handles the vertical transition between those two
+ * sections by identity rather than geometry. This is required because the
+ * menu is outside the cards container and must not be treated as a list item.
  */
 export function FilmGridComponent(props: FilmGridComponentProps) {
   const styles = useThemedStyles(componentStyles);
@@ -652,14 +579,28 @@ export function FilmGridComponent(props: FilmGridComponentProps) {
     preferredChildFocusKey: cardsFocusKey,
   });
 
+  const { ListMenuComponent } = props;
+
   return (
     <FocusContext.Provider value={ focusKey }>
       <View ref={ ref } style={ styles.grid } tvFocusable={ false }>
+        { ListMenuComponent && tabPosition === 'top' && (
+          <View style={ styles.menu }>
+            { ListMenuComponent }
+          </View>
+        ) }
+
         <FilmGridList
           { ...props }
           gridFocusKey={ focusKey }
           cardsFocusKey={ cardsFocusKey }
         />
+
+        { ListMenuComponent && tabPosition === 'bottom' && (
+          <View style={ styles.menu }>
+            { ListMenuComponent }
+          </View>
+        ) }
       </View>
     </FocusContext.Provider>
   );

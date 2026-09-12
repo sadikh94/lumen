@@ -81,15 +81,11 @@ export function BookmarksScreenComponent({
 
     return (
       <View style={ styles.content }>
-        { isLocalLibrary && (
-          <View style={ styles.header }>
-            { renderManageButton() }
-          </View>
-        ) }
         <FilmPager
           { ...pagerHandlers }
           pagerItems={ pagerItems }
           tabPosition={ tabPosition }
+          TabBarActionComponent={ isLocalLibrary && renderManageButton() }
           isEmpty={ isLocalLibrary }
           ListEmptyComponent={ renderEmptyCategory() }
           centerEmptyComponent

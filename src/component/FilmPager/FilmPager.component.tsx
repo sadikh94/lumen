@@ -5,6 +5,7 @@ import { ThemedOverlayRef } from 'Component/ThemedOverlay/ThemedOverlay.type';
 import { Wrapper } from 'Component/Wrapper';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeSyntheticEvent, ScrollView, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { usePagerView } from 'react-native-pager-view';
@@ -109,6 +110,7 @@ export const FilmPagerComponent = ({
   hideGrid,
   disableStatusbarSafeArea,
   tabPosition = 'bottom',
+  TabBarActionComponent,
   ListEmptyComponent,
   centerEmptyComponent,
   sorting,
@@ -120,6 +122,7 @@ export const FilmPagerComponent = ({
 }: FilmPagerComponentProps) => {
   const { scale, theme } = useAppTheme();
   const styles = useThemedStyles(componentStyles);
+  const { top: safeAreaTop } = useSafeAreaInsets();
   const { AnimatedPagerView, ref: pagerViewRef } = usePagerView({ pagesAmount: 10 });
   const [activeIndex, setActiveIndex] = useState(initialPage);
   const [activeTab, setActiveTab] = useState(initialPage);
@@ -239,31 +242,60 @@ export const FilmPagerComponent = ({
   }, []);
 
   const renderScrollableTabBar = useMemo(() => (
-    <Wrapper>
-      <ScrollView
-        ref={ scrollViewRef }
-        horizontal
-        showsHorizontalScrollIndicator={ false }
-        showsVerticalScrollIndicator={ false }
-        contentContainerStyle={ styles.tabBarContainer }
-        accessibilityRole="tablist"
-      >
-        { pagerItems.map(({ menuItem }, i) => (
-          <TabButton
-            key={ menuItem.id }
-            menuItem={ menuItem }
-            isActive={ activeTab === i }
-            onPress={ () => handleTabPress(i) }
-            onLayout={ (width) => handleTabLayout(i, width) }
-            styles={ styles }
-            sorting={ sorting }
-            selectedSorting={ selectedSorting }
-            handleSelectSorting={ handleSelectSorting }
-          />
-        )) }
-      </ScrollView>
-    </Wrapper>
-  ), [styles, pagerItems, activeTab, sorting, selectedSorting, handleSelectSorting, handleTabPress, handleTabLayout]);
+    <View
+      style={ [
+        styles.tabBarOuter,
+        tabPosition === 'top' && { paddingTop: safeAreaTop },
+      ] }
+    >
+      <Wrapper>
+        <View style={ styles.tabBarRow }>
+          { pagerItems.length > 1 && (
+            <ScrollView
+              ref={ scrollViewRef }
+              horizontal
+              showsHorizontalScrollIndicator={ false }
+              showsVerticalScrollIndicator={ false }
+              style={ { flex: 1, minWidth: 0 } }
+              contentContainerStyle={ styles.tabBarContainer }
+              accessibilityRole="tablist"
+            >
+              { pagerItems.map(({ menuItem }, i) => (
+                <TabButton
+                  key={ menuItem.id }
+                  menuItem={ menuItem }
+                  isActive={ activeTab === i }
+                  onPress={ () => handleTabPress(i) }
+                  onLayout={ (width) => handleTabLayout(i, width) }
+                  styles={ styles }
+                  sorting={ sorting }
+                  selectedSorting={ selectedSorting }
+                  handleSelectSorting={ handleSelectSorting }
+                />
+              )) }
+            </ScrollView>
+          ) }
+          { TabBarActionComponent && (
+            <View style={ { flexShrink: 0 } }>
+              { TabBarActionComponent }
+            </View>
+          ) }
+        </View>
+      </Wrapper>
+    </View>
+  ), [
+    styles,
+    pagerItems,
+    activeTab,
+    sorting,
+    selectedSorting,
+    handleSelectSorting,
+    handleTabPress,
+    handleTabLayout,
+    TabBarActionComponent,
+    tabPosition,
+    safeAreaTop,
+  ]);
 
   const renderPage = useCallback((pagerItem: PagerItemInterface, idx: number) => {
     if (!renderedIndexes.has(idx) && idx !== initialPage) {
@@ -278,6 +310,7 @@ export const FilmPagerComponent = ({
         hasMorePages={ pagination.currentPage < pagination.totalPages }
         disableEmptyComponent={ disableEmptyComponent }
         disableStatusbarSafeArea={ disableStatusbarSafeArea }
+        tabPosition={ tabPosition }
         // empty flag it true, films array exist and this array is empty
         isEmpty={ isEmpty && films !== null && !films.length }
         hideGrid={ hideGrid }
@@ -319,11 +352,13 @@ export const FilmPagerComponent = ({
     theme,
   ]);
 
+  const hasTabBarContent = pagerItems.length > 1 || Boolean(TabBarActionComponent);
+
   return (
     <View style={ { flex: 1 } }>
-      { tabPosition === 'top' && pagerItems.length > 1 && renderScrollableTabBar }
+      { tabPosition === 'top' && hasTabBarContent && renderScrollableTabBar }
       { renderPagerView }
-      { tabPosition === 'bottom' && pagerItems.length > 1 && renderScrollableTabBar }
+      { tabPosition === 'bottom' && hasTabBarContent && renderScrollableTabBar }
     </View>
   );
 };
