@@ -31,7 +31,7 @@ const buildLocalPagerItems = (blob: LocalBookmarksBlob): PagerItemInterface[] =>
 );
 
 export function BookmarksScreenContainer() {
-  const { isTV, isLocalLibrary } = useConfigContext();
+  const { isTV, isLocalLibrary, tabPosition } = useConfigContext();
   const { isSignedIn, currentService } = useServiceContext();
   const localBookmarks = useLocalBookmarks();
   const manageCategoriesOverlayRef = useRef<ThemedOverlayRef | null>(null);
@@ -84,6 +84,7 @@ export function BookmarksScreenContainer() {
     isLoading: isLocalLibrary ? false : !isSignedIn || isBookmarksLoading,
     pagerItems: isLocalLibrary ? localPagerItems : pagerItems,
     isLocalLibrary,
+    tabPosition,
     manageCategoriesOverlayRef,
     onPreLoad,
     onNextLoad,

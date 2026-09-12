@@ -193,6 +193,7 @@ export function FilmPagerComponent({
   isEmpty,
   hideGrid,
   menuDefaultFocus,
+  tabPosition = 'bottom',
   sorting,
   selectedSorting,
   initialPage = 0,
@@ -248,6 +249,7 @@ export function FilmPagerComponent({
         // empty flag it true, films array exist and this array is empty
         isEmpty={ isEmpty && currentPagerItem?.films !== null && !currentPagerItem?.films?.length }
         hideGrid={ hideGrid }
+        tabPosition={ tabPosition }
         ListHeaderComponent={ ListHeaderComponent }
         // The menu scrolls away with the grid rather than collapsing above it,
         // so it is rendered inside the list -- as a focus sibling of the cards.

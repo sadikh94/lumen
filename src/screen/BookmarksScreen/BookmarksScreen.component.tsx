@@ -20,6 +20,7 @@ import { BookmarksScreenComponentProps } from './BookmarksScreen.type';
 export function BookmarksScreenComponent({
   isLoading,
   isLocalLibrary,
+  tabPosition,
   manageCategoriesOverlayRef,
   openManageCategories,
   pagerItems,
@@ -93,6 +94,7 @@ export function BookmarksScreenComponent({
         <FilmPager
           { ...pagerHandlers }
           pagerItems={ pagerItems }
+          tabPosition={ tabPosition }
           isEmpty={ isLocalLibrary }
           ListEmptyComponent={ renderEmptyCategory() }
           centerEmptyComponent

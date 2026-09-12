@@ -33,6 +33,7 @@ import Columns2 from 'lucide-react-native/icons/columns-2';
 import DatabaseBackup from 'lucide-react-native/icons/database-backup';
 import Dock from 'lucide-react-native/icons/dock';
 import Download from 'lucide-react-native/icons/download';
+import MoveVertical from 'lucide-react-native/icons/move-vertical';
 import ExternalLink from 'lucide-react-native/icons/external-link';
 import EyeOff from 'lucide-react-native/icons/eye-off';
 import FastForward from 'lucide-react-native/icons/fast-forward';
@@ -83,6 +84,7 @@ import { openLinkInBrowser } from 'Util/Link';
 import {
   APP_LANGUAGE_OPTIONS,
   COLUMNS_TV_OPTIONS,
+  TAB_POSITION_OPTIONS,
   FILM_COUNTRY_OPTIONS,
   GITHUB_LINK,
   PLAYER_ASPECT_RATIO_OPTIONS,
@@ -108,6 +110,7 @@ import { SETTING_GROUP, SettingsScreenComponentProps } from './SettingsScreen.ty
 export function SettingsScreenComponent({
   initialRoute,
   homeDefaultTab,
+  tabPosition,
   numberOfColumnsTV,
   recentTwoColumnsTV,
   hiddenCountries,
@@ -288,6 +291,13 @@ export function SettingsScreenComponent({
         value={ homeDefaultTab || homeMenuOptions[0]?.value || '' }
         options={ homeMenuOptions }
         onChange={ (value) => onConfigUpdate('homeDefaultTab', value) }
+      />
+      <SettingSelect
+        title={ t('Tab position') }
+        IconComponent={ MoveVertical }
+        value={ tabPosition }
+        options={ TAB_POSITION_OPTIONS }
+        onChange={ (value) => onConfigUpdate('tabPosition', value) }
       />
       <SettingSelect
         title={ t('Columns in list') }

@@ -108,6 +108,7 @@ export const FilmPagerComponent = ({
   isEmpty,
   hideGrid,
   disableStatusbarSafeArea,
+  tabPosition = 'bottom',
   ListEmptyComponent,
   centerEmptyComponent,
   sorting,
@@ -320,8 +321,9 @@ export const FilmPagerComponent = ({
 
   return (
     <View style={ { flex: 1 } }>
+      { tabPosition === 'top' && pagerItems.length > 1 && renderScrollableTabBar }
       { renderPagerView }
-      { pagerItems.length > 1 && renderScrollableTabBar }
+      { tabPosition === 'bottom' && pagerItems.length > 1 && renderScrollableTabBar }
     </View>
   );
 };
