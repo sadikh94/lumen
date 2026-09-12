@@ -91,6 +91,7 @@ export function BookmarksScreenComponent({
           { ...pagerHandlers }
           pagerItems={ pagerItems }
           tabPosition={ tabPosition }
+          TabBarActionComponent={ isLocalLibrary && renderManageButton() }
           isEmpty={ isLocalLibrary }
           ListEmptyComponent={ renderEmptyCategory() }
           centerEmptyComponent
