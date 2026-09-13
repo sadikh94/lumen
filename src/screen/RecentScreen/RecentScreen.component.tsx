@@ -1,4 +1,5 @@
 import { ConfirmOverlay } from 'Component/ConfirmOverlay';
+import { FilmRating } from 'Component/FilmRating';
 import { InfoBlock } from 'Component/InfoBlock';
 import { LoginForm } from 'Component/LoginForm';
 import { Page } from 'Component/Page';
@@ -55,10 +56,13 @@ function RecentItem({
       ] }
       >
         <View style={ styles.itemContainer }>
-          <ThemedImage
-            style={ styles.poster }
-            src={ image }
-          />
+          <View style={ { position: 'relative' } }>
+            <ThemedImage
+              style={ styles.poster }
+              src={ image }
+            />
+            <FilmRating filmId={ item.id } />
+          </View>
           <View style={ styles.itemContent }>
             <ThemedText style={ styles.name }>
               { name }

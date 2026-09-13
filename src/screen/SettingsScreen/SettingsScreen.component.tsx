@@ -99,6 +99,7 @@ import {
   PLAYER_SUBTITLES_EDGE_OPTIONS,
   PLAYER_SUBTITLES_SIZE_OPTIONS,
   PLAYER_VOLUME_NORMALIZATION_OPTIONS,
+  RATING_SOURCE_OPTIONS,
   TELEGRAM_LINK,
   THEME_SCHEME_OPTIONS,
 } from './SettingsScreen.config';
@@ -109,6 +110,7 @@ import { useTripleTap } from './useTripleTap';
 
 export function SettingsScreenComponent({
   initialRoute,
+  ratingSource,
   homeDefaultTab,
   numberOfColumnsMobile,
   hiddenCountries,
@@ -291,6 +293,14 @@ export function SettingsScreenComponent({
         value={ homeDefaultTab || homeMenuOptions[0]?.value || '' }
         options={ homeMenuOptions }
         onChange={ (value) => onConfigUpdate('homeDefaultTab', value) }
+      />
+      <SettingSelect
+        title={ t('Rating source') }
+        subtitle={ t('Show movie ratings on posters.') }
+        IconComponent={ Tag }
+        value={ ratingSource }
+        options={ RATING_SOURCE_OPTIONS }
+        onChange={ (value) => onConfigUpdate('ratingSource', value) }
       />
       <SettingSelect
         title={ t('Columns in list') }

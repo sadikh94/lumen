@@ -102,6 +102,7 @@ class Storage {
   private downloadsStorage: StorageWrapper|null = null;
   private localLibraryStorage: StorageWrapper|null = null;
   private commentsStorage: StorageWrapper|null = null;
+  private ratingStorage: StorageWrapper|null = null;
 
   getConfigStorage() {
     if (!this.configStorage) {
@@ -157,6 +158,14 @@ class Storage {
     }
 
     return this.commentsStorage;
+  }
+
+  getRatingStorage() {
+    if (!this.ratingStorage) {
+      this.ratingStorage = new StorageWrapper(createMMKV({ id: 'ratings' }));
+    }
+
+    return this.ratingStorage;
   }
 }
 
