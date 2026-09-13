@@ -3,6 +3,7 @@ import { BookmarkInterface } from 'Type/Bookmark.interface';
 import { CommentListInterface } from 'Type/CommentList.interface';
 import { ContentCollectionInterface } from 'Type/ContentCollection.interface';
 import { FilmInterface } from 'Type/Film.interface';
+import { FilmRatingsInterface } from 'Type/FilmRatings.interface';
 import { FilmListInterface } from 'Type/FilmList.interface';
 import { FilmStreamInterface } from 'Type/FilmStream.interface';
 import { FilmVideoInterface } from 'Type/FilmVideo.interface';
@@ -123,6 +124,7 @@ export interface ApiInterface {
   ) => Promise<FilmListInterface>;
   getFilm: (link: string) => Promise<FilmInterface | null>;
   getFilmTrailer: (filmId: string) => Promise<string | null>;
+  getFilmRatings: (filmId: string) => Promise<FilmRatingsInterface>;
   getFilmSeasons: (film: FilmInterface, voice: FilmVoiceInterface) => Promise<FilmVoiceInterface>;
   getFilmStreamsByVoice: (
     film: FilmInterface,

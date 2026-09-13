@@ -1,3 +1,4 @@
+import { FilmRating } from 'Component/FilmRating';
 import { ThemedImage } from 'Component/ThemedImage';
 import { ThemedText } from 'Component/ThemedText';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
@@ -112,6 +113,7 @@ export function FilmCardComponent({
     <View style={ [styles.card, style] }>
       <View style={ styles.posterWrapper }>
         { renderPoster() }
+        <FilmRating filmId={ filmCard.id } />
         { renderAdditionContainer() }
       </View>
       <View style={ styles.info }>

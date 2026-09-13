@@ -71,6 +71,7 @@ export type DeviceConfigType = {
   playerSaveBrightness: boolean;
   playerSavedBrightness?: number;
   sortVoicesByRating: boolean;
+  ratingSource: 'off' | 'imdb' | 'kinopoisk';
   playerStopPlayOnButtonTV: boolean;
   playerStopPlayShowInterfaceTV: boolean;
   playerBufferTimeSetting?: number;
@@ -154,6 +155,7 @@ export const defaultConfig: DeviceConfigType = {
   playerBufferTimeSetting: undefined,
   playerBackBufferTimeSetting: 30,
   sortVoicesByRating: false,
+  ratingSource: 'off',
   checkForUpdates: true,
   strictConnectionCheck: true,
   playerDefaultAspectRatio: ASPECT_RATIO_OPTIONS[0],
@@ -187,6 +189,7 @@ export const CONFIG_KEY_SECTIONS = {
   isLowMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
   isTVAwake: BACKUP_SECTION.SETTINGS_APPEARANCE,
   sortVoicesByRating: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  ratingSource: BACKUP_SECTION.SETTINGS_APPEARANCE,
   isContinueBtnEnabled: BACKUP_SECTION.SETTINGS_APPEARANCE,
   commentPostingMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,
   commentPostingTV: BACKUP_SECTION.SETTINGS_APPEARANCE,

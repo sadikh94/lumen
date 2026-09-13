@@ -1,6 +1,7 @@
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation-react-native-tvos';
 import { ConfirmOverlay } from 'Component/ConfirmOverlay';
 import { InfoBlock } from 'Component/InfoBlock';
+import { FilmRating } from 'Component/FilmRating';
 import { LoginForm } from 'Component/LoginForm';
 import { Page } from 'Component/Page';
 import { ThemedButton } from 'Component/ThemedButton';
@@ -193,6 +194,7 @@ function RecentRow({
                     style={ styles.poster }
                     src={ image }
                   />
+                  <FilmRating filmId={ item.id } />
                 </View>
                 { /* The row is a fixed height and its content is centred, so
                      text that wraps past it is clipped at both ends rather than

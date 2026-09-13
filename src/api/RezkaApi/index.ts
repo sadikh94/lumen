@@ -1158,6 +1158,22 @@ const RezkaApi: RezkaApiInterface = {
     return film;
   },
 
+  async getFilmRatings(filmId) {
+    const content = await this.postRequest('/engine/ajax/quick_content.php', {
+      id: filmId,
+      is_touch: '1',
+    });
+
+    const root = this.parseContent(content);
+    const imdb = Number(root.querySelector('.imdb b')?.rawText);
+    const kinopoisk = Number(root.querySelector('.kp b')?.rawText);
+
+    return {
+      ...(Number.isFinite(imdb) && imdb > 0 ? { imdb } : {}),
+      ...(Number.isFinite(kinopoisk) && kinopoisk > 0 ? { kinopoisk } : {}),
+    };
+  },
+
   async getFilmTrailer(filmId) {
     const result = await this.postJson<TrailerResult>('/engine/ajax/gettrailervideo.php', {
       id: filmId,
