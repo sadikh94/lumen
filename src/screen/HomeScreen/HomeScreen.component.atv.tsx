@@ -10,6 +10,7 @@ export function HomeScreenComponent({
     <Page>
       <FilmPager
         { ...pagerHandlers }
+        menuDefaultFocus
       />
     </Page>
   );

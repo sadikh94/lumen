@@ -35,14 +35,20 @@ export function BookmarksScreenComponent({
 
   const renderManageButton = (autofocus = false) => (
     <ThemedButton
-      title={ t('Manage categories') }
+      title=""
       focusKey={ MANAGE_CATEGORIES_FOCUS_KEY }
       autofocus={ autofocus }
       IconComponent={ FolderCog }
       iconProps={ {
         size: scale(18),
       } }
+      iconColor='#FFFFFF'
+      iconColorFocused='#FFFFFF'
       onPress={ openManageCategories }
+      style={ styles.manageButton }
+      contentStyle={ styles.manageButtonContent }
+      styleFocused={ styles.manageButtonFocused }
+      textStyle={ styles.manageButtonText }
     />
   );
 
@@ -80,11 +86,6 @@ export function BookmarksScreenComponent({
 
     return (
       <View style={ styles.content }>
-        { isLocalLibrary && (
-          <View style={ styles.header }>
-            { renderManageButton() }
-          </View>
-        ) }
         <FilmPager
           { ...pagerHandlers }
           pagerItems={ pagerItems }
@@ -92,6 +93,7 @@ export function BookmarksScreenComponent({
           ListEmptyComponent={ renderEmptyCategory() }
           centerEmptyComponent
           menuDefaultFocus
+          menuTrailingComponent={ isLocalLibrary ? renderManageButton() : undefined }
         />
       </View>
     );

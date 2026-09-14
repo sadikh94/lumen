@@ -1,5 +1,5 @@
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
-import { ComponentType, ReactElement } from 'react';
+import { ComponentType, ReactElement, ReactNode } from 'react';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { MenuItemInterface } from 'Type/MenuItem.interface';
 import { PaginationInterface } from 'Type/Pagination.interface';
@@ -26,6 +26,8 @@ export interface FilmPagerContainerProps extends FilmPagerHandlers {
   disableStatusbarSafeArea?: boolean;
   // TV related
   menuDefaultFocus?: boolean;
+  /** Optional focusable control rendered after the TV tab list. */
+  menuTrailingComponent?: ReactNode;
   // Fires when grid focus enters/leaves the first row, so the screen can
   // collapse its own headers alongside the pager menu.
   onAtTopChange?: (atTop: boolean) => void;

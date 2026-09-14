@@ -8,8 +8,11 @@ import { ThemedText } from 'Component/ThemedText';
 import { useNavigationContext } from 'Context/NavigationContext';
 import { useServiceContext } from 'Context/ServiceContext';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
+import { useConfigContext } from 'Context/ConfigContext';
 import { t } from 'i18n/translate';
 import { ACCOUNT_TAB, DOWNLOADS_SCREEN, SETTINGS_SCREEN } from 'Navigation/navigationRoutes';
+import PanelLeft from 'lucide-react-native/icons/panel-left';
+import PanelRight from 'lucide-react-native/icons/panel-right';
 import { ComponentType, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -18,11 +21,11 @@ import { ThemedStyles } from 'Theme/types';
 import { ProfileInterface } from 'Type/Profile.interface';
 import { setTimeoutSafe } from 'Util/Misc';
 
-import { componentStyles } from './NavigationBar.style.atv';
+import { componentStyles, NAVIGATION_BAR_ANIMATION_DURATION_MS } from './NavigationBar.style.atv';
 import { NavigationBarComponentProps } from './NavigationBar.type';
 
 export const SIDEBAR_FOCUS_KEY = 'SIDEBAR';
-
+const SIDEBAR_TOGGLE_FOCUS_KEY = 'SIDEBAR_TOGGLE';
 const TAB_SELECT_DEBOUNCE_MS = 400;
 
 const getTabFocusKey = (name: string) => `sidebar-tab-${name}`;
@@ -63,7 +66,7 @@ const NavigationTab = ({
     if (typeof label === 'function') {
       return label({
         focused: isActiveTab,
-        color: isFocused && isMenuOpened ? theme.colors.iconFocused : theme.colors.icon,
+        color: isActiveTab ? '#FFFFFF' : theme.colors.textSecondary,
         position: 'below-icon',
         children: '',
       });
@@ -79,7 +82,7 @@ const NavigationTab = ({
           <IconComponent
             style={ styles.tabIcon }
             size={ styles.tabIcon.width }
-            color={ isFocused && isMenuOpened ? theme.colors.iconFocused : theme.colors.icon }
+            color={ isActiveTab ? '#FFFFFF' : theme.colors.textSecondary }
           />
         ) }
         { badgeCount > 0 && (
@@ -88,14 +91,16 @@ const NavigationTab = ({
           </ThemedText>
         ) }
       </View>
-      <ThemedText
-        style={ [
-          styles.tabText,
-          isFocused && isMenuOpened && styles.tabContentFocused,
-        ] }
-      >
-        { renderLabel(isFocused) }
-      </ThemedText>
+      { isMenuOpened && (
+        <ThemedText
+          style={ [
+            styles.tabText,
+            isActiveTab && styles.tabContentFocused,
+          ] }
+        >
+          { renderLabel(isFocused) }
+        </ThemedText>
+      ) }
     </>
   );
 
@@ -117,26 +122,27 @@ const NavigationTab = ({
             />
           ) }
         </View>
-        <View style={ styles.profile }>
-          <ThemedText
-            style={ [
-              styles.tabText,
-              styles.profileNameText,
-              isFocused && isMenuOpened && styles.tabContentFocused,
-            ] }
-          >
-            { renderLabel(isFocused) }
-          </ThemedText>
-          <ThemedText
-            style={ [
-              styles.tabText,
-              styles.profileSwitchText,
-              isFocused && isMenuOpened && styles.tabContentFocused,
-            ] }
-          >
-            { isSignedIn ? t('You') : t('Sign in') }
-          </ThemedText>
-        </View>
+        { isMenuOpened && (
+          <View style={ styles.profile }>
+            <ThemedText
+              style={ [
+                styles.tabText,
+                styles.profileNameText,
+                isActiveTab && styles.tabContentFocused,
+              ] }
+            >
+              { renderLabel(isFocused) }
+            </ThemedText>
+            <ThemedText
+              style={ [
+                styles.tabText,
+                styles.profileSwitchText,
+              ] }
+            >
+              { isSignedIn ? t('You') : t('Sign in') }
+            </ThemedText>
+          </View>
+        ) }
       </>
     );
   };
@@ -145,8 +151,8 @@ const NavigationTab = ({
     <ThemedPressable
       focusKey={ getTabFocusKey(name) }
       onFocus={ () => onTabFocus(name) }
-      onEnterPress={ onReload }
       onPress={ () => onTabSelect(name) }
+      onEnterPress={ () => onTabSelect(name) }
       style={ styles.tabButton }
       contentStyle={ styles.tabButtonContent }
     >
@@ -154,8 +160,8 @@ const NavigationTab = ({
         <View
           style={ [
             styles.tab,
-            isActiveTab && !isMenuOpened && styles.tabSelected,
-            isFocused && isMenuOpened && styles.tabFocused,
+            isActiveTab && styles.tabSelected,
+            isFocused && styles.tabFocused,
           ] }
         >
           { name === ACCOUNT_TAB ? renderAccountTab(isFocused) : renderDefaultTab(isFocused) }
@@ -175,89 +181,25 @@ export function NavigationBarComponent({
   onReload,
 }: NavigationBarComponentProps) {
   const { badgeData } = useServiceContext();
-  const { toggleMenu, hideScene } = useNavigationContext();
+  const { isMenuOpen, toggleMenu } = useNavigationContext();
+  const { isLowMode } = useConfigContext();
   const styles = useThemedStyles(componentStyles);
-  const timerRef = useRef<number | null>(null);
-  const pendingTabRef = useRef<string | null>(null);
-  const hasFocusedChildRef = useRef(false);
-  const [focusedTabName, setFocusedTabName] = useState<string | null>(null);
-
-  const activeTabName = state.routes[state.index]?.name ?? null;
-
-  const { ref, focusKey, hasFocusedChild } = useFocusable({
+  const { ref, focusKey } = useFocusable({
     focusKey: SIDEBAR_FOCUS_KEY,
     trackChildren: true,
     isFocusBoundary: true,
     focusBoundaryDirections: ['left'],
-    saveLastFocusedChild: false,
-    preferredChildFocusKey: activeTabName ? getTabFocusKey(activeTabName) : undefined,
-    // Norigin navigates *from* the focused node, so with nothing focused at all a
-    // D-Pad press is simply dropped -- the app is then stuck with no way back to
-    // the menu. That happens whenever the screen the app starts on renders no
-    // focusable at all (an empty state: no notifications, no recent items ...),
-    // and again any time focus is lost. `forceFocus` makes the sidebar the
-    // recovery target: the first arrow press lands on the active tab instead of
-    // going nowhere.
+    saveLastFocusedChild: true,
     forceFocus: true,
   });
 
-  useEffect(() => {
-    hasFocusedChildRef.current = hasFocusedChild;
-    toggleMenu(hasFocusedChild);
-
-    // the user left the sidebar before the debounce elapsed — commit the tab now,
-    // so navigation never lands while focus already sits inside the content
-    if (!hasFocusedChild && timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-
-      if (pendingTabRef.current) {
-        onPress(pendingTabRef.current);
-        pendingTabRef.current = null;
-      }
-    }
-  }, [hasFocusedChild, toggleMenu, onPress]);
-
-  // mask the scene only while a *different* tab is being previewed — browsing back
-  // onto the tab you are already on should reveal it again, not hide it
-  useEffect(() => {
-    hideScene(
-      hasFocusedChild
-      && focusedTabName !== null
-      && focusedTabName !== activeTabName
-    );
-  }, [hasFocusedChild, focusedTabName, activeTabName, hideScene]);
-
-  useEffect(() => () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-  }, []);
-
   const onTabSelect = useCallback((name: string) => {
-    setFocusedTabName(name);
-
     onPress(name);
   }, [onPress]);
 
-  const onTabFocus = useCallback((name: string) => {
-    if (!hasFocusedChildRef.current) {
-      return;
-    }
-
-    setFocusedTabName(name);
-
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    pendingTabRef.current = name;
-    timerRef.current = setTimeoutSafe(() => {
-      timerRef.current = null;
-      pendingTabRef.current = null;
-      onTabSelect(name);
-    }, TAB_SELECT_DEBOUNCE_MS);
-  }, [onTabSelect]);
+  const onTabFocus = useCallback((_name: string) => {
+    // Focus only moves between sidebar items. It must never change the route.
+  }, []);
 
   const { topTabs, middleTabs, bottomTabs } = useMemo(() => {
     const tt = [] as { route: NavigationRoute<ParamListBase, string>, index: number }[];
@@ -267,7 +209,7 @@ export function NavigationBarComponent({
     state.routes.forEach((route, index) => {
       switch (route.name) {
         case ACCOUNT_TAB:
-          tt.push({ route, index });
+          bt.push({ route, index });
           break;
         case SETTINGS_SCREEN:
           bt.push({ route, index });
@@ -300,7 +242,7 @@ export function NavigationBarComponent({
         badgeCount={ badgeData[route.name] || 0 }
         profile={ route.name === ACCOUNT_TAB ? profile : undefined }
         isActiveTab={ state.index === index }
-        isMenuOpened={ hasFocusedChild }
+        isMenuOpened={ isMenuOpen }
         onTabSelect={ onTabSelect }
         onTabFocus={ onTabFocus }
         onReload={ onReload }
@@ -308,9 +250,42 @@ export function NavigationBarComponent({
     );
   };
 
+  const handleToggleMenu = () => {
+    toggleMenu(!isMenuOpen);
+  };
+
   return (
     <FocusContext.Provider value={ focusKey }>
-      <Animated.View ref={ ref } style={ [styles.bar, hasFocusedChild && styles.barOpened] }>
+      <Animated.View
+        ref={ ref }
+        style={ [
+          styles.bar,
+          {
+            transitionDuration: isLowMode
+              ? '0ms'
+              : `${NAVIGATION_BAR_ANIMATION_DURATION_MS}ms`,
+          },
+          isMenuOpen && styles.barOpened,
+        ] }
+      >
+        <ThemedPressable
+          focusKey={ SIDEBAR_TOGGLE_FOCUS_KEY }
+          onPress={ handleToggleMenu }
+          style={ styles.toggleButton }
+          contentStyle={ [styles.toggleButtonContent, isMenuOpen && styles.toggleButtonContentOpened] }
+        >
+          { ({ isFocused }) => {
+            const ToggleIcon = isMenuOpen ? PanelRight : PanelLeft;
+
+            return (
+              <ToggleIcon
+                size={ styles.toggleIcon.width }
+                color={ isFocused ? styles.toggleIconFocused.color : styles.toggleIcon.color }
+              />
+            );
+          } }
+        </ThemedPressable>
+
         <ThemedScrollView
           style={ styles.tabs }
           contentContainerStyle={ styles.tabsContent }
@@ -318,9 +293,11 @@ export function NavigationBarComponent({
           <View>
             { topTabs.map(({ route, index }) => renderTab(route, index)) }
           </View>
+
           <View style={ styles.middleTabs }>
             { middleTabs.map(({ route, index }) => renderTab(route, index)) }
           </View>
+
           <View>
             { bottomTabs.map(({ route, index }) => renderTab(route, index)) }
           </View>

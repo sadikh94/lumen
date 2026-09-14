@@ -4,8 +4,13 @@ export const NAVIGATION_BAR_Z_INDEX = 100;
 export const NAVIGATION_BAR_TV_WIDTH = 68;
 export const NAVIGATION_BAR_TV_WIDTH_PADDING = 12;
 
-export const NAVIGATION_BAR_TV_TAB_WIDTH = NAVIGATION_BAR_TV_WIDTH - NAVIGATION_BAR_TV_WIDTH_PADDING * 2;
+export const NAVIGATION_BAR_TV_TAB_WIDTH =
+  NAVIGATION_BAR_TV_WIDTH - NAVIGATION_BAR_TV_WIDTH_PADDING * 2;
+
 export const NAVIGATION_BAR_TV_TAB_WIDTH_EXPANDED = 120;
+
+export const NAVIGATION_BAR_TV_WIDTH_OPENED =
+  NAVIGATION_BAR_TV_TAB_WIDTH + NAVIGATION_BAR_TV_TAB_WIDTH_EXPANDED;
 
 export const NAVIGATION_BAR_ANIMATION_DURATION_MS = 300;
 
@@ -25,10 +30,11 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     backgroundColor: colors.background,
   },
   barOpened: {
-    width: scale(NAVIGATION_BAR_TV_TAB_WIDTH) + scale(NAVIGATION_BAR_TV_TAB_WIDTH_EXPANDED),
+    width: scale(NAVIGATION_BAR_TV_WIDTH_OPENED),
   },
   tabsContent: {
     flexGrow: 1,
+    justifyContent: 'center',
   },
   tabs: {
     width: '100%',
@@ -41,30 +47,29 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     justifyContent: 'center',
   },
   tabButton: {
-    marginBottom: scale(12),
+    marginBottom: scale(8),
   },
   tabButtonContent: {
-    borderRadius: scale(24),
+    borderRadius: scale(12),
   },
   tab: {
     width: '100%',
+    minHeight: scale(44),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    padding: scale(12),
+    padding: scale(10),
+    borderRadius: scale(12),
   },
   tabSelected: {
-    backgroundColor: colors.tertiary,
-    borderRadius: scale(24),
+    backgroundColor: colors.transparent,
   },
   tabFocused: {
-    backgroundColor: colors.backgroundFocused,
-    borderRadius: scale(24),
+    backgroundColor: colors.transparent,
   },
   tabIcon: {
     width: scale(20),
     height: scale(20),
-    opacity: 1,
   },
   tabText: {
     display: 'flex',
@@ -72,9 +77,12 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     left: scale(44),
     color: colors.text,
     fontSize: scale(text.xs.fontSize),
+    opacity: 0.7,
   },
   tabContentFocused: {
-    color: colors.textFocused,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    opacity: 1,
   },
   profile: {
     height: scale(32),
@@ -113,5 +121,30 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     right: scale(-8),
     top: scale(-8),
     color: colors.textOnContrast,
+  },
+  toggleButton: {
+    width: '100%',
+    height: scale(44),
+    marginTop: scale(8),
+  },
+  toggleButtonContent: {
+    minHeight: scale(44),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: scale(12),
+    backgroundColor: colors.transparent,
+  },
+  toggleButtonContentOpened: {
+    justifyContent: 'flex-end',
+  },
+  toggleIcon: {
+    width: scale(20),
+    height: scale(20),
+    color: colors.icon,
+  },
+  toggleIconFocused: {
+    width: scale(20),
+    height: scale(20),
+    color: '#FFFFFF',
   },
 } satisfies ThemedStyles);

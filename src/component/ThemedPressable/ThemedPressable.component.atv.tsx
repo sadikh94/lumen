@@ -18,6 +18,7 @@ export const ThemedPressableComponent = ({
   children,
   style,
   contentStyle,
+  hitSlop,
   disabled,
   accessibilityRole,
   mode = 'light',
@@ -102,6 +103,7 @@ export const ThemedPressableComponent = ({
           color: mode === 'light' ? theme.colors.pressableHighlight : theme.colors.pressableHighlightOpposite,
         } }
         unstable_pressDelay={ pressDelay }
+        hitSlop={ hitSlop }
         style={ [{
           flexDirection: 'row',
           justifyContent: 'center',
