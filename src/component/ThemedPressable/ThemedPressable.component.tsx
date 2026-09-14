@@ -13,6 +13,7 @@ export const ThemedPressableComponent = ({
   style,
   contentStyle,
   disabled,
+  accessibilityRole,
   mode = 'light',
   pressDelay = 50,
   topAdditionalElement,
@@ -54,6 +55,7 @@ export const ThemedPressableComponent = ({
         onPress={ onPress }
         onLongPress={ onLongPress }
         disabled={ disabled }
+        accessibilityRole={ accessibilityRole }
         android_ripple={ {
           color: mode === 'light' ? theme.colors.pressableHighlight : theme.colors.pressableHighlightOpposite,
         } }
