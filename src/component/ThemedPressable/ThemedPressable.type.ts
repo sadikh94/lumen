@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode, Ref } from 'react';
-import { StyleProp, View, ViewStyle } from 'react-native';
+import { AccessibilityRole, StyleProp, View, ViewStyle } from 'react-native';
 
 export type ThemedFocusableNodeState = {
   isFocused: boolean;
@@ -13,6 +13,7 @@ export type ThemedPressableContainerProps ={
   style?: StyleProp<ViewStyle> | ((state: ThemedFocusableNodeState) => StyleProp<ViewStyle>);
   contentStyle?: StyleProp<ViewStyle> | ((state: ThemedFocusableNodeState) => StyleProp<ViewStyle>);
   disabled?: boolean;
+  accessibilityRole?: AccessibilityRole;
   mode?: 'light' | 'dark';
   pressDelay?: number;
   topAdditionalElement?: (state: ThemedFocusableNodeState) => ReactElement | null;

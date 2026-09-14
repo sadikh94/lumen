@@ -79,6 +79,7 @@ export interface ApiInterface {
   getHeaders: (includeHeaders?: boolean) => Record<string, string>;
   validateUrl: (url: string) => Promise<void>;
   modifyCDN: (streams: FilmStreamInterface[]) => FilmStreamInterface[];
+  getRequest: (query: string, variables?: Variables) => Promise<string>;
 
   // account
   isSignedIn: () => boolean;
