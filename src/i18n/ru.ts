@@ -155,7 +155,7 @@ const ru: Translations = {
   'No recent items': 'Нет недавних фильмов',
   'You have not watched any films yet': 'Вы пока не посмотрели ни одного фильма',
   'Rating source': 'Источник рейтинга',
-  'Show movie ratings on posters.': 'Показывать рейтинг фильмов на постерах.',
+  'Show movie ratings on posters.': 'Показывать рейтинг фильмов на постерах. Может увеличить количество запросов к серверу.',
   'IMDb': 'IMDb',
   'Kinopoisk': 'Кинопоиск',
   'Columns in list': 'Фильмов в ряду',

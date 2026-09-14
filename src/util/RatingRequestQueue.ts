@@ -1,3 +1,10 @@
+export class RatingRequestDroppedError extends Error {
+  constructor() {
+    super('Rating request dropped because the queue is full.');
+    this.name = 'RatingRequestDroppedError';
+  }
+}
+
 type QueueTask<T> = {
   key: string;
   execute: () => Promise<T>;
@@ -5,12 +12,15 @@ type QueueTask<T> = {
   reject: (error: unknown) => void;
 };
 
-const MAX_CONCURRENT = 2;
-const MIN_REQUEST_INTERVAL = 150;
+const MAX_CONCURRENT = 1;
+const MAX_PENDING = 8;
+const MIN_REQUEST_INTERVAL = 300;
+const NEW_REQUESTS_BEFORE_OLD = 5;
 
 let activeRequests = 0;
 let lastRequestStartedAt = 0;
 let isDraining = false;
+let newRequestsSinceOld = 0;
 
 const queue: QueueTask<unknown>[] = [];
 const pendingRequests = new Map<string, Promise<unknown>>();
@@ -20,6 +30,23 @@ const wait = (milliseconds: number) => (
     setTimeout(resolve, milliseconds);
   })
 );
+
+const takeNextTask = (): QueueTask<unknown> | undefined => {
+  if (queue.length === 0) {
+    return undefined;
+  }
+
+  if (
+    newRequestsSinceOld >= NEW_REQUESTS_BEFORE_OLD
+    && queue.length > 1
+  ) {
+    newRequestsSinceOld = 0;
+    return queue.shift();
+  }
+
+  newRequestsSinceOld += 1;
+  return queue.pop();
+};
 
 const drainQueue = async () => {
   if (isDraining) {
@@ -41,7 +68,7 @@ const drainQueue = async () => {
         continue;
       }
 
-      const task = queue.shift();
+      const task = takeNextTask();
 
       if (!task) {
         continue;
@@ -76,6 +103,10 @@ export const enqueueRatingRequest = <T>(
 
   if (existingRequest) {
     return existingRequest as Promise<T>;
+  }
+
+  if (queue.length >= MAX_PENDING) {
+    return Promise.reject(new RatingRequestDroppedError());
   }
 
   const promise = new Promise<T>((resolve, reject) => {

@@ -1,5 +1,6 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
+import { RatingRequestDroppedError } from 'Util/RatingRequestQueue';
 import { reportQueryError } from './errorHandler';
 
 export const STALE_TIME = {
@@ -22,9 +23,14 @@ const isSilent = (meta?: Record<string, unknown>) => meta?.silent === true;
 export const createQueryClient = () => new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
-      if (!isSilent(query.meta)) {
-        reportQueryError(error);
+      if (
+        error instanceof RatingRequestDroppedError
+        || isSilent(query.meta)
+      ) {
+        return;
       }
+
+      reportQueryError(error);
     },
   }),
   mutationCache: new MutationCache({

@@ -14,4 +14,5 @@ export type SettingSelectComponentProps = SettingCommonProps & {
   customValue?: string;
   customInputTitle?: string;
   onCustomChange?: SettingChangeHandler<string>;
+  showSelectedValueInSubtitle?: boolean;
 };

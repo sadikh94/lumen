@@ -15,6 +15,7 @@ export function FilmCardComponent({
   filmCard,
   style,
   isHidden,
+  isRatingVisible,
 }: FilmCardComponentProps) {
   const {
     type,
@@ -113,7 +114,10 @@ export function FilmCardComponent({
     <View style={ [styles.card, style] }>
       <View style={ styles.posterWrapper }>
         { renderPoster() }
-        <FilmRating filmId={ filmCard.id } />
+        <FilmRating
+          filmId={ filmCard.id }
+          isVisible={ isRatingVisible }
+        />
         { renderAdditionContainer() }
       </View>
       <View style={ styles.info }>

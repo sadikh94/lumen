@@ -12,7 +12,7 @@ import { queryKeys } from 'Util/Query';
 
 const RATING_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 
-export const useFilmRatings = (filmId?: string) => {
+export const useFilmRatings = (filmId?: string, isVisible = true) => {
   const { ratingSource } = useConfigContext();
   const { isInternetAvailable } = useNetworkContext();
   const { currentService } = useServiceContext();
@@ -27,6 +27,7 @@ export const useFilmRatings = (filmId?: string) => {
     Boolean(filmId)
     && ratingSource !== 'off'
     && isInternetAvailable
+    && isVisible
   );
 
   const query = useQuery<FilmRatingsInterface>({
@@ -36,7 +37,9 @@ export const useFilmRatings = (filmId?: string) => {
       async () => {
         const ratings = await currentService.getFilmRatings(filmId ?? '');
 
-        saveCachedFilmRatings(serviceType, filmId ?? '', ratings);
+        if (Object.keys(ratings).length > 0) {
+          saveCachedFilmRatings(serviceType, filmId ?? '', ratings);
+        }
 
         return ratings;
       },

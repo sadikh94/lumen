@@ -1,11 +1,11 @@
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, ViewToken } from '@shopify/flash-list';
 import { FilmCard } from 'Component/FilmCard';
 import { FilmCardThumbnail } from 'Component/FilmCard/FilmCard.thumbnail';
 import { Loader } from 'Component/Loader';
 import { ThemedSafeArea } from 'Component/ThemedSafeArea';
 import { ThemedText } from 'Component/ThemedText';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
-import { ComponentType, memo, ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import { ComponentType, memo, ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from 'Theme/context';
@@ -36,6 +36,7 @@ const FilmGridHeader = ({
 function FilmGridItemCard({
   item,
   handleOnPress,
+  isRatingVisible,
 }: FilmGridItemProps) {
   const { isPlaceholder, film } = item;
   const { scale } = useAppTheme();
@@ -57,7 +58,10 @@ function FilmGridItemCard({
       style={ style }
       onPress={ () => handleOnPress(film) }
     >
-      <FilmCard filmCard={ film } />
+      <FilmCard
+        filmCard={ film }
+        isRatingVisible={ isRatingVisible }
+      />
     </Pressable>
   );
 }
@@ -87,6 +91,22 @@ export function FilmGridComponent({
   const styles = useThemedStyles(componentStyles);
   const { scale } = useAppTheme();
   const { top: safeAreaTop } = useSafeAreaInsets();
+  const [visibleFilmIds, setVisibleFilmIds] = useState<Set<string>>(new Set());
+
+  const viewabilityConfig = useMemo(() => ({
+    itemVisiblePercentThreshold: 50,
+  }), []);
+
+  const onViewableItemsChanged = useCallback(({
+    viewableItems,
+  }: { viewableItems: ViewToken<FilmGridItem>[] }) => {
+    setVisibleFilmIds(new Set(
+      viewableItems
+        .filter((token) => token.isViewable && token.item.type === FilmGridItemType.FILM)
+        .map((token) => token.item.type === FilmGridItemType.FILM ? token.item.film.id : '')
+        .filter(Boolean),
+    ));
+  }, []);
 
   const renderItem = useCallback(({ item }: { item: FilmGridItem }) => {
     if (item.type === FilmGridItemType.HEADER) {
@@ -102,9 +122,13 @@ export function FilmGridComponent({
       <MemoizedGridItem
         item={ item }
         handleOnPress={ handleOnPress }
+        isRatingVisible={
+          item.type === FilmGridItemType.FILM
+          && visibleFilmIds.has(item.film.id)
+        }
       />
     );
-  }, [styles, handleOnPress]);
+  }, [styles, handleOnPress, visibleFilmIds]);
 
   // Headers and cards differ wildly in height, so recycle them separately --
   // and so do real cards and their loading placeholders.
@@ -207,6 +231,8 @@ export function FilmGridComponent({
       renderItem={ renderItem }
       keyExtractor={ keyExtractor }
       getItemType={ getItemType }
+      viewabilityConfig={ viewabilityConfig }
+      onViewableItemsChanged={ onViewableItemsChanged }
       onEndReached={ handleScrollEnd }
       onEndReachedThreshold={ 0.25 }
       numColumns={ numberOfColumns }

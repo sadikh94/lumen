@@ -1164,7 +1164,12 @@ const RezkaApi: RezkaApiInterface = {
       is_touch: '1',
     });
 
-    const root = this.parseContent(content);
+    const root = parseHtml(content);
+
+    if (root.querySelector('.error-code')) {
+      return {};
+    }
+
     const imdb = Number(root.querySelector('.imdb b')?.rawText);
     const kinopoisk = Number(root.querySelector('.kp b')?.rawText);
 

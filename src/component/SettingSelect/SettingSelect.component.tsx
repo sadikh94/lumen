@@ -26,6 +26,7 @@ export const SettingSelectComponent = memo(({
 }: SettingSelectComponentProps) => {
   const { title, subtitle } = baseProps;
   const styles = useThemedStyles(inputStyles);
+  const { showSelectedValueInSubtitle = false } = baseProps;
   const overlayRef = useRef<ThemedOverlayRef>(null);
   const customOverlayRef = useRef<ThemedOverlayRef>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,7 +84,9 @@ export const SettingSelectComponent = memo(({
     <View>
       <SettingBase
         { ...baseProps }
-        subtitle={ selectedOption ? selectedOption.label : subtitle }
+        subtitle={ showSelectedValueInSubtitle && selectedOption
+          ? [selectedOption.label, subtitle].filter(Boolean).join(' — ')
+          : selectedOption ? selectedOption.label : subtitle }
         onPress={ () => overlayRef.current?.open() }
       />
 

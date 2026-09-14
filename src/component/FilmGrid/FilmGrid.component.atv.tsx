@@ -1,6 +1,6 @@
 import { getCurrentFocusKey, NextFocusResolver, setFocus } from '@noriginmedia/norigin-spatial-navigation-core';
 import { FocusContext, FocusHandler, useFocusable } from '@noriginmedia/norigin-spatial-navigation-react-native-tvos';
-import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list';
 import { FilmCard } from 'Component/FilmCard';
 import { POSTER_ASPECT_HEIGHT, POSTER_ASPECT_WIDTH } from 'Component/FilmCard/FilmCard.config';
 import { INFO_HEIGHT } from 'Component/FilmCard/FilmCard.style.atv';
@@ -57,6 +57,7 @@ function FilmGridItemCard({
   isLastRow,
   registerCard,
   handleOnPress,
+  isRatingVisible,
 }: FilmGridItemProps) {
   const { scale } = useAppTheme();
   const { scrollTo } = useScrollContext();
@@ -125,6 +126,7 @@ function FilmGridItemCard({
         filmCard={ film }
         isFocused={ focused }
         disableScaleTransition={ isInstantZoom }
+        isRatingVisible={ isRatingVisible }
       />
     );
   };
@@ -183,6 +185,22 @@ function FilmGridList({
 }: FilmGridListProps) {
   const styles = useThemedStyles(componentStyles);
   const { scale, theme: { dimensions } } = useAppTheme();
+  const [visibleFilmIds, setVisibleFilmIds] = useState<Set<string>>(new Set());
+
+  const viewabilityConfig = useMemo(() => ({
+    itemVisiblePercentThreshold: 50,
+  }), []);
+
+  const onViewableItemsChanged = useCallback(({
+    viewableItems,
+  }: { viewableItems: ViewToken<FilmGridItem>[] }) => {
+    setVisibleFilmIds(new Set(
+      viewableItems
+        .filter((token) => token.isViewable && token.item.type === FilmGridItemType.FILM)
+        .map((token) => token.item.type === FilmGridItemType.FILM ? token.item.film.id : '')
+        .filter(Boolean),
+    ));
+  }, []);
   // An animated scroll runs over several frames while the row being entered is
   // still mounting its cards and the focus engine is measuring them; on weak
   // hardware the two compete and the move feels sluggish, so low mode jumps.
@@ -452,9 +470,13 @@ function FilmGridList({
         isLastRow={ item.scrollIndex === lastRowIndex }
         registerCard={ registerCard }
         handleOnPress={ handleOnPress }
+        isRatingVisible={
+          item.type === FilmGridItemType.FILM
+          && visibleFilmIds.has(item.film.id)
+        }
       />
     );
-  }, [styles, handleOnPress, lastRowIndex, registerCard]);
+  }, [styles, handleOnPress, lastRowIndex, registerCard, visibleFilmIds]);
 
   // Headers and cards differ wildly in height, so recycle them separately --
   // and so do real cards and their loading placeholders.
@@ -511,6 +533,8 @@ function FilmGridList({
             renderItem={ renderItem }
             keyExtractor={ keyExtractor }
             getItemType={ getItemType }
+            viewabilityConfig={ viewabilityConfig }
+            onViewableItemsChanged={ onViewableItemsChanged }
             onLoad={ handleLoad }
             scrollEventThrottle={ FOCUS_SCROLL_EVENT_THROTTLE }
             onEndReached={ handleScrollEnd }
