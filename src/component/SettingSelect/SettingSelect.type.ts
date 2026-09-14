@@ -9,4 +9,5 @@ export type SettingSelectComponentProps = SettingCommonProps & {
   value: string;
   options: SettingItemOption[];
   onChange: SettingChangeHandler<string>;
+  showSelectedValueInSubtitle?: boolean;
 };

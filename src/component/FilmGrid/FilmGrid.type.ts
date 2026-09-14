@@ -133,6 +133,7 @@ export type RegisterCard = (focusKey: string, handle: FilmGridCardHandle) => () 
 
 export interface FilmGridItemProps {
   item: FilmGridFilmItem;
+  isRatingVisible: boolean;
   // TV related
   isLastRow?: boolean;
   registerCard?: RegisterCard;

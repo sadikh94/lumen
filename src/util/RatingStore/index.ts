@@ -7,7 +7,7 @@ export interface CachedFilmRatings {
   checked: true;
 }
 
-const CACHE_PREFIX = 'film:';
+const CACHE_PREFIX = 'film:v2:';
 const storageInstance = () => storage.getRatingStorage();
 
 const getKey = (serviceType: string, filmId: string) => (

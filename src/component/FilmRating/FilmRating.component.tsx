@@ -8,6 +8,7 @@ import { componentStyles } from './FilmRating.style';
 
 interface FilmRatingProps {
   filmId: string;
+  isVisible?: boolean;
 }
 
 const getRatingColor = (rating: number) => {
@@ -22,10 +23,10 @@ const getRatingColor = (rating: number) => {
   return 'rgba(22, 163, 74, 0.9)';
 };
 
-export function FilmRating({ filmId }: FilmRatingProps) {
+export function FilmRating({ filmId, isVisible = true }: FilmRatingProps) {
   const styles = useThemedStyles(componentStyles);
   const { theme } = useAppTheme();
-  const { rating } = useFilmRatings(filmId);
+  const { rating } = useFilmRatings(filmId, isVisible);
 
   if (typeof rating !== 'number' || !Number.isFinite(rating)) {
     return null;

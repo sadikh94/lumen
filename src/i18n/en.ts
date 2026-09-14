@@ -153,7 +153,7 @@ const en = {
   'No recent items': 'No recent items',
   'You have not watched any films yet': 'You have not watched any films yet',
   'Rating source': 'Rating source',
-  'Show movie ratings on posters.': 'Show movie ratings on posters.',
+  'Show movie ratings on posters.': 'Show movie ratings on posters. May increase server requests.',
   'IMDb': 'IMDb',
   'Kinopoisk': 'Kinopoisk',
   'Columns in list': 'Columns in list',

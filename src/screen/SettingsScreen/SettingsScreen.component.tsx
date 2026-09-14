@@ -297,6 +297,7 @@ export function SettingsScreenComponent({
       <SettingSelect
         title={ t('Rating source') }
         subtitle={ t('Show movie ratings on posters.') }
+        showSelectedValueInSubtitle
         IconComponent={ Tag }
         value={ ratingSource }
         options={ RATING_SOURCE_OPTIONS }
