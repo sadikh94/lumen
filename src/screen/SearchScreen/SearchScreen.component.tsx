@@ -85,7 +85,6 @@ export function SearchScreenComponent({
         placeholderTextColor={ theme.colors.text }
         selectionColor={ theme.colors.primary }
         cursorColor={ theme.colors.text }
-        onPress={ resetSearch }
       />
       { enteredText && (
         <ThemedPressable

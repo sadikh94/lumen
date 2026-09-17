@@ -6,12 +6,15 @@ import { SettingExport } from 'Component/SettingExport';
 import { SettingImport } from 'Component/SettingImport';
 import { SettingInput } from 'Component/SettingInput';
 import { SettingLink } from 'Component/SettingLink';
+import { NavigationOrderSetting } from 'Component/NavigationOrderSetting';
+import { getMobileNavigationOrderItems, getTVNavigationOrderItems } from '../../config/NavigationOrderOptions';
 import { SettingMultiSelect } from 'Component/SettingMultiSelect';
 import { SettingSelect } from 'Component/SettingSelect';
 import { SettingSwitch } from 'Component/SettingSwitch';
 import { SettingText } from 'Component/SettingText';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
+import { normalizeAccentColor } from 'Theme/accentColors';
 import { t } from 'i18n/translate';
 import ALargeSmall from 'lucide-react-native/icons/a-large-small';
 import AlignVerticalJustifyEnd from 'lucide-react-native/icons/align-vertical-justify-end';
@@ -52,12 +55,12 @@ import Loader from 'lucide-react-native/icons/loader';
 import LoaderCircle from 'lucide-react-native/icons/loader-circle';
 import Maximize2 from 'lucide-react-native/icons/maximize-2';
 import MessageSquarePlus from 'lucide-react-native/icons/message-square-plus';
-import MonitorCog from 'lucide-react-native/icons/monitor-cog';
 import MonitorPlay from 'lucide-react-native/icons/monitor-play';
 import MonitorUp from 'lucide-react-native/icons/monitor-up';
 import MoveRight from 'lucide-react-native/icons/move-right';
 import PaintBucket from 'lucide-react-native/icons/paint-bucket';
 import Palette from 'lucide-react-native/icons/palette';
+import MonitorCog from 'lucide-react-native/icons/monitor-cog';
 import Pin from 'lucide-react-native/icons/pin';
 import RefreshCw from 'lucide-react-native/icons/refresh-cw';
 import Rewind from 'lucide-react-native/icons/rewind';
@@ -98,6 +101,8 @@ import {
   PLAYER_SUBTITLES_SIZE_OPTIONS,
   PLAYER_VOLUME_NORMALIZATION_OPTIONS,
   TELEGRAM_LINK,
+  MOBILE_NAVIGATION_OPTIONS,
+  TV_NAVIGATION_OPTIONS,
   THEME_SCHEME_OPTIONS,
   TV_SCREENS,
 } from './SettingsScreen.config';
@@ -160,6 +165,12 @@ export function SettingsScreenComponent({
   isVolumeNormalizationSupported,
   theme,
   themeScheme,
+  isTV,
+  accentColor,
+  tvNavigationOrder,
+  hiddenTVNavigationTabs,
+  mobileNavigationOrder,
+  hiddenMobileNavigationTabs,
   appLanguage,
   playerQuality,
   officialMode,
@@ -194,6 +205,7 @@ export function SettingsScreenComponent({
   const [currentGroup, setCurrentGroup] = useState<SETTING_GROUP>(
     () => takeHandedOverGroup() ?? SETTING_GROUP.APPEARANCE
   );
+  const [navigationOrderEditor, setNavigationOrderEditor] = useState<'tv' | 'mobile' | null>(null);
 
   /**
    * The group switches on FOCUS, so every D-Pad move in the menu swaps the whole
@@ -259,6 +271,17 @@ export function SettingsScreenComponent({
     </ThemedScrollView>
   );
 
+  const onAccentColorInput = async (value: string) => {
+    const normalized = normalizeAccentColor(value.startsWith('#') ? value : '#' + value);
+
+    if (!normalized) {
+      return false;
+    }
+
+    onConfigUpdate('accentColor', normalized);
+    return true;
+  };
+
   const renderAppearance = () => (
     <ThemedScrollView>
       <SettingSelect
@@ -268,6 +291,50 @@ export function SettingsScreenComponent({
         options={ THEME_SCHEME_OPTIONS }
         onChange={ onThemeSchemeChange }
       />
+      <SettingSelect
+        title={ t('Interface mode') }
+        IconComponent={ TvMinimalPlay }
+        value={ isTV ? 'tv' : 'mobile' }
+        options={ [
+          { value: 'mobile', label: t('Mobile Version') },
+          { value: 'tv', label: t('TV Version') },
+        ] }
+        onChange={ (value) => onConfigUpdate('isTV', value === 'tv') }
+      />
+      <SettingSelect
+        title={ t('Accent color') }
+        IconComponent={ Palette }
+        value={ accentColor.startsWith('#') ? 'custom' : accentColor }
+        options={ [
+          { value: 'default', label: t('Default') },
+          { value: 'blue', label: t('Blue') },
+          { value: 'green', label: t('Green') },
+          { value: 'purple', label: t('Purple') },
+          { value: 'orange', label: t('Orange') },
+          { value: 'red', label: t('Red') },
+          { value: 'custom', label: t('Custom') },
+        ] }
+        customValue={ accentColor.startsWith('#') ? accentColor : '' }
+        customInputTitle={ t('Custom') }
+        onChange={ (value) => value === 'custom'
+          ? onConfigUpdate('accentColor', accentColor.startsWith('#') ? accentColor : '#')
+          : onConfigUpdate('accentColor', value) }
+        onCustomChange={ onAccentColorInput }
+      />
+      { isTV && (
+        <SettingBase
+          title={ t('TV navigation order') }
+          IconComponent={ TvMinimalPlay }
+          onPress={ () => setNavigationOrderEditor('tv') }
+        />
+      ) }
+      { !isTV && (
+        <SettingBase
+          title={ t('Mobile navigation order') }
+          IconComponent={ Dock }
+          onPress={ () => setNavigationOrderEditor('mobile') }
+        />
+      ) }
       <SettingSelect
         title={ t('Interface language') }
         IconComponent={ Globe }
@@ -796,6 +863,36 @@ export function SettingsScreenComponent({
   );
 
   const renderCurrentGroup = () => {
+    if (navigationOrderEditor) {
+      const isTVNavigation = navigationOrderEditor === 'tv';
+
+      return (
+        <NavigationOrderSetting
+          title={ isTVNavigation ? t('TV navigation order') : t('Mobile navigation order') }
+          items={
+            isTVNavigation
+              ? getTVNavigationOrderItems()
+              : getMobileNavigationOrderItems()
+          }
+          value={ isTVNavigation ? tvNavigationOrder : mobileNavigationOrder }
+          hiddenItems={ isTVNavigation ? hiddenTVNavigationTabs : hiddenMobileNavigationTabs }
+          onHiddenItemsChange={ (value) =>
+            onConfigUpdate(
+              isTVNavigation ? 'hiddenTVNavigationTabs' : 'hiddenMobileNavigationTabs',
+              value,
+            )
+          }
+          onChange={ (value) =>
+            onConfigUpdate(
+              isTVNavigation ? 'tvNavigationOrder' : 'mobileNavigationOrder',
+              value,
+            )
+          }
+          onBack={ () => setNavigationOrderEditor(null) }
+        />
+      );
+    }
+
     switch (deferredGroup) {
       case SETTING_GROUP.APPEARANCE:
         return renderAppearance();

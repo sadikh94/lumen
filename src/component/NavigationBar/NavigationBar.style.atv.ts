@@ -34,7 +34,6 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
   },
   tabsContent: {
     flexGrow: 1,
-    justifyContent: 'center',
   },
   tabs: {
     width: '100%',
@@ -47,10 +46,10 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     justifyContent: 'center',
   },
   tabButton: {
-    marginBottom: scale(8),
+    marginBottom: scale(12),
   },
   tabButtonContent: {
-    borderRadius: scale(12),
+    borderRadius: scale(24),
   },
   tab: {
     width: '100%',
@@ -58,14 +57,14 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    padding: scale(10),
-    borderRadius: scale(12),
+    padding: scale(12),
+    borderRadius: scale(24),
   },
   tabSelected: {
-    backgroundColor: colors.transparent,
+    backgroundColor: colors.tertiary,
   },
   tabFocused: {
-    backgroundColor: colors.transparent,
+    backgroundColor: colors.backgroundFocused,
   },
   tabIcon: {
     width: scale(20),
@@ -75,14 +74,11 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     display: 'flex',
     position: 'absolute',
     left: scale(44),
-    color: colors.text,
+    color: colors.textSecondary,
     fontSize: scale(text.xs.fontSize),
-    opacity: 0.7,
   },
   tabContentFocused: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    opacity: 1,
+    color: colors.textFocused,
   },
   profile: {
     height: scale(32),
@@ -130,21 +126,37 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
   toggleButtonContent: {
     minHeight: scale(44),
     alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: scale(12),
+    justifyContent: 'flex-start',
+    borderRadius: scale(24),
     backgroundColor: colors.transparent,
   },
-  toggleButtonContentOpened: {
-    justifyContent: 'flex-end',
+  toggleButtonInner: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: scale(12),
+    gap: scale(12),
+  },
+  toggleButtonInnerCollapsed: {
+    justifyContent: 'center',
+  },
+  toggleText: {
+    color: '#8F9190',
+    fontSize: scale(text.xs.fontSize),
+  },
+  toggleTextFocused: {
+    color: '#8F9190',
+    fontWeight: 'bold',
   },
   toggleIcon: {
     width: scale(20),
     height: scale(20),
-    color: colors.icon,
+    color: '#8F9190',
   },
   toggleIconFocused: {
     width: scale(20),
     height: scale(20),
-    color: '#FFFFFF',
+    color: '#8F9190',
   },
 } satisfies ThemedStyles);

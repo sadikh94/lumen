@@ -13,10 +13,17 @@ import { HOME_SCREEN } from 'Navigation/navigationRoutes';
 import { BACKUP_SECTION } from 'Type/Backup.interface';
 import { BackupConfigKey, SettingsSection } from 'Util/Backup/logic';
 import { DEFAULT_MAX_PARALLEL_DOWNLOADS } from 'Util/Download';
+import { AccentColor } from 'Theme/accentColors';
+
 
 export type DeviceConfigType = {
   isConfigured: boolean;
   isTV: boolean;
+  accentColor: AccentColor;
+  tvNavigationOrder: string[];
+  mobileNavigationOrder: string[];
+  hiddenTVNavigationTabs: string[];
+  hiddenMobileNavigationTabs: string[];
   isFirestore: boolean;
   securedSettings: boolean;
   isLowMode: boolean;
@@ -85,6 +92,11 @@ export type DeviceConfigType = {
 export const defaultConfig: DeviceConfigType = {
   isConfigured: false,
   isTV: false,
+  accentColor: 'default',
+  tvNavigationOrder: [],
+  mobileNavigationOrder: [],
+  hiddenTVNavigationTabs: [],
+  hiddenMobileNavigationTabs: [],
   isFirestore: false,
   securedSettings: false,
   isLowMode: false,
@@ -155,6 +167,11 @@ export const defaultConfig: DeviceConfigType = {
 
 export const CONFIG_KEY_SECTIONS = {
   themeScheme: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  accentColor: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  tvNavigationOrder: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  mobileNavigationOrder: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  hiddenTVNavigationTabs: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  hiddenMobileNavigationTabs: BACKUP_SECTION.SETTINGS_APPEARANCE,
   initialRoute: BACKUP_SECTION.SETTINGS_APPEARANCE,
   homeDefaultTab: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,

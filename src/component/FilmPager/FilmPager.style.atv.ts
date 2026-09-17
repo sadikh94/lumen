@@ -15,6 +15,7 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     height: '100%',
   },
   menuRow: {
+    paddingLeft: scale(28),
     width: '100%',
     height: scale(42),
     flexDirection: 'row',

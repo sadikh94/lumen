@@ -97,6 +97,23 @@ export const MOBILE_SCREENS = [
   },
 ];
 
+export const TV_NAVIGATION_OPTIONS = [
+  'Account-tab',
+  'Notifications-tab',
+  'Home-tab',
+  'Recent-tab',
+  'Search-tab',
+  'Bookmarks-tab',
+  'Settings',
+];
+
+export const MOBILE_NAVIGATION_OPTIONS = [
+  'Home-tab',
+  'Search-tab',
+  'Bookmarks-tab',
+  'Recent-tab',
+  'Account-tab',
+];
 export const THEME_SCHEME_OPTIONS = [
   {
     value: 'system',

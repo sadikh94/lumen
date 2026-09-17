@@ -152,11 +152,11 @@ export const ThemedScrollViewComponent = ({
           showsHorizontalScrollIndicator={ false }
           showsVerticalScrollIndicator={ false }
           scrollEventThrottle={ 16 }
-          onLayout={ handleLayout }
+          onLayout={ event => { const { width, height } = event.nativeEvent.layout; console.log('[ATV ScrollView]', { width, height }); handleLayout(event); } }
           onContentSizeChange={ handleContentSizeChange }
           onScroll={ handleScroll }
         >
-          <View ref={ ref } style={ [{ flexDirection: horizontal ? 'row' : 'column' }, style] }>
+          <View ref={ ref } style={ [{ flexDirection: horizontal ? 'row' : 'column' }, style] } onLayout={ event => { const { width, height } = event.nativeEvent.layout; console.log('[ATV ScrollView contentView]', { width, height }); } }>
             { children }
           </View>
         </ScrollView>

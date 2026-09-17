@@ -7,13 +7,17 @@ import { SettingExport } from 'Component/SettingExport';
 import { SettingImport } from 'Component/SettingImport';
 import { SettingInput } from 'Component/SettingInput';
 import { SettingLink } from 'Component/SettingLink';
+import { NavigationOrderSetting } from 'Component/NavigationOrderSetting';
+import { getMobileNavigationOrderItems, getTVNavigationOrderItems } from '../../config/NavigationOrderOptions';
 import { SettingMultiSelect } from 'Component/SettingMultiSelect';
 import { SettingSelect } from 'Component/SettingSelect';
+
 import { SettingSwitch } from 'Component/SettingSwitch';
 import { SettingText } from 'Component/SettingText';
 import { ThemedSafeArea } from 'Component/ThemedSafeArea';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
+import { normalizeAccentColor } from 'Theme/accentColors';
 import { t } from 'i18n/translate';
 import ALargeSmall from 'lucide-react-native/icons/a-large-small';
 import AlignVerticalJustifyEnd from 'lucide-react-native/icons/align-vertical-justify-end';
@@ -32,6 +36,7 @@ import Cloud from 'lucide-react-native/icons/cloud';
 import CloudCog from 'lucide-react-native/icons/cloud-cog';
 import CloudOff from 'lucide-react-native/icons/cloud-off';
 import DatabaseBackup from 'lucide-react-native/icons/database-backup';
+import Dock from 'lucide-react-native/icons/dock';
 import Download from 'lucide-react-native/icons/download';
 import ExternalLink from 'lucide-react-native/icons/external-link';
 import EyeOff from 'lucide-react-native/icons/eye-off';
@@ -84,6 +89,7 @@ import {
   COLUMNS_MOBILE_OPTIONS,
   FILM_COUNTRY_OPTIONS,
   GITHUB_LINK,
+  MOBILE_NAVIGATION_OPTIONS,
   MOBILE_SCREENS,
   PLAYER_ASPECT_RATIO_OPTIONS,
   PLAYER_BACK_BUFFER_TIME_OPTIONS,
@@ -101,6 +107,7 @@ import {
   PLAYER_VOLUME_NORMALIZATION_OPTIONS,
   TELEGRAM_LINK,
   THEME_SCHEME_OPTIONS,
+  TV_NAVIGATION_OPTIONS,
 } from './SettingsScreen.config';
 import { handOverGroup, takeHandedOverGroup } from './SettingsScreen.reload';
 import { componentStyles } from './SettingsScreen.style';
@@ -161,6 +168,12 @@ export function SettingsScreenComponent({
   showAgeRating,
   theme,
   themeScheme,
+  isTV,
+  accentColor,
+  tvNavigationOrder,
+  hiddenTVNavigationTabs,
+  mobileNavigationOrder,
+  hiddenMobileNavigationTabs,
   appLanguage,
   playerQuality,
   officialMode,
@@ -189,6 +202,7 @@ export function SettingsScreenComponent({
   const { handleTap } = useTripleTap();
   const styles = useThemedStyles(componentStyles);
   const [currentGroup, setCurrentGroup] = useState<SETTING_GROUP | null>(takeHandedOverGroup);
+  const [navigationOrderEditor, setNavigationOrderEditor] = useState<'tv' | 'mobile' | null>(null);
 
   const handleOpenGroup = useCallback((group: SETTING_GROUP) => {
     setCurrentGroup(group);
@@ -262,6 +276,17 @@ export function SettingsScreenComponent({
     </ThemedScrollView>
   );
 
+  const onAccentColorInput = useCallback(async (value: string) => {
+    const normalized = normalizeAccentColor(value.startsWith('#') ? value : '#' + value);
+
+    if (!normalized) {
+      return false;
+    }
+
+    onConfigUpdate('accentColor', normalized);
+    return true;
+  }, [onConfigUpdate]);
+
   const renderAppearance = () => (
     <ThemedScrollView>
       <SettingSelect
@@ -270,6 +295,36 @@ export function SettingsScreenComponent({
         value={ themeScheme ?? 'system' }
         options={ THEME_SCHEME_OPTIONS }
         onChange={ onThemeSchemeChange }
+      />
+      <SettingSelect
+        title={ t('Interface mode') }
+        IconComponent={ TvMinimalPlay }
+        value={ isTV ? 'tv' : 'mobile' }
+        options={ [
+          { value: 'mobile', label: t('Mobile Version') },
+          { value: 'tv', label: t('TV Version') },
+        ] }
+        onChange={ (value) => onConfigUpdate('isTV', value === 'tv') }
+      />
+      <SettingSelect
+        title={ t('Accent color') }
+        IconComponent={ Palette }
+        value={ accentColor.startsWith('#') ? 'custom' : accentColor }
+        options={ [
+          { value: 'default', label: t('Default') },
+          { value: 'blue', label: t('Blue') },
+          { value: 'green', label: t('Green') },
+          { value: 'purple', label: t('Purple') },
+          { value: 'orange', label: t('Orange') },
+          { value: 'red', label: t('Red') },
+          { value: 'custom', label: t('Custom') },
+        ] }
+        customValue={ accentColor.startsWith('#') ? accentColor : '' }
+        customInputTitle={ t('Custom') }
+        onChange={ (value) => value === 'custom'
+          ? onConfigUpdate('accentColor', accentColor.startsWith('#') ? accentColor : '#')
+          : onConfigUpdate('accentColor', value) }
+        onCustomChange={ onAccentColorInput }
       />
       <SettingSelect
         title={ t('Interface language') }
@@ -814,6 +869,35 @@ export function SettingsScreenComponent({
     }
   };
 
+  if (navigationOrderEditor) {
+    const isTVNavigation = navigationOrderEditor === 'tv';
+
+    return (
+      <NavigationOrderSetting
+        title={ isTVNavigation ? t('TV navigation order') : t('Mobile navigation order') }
+        items={
+          isTVNavigation
+            ? getTVNavigationOrderItems()
+            : getMobileNavigationOrderItems()
+        }
+        value={ isTVNavigation ? tvNavigationOrder : mobileNavigationOrder }
+        hiddenItems={ isTVNavigation ? hiddenTVNavigationTabs : hiddenMobileNavigationTabs }
+        onHiddenItemsChange={ (value) =>
+          onConfigUpdate(
+            isTVNavigation ? 'hiddenTVNavigationTabs' : 'hiddenMobileNavigationTabs',
+            value,
+          )
+        }
+        onChange={ (value) =>
+          onConfigUpdate(
+            isTVNavigation ? 'tvNavigationOrder' : 'mobileNavigationOrder',
+            value,
+          )
+        }
+        onBack={ () => setNavigationOrderEditor(null) }
+      />
+    );
+  }
   return (
     <Page checkConnection={ false }>
       <ThemedSafeArea>

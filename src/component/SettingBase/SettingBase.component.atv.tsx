@@ -85,7 +85,7 @@ const SettingBaseComponent = ({
                 <IconComponent
                   style={ styles.settingIcon }
                   size={ scale(24) }
-                  color={ isFocused ? '#FFFFFF' : theme.colors.textSecondary }
+                  color={ isFocused ? '#FFFFFF' : '#8F9190' }
                   { ...iconProps }
                   { ...(isFocused ? iconPropsFocused : undefined) }
                 />

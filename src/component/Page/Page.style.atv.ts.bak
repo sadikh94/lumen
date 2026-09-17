@@ -7,10 +7,10 @@ import { Theme, ThemedStyles } from 'Theme/types';
 export const componentStyles = ({ scale, dimensions, colors }: Theme) => ({
   container: {
     height: '100%',
-    flex: 1,
+    width: dimensions.width - scale(NAVIGATION_BAR_TV_WIDTH),
   },
   containerOpened: {
-    flex: 1,
+    width: dimensions.width - scale(NAVIGATION_BAR_TV_WIDTH_OPENED),
   },
   fullscreen: {
     height: '100%',

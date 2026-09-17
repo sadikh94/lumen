@@ -266,6 +266,7 @@ export function SettingsScreenContainer() {
 
   const containerProps = {
     ...config,
+    isTV,
     theme,
     themeScheme,
     appLanguage,

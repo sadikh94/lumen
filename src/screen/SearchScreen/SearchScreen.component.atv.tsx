@@ -93,7 +93,7 @@ const SearchHeader = memo(({
       />
       <ThemedButton
         title=""
-        style={ styles.actionBtn }
+        style={ [styles.actionBtn, styles.collectionsBtn] }
         contentStyle={ styles.actionBtnContent }
         IconComponent={ LayoutGrid }
         onPress={ handleOpenCollections }

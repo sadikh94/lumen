@@ -41,6 +41,7 @@ import {
   SETTINGS_SCREEN,
 } from './navigationRoutes';
 import { SceneMask } from './SceneMask';
+import { normalizeNavigationOrder } from 'Util/NavigationOrder';
 
 const Tab = createBottomTabNavigator();
 
@@ -58,7 +59,151 @@ const MobileAccountNavigator = createAccountNavigator(ACCOUNT_SCREEN, AccountScr
 // NOTE: these are plain render functions, not components. `Tab.Navigator` only accepts
 // `Screen`, `Group` or `Fragment` as its direct children, so the group has to be returned
 // inline instead of being wrapped in a component.
-const renderTVTabs = (theme: Theme, isLocalLibrary: boolean) => {
+const renderTVTabs = (
+  theme: Theme,
+  isLocalLibrary: boolean,
+  tvNavigationOrder: string[],
+  hiddenNavigationTabs: string[],
+) => {
+  const fallbackOrder = [
+    ACCOUNT_TAB,
+    NOTIFICATIONS_TAB,
+    HOME_TAB,
+    RECENT_TAB,
+    SEARCH_TAB,
+    BOOKMARKS_TAB,
+    SETTINGS_SCREEN,
+  ];
+
+  const availableRoutes = [
+    ACCOUNT_TAB,
+    NOTIFICATIONS_TAB,
+    HOME_TAB,
+    RECENT_TAB,
+    SEARCH_TAB,
+    BOOKMARKS_TAB,
+    SETTINGS_SCREEN,
+  ];
+
+  const navigationOrder = normalizeNavigationOrder(
+    tvNavigationOrder,
+    availableRoutes,
+    fallbackOrder,
+  ).filter(route => !hiddenNavigationTabs.includes(route));
+
+  const renderScreen = (routeName: string) => {
+    const actualRouteName = routeName === ACCOUNT_TAB && isLocalLibrary
+      ? DOWNLOADS_SCREEN
+      : routeName;
+    switch (actualRouteName) {
+      case DOWNLOADS_SCREEN:
+        return (
+          <Tab.Screen
+            key={ DOWNLOADS_SCREEN }
+            name={ DOWNLOADS_SCREEN }
+            component={ DownloadsScreen }
+            options={ {
+              tabBarLabel: t('Downloads'),
+              tabBarIcon: Download,
+            } }
+          />
+        );
+
+      case ACCOUNT_TAB:
+        return (
+          <Tab.Screen
+            key={ ACCOUNT_TAB }
+            name={ ACCOUNT_TAB }
+            component={ TVAccountNavigator }
+            options={ {
+              tabBarLabel: t('Account'),
+            } }
+          />
+        );
+
+      case NOTIFICATIONS_TAB:
+        return (
+          <Tab.Screen
+            key={ NOTIFICATIONS_TAB }
+            name={ NOTIFICATIONS_TAB }
+            component={ NotificationsNavigator }
+            options={ {
+              tabBarLabel: t('Notifications'),
+              tabBarIcon: Bell,
+            } }
+          />
+        );
+
+      case HOME_TAB:
+        return (
+          <Tab.Screen
+            key={ HOME_TAB }
+            name={ HOME_TAB }
+            component={ HomeNavigator }
+            options={ {
+              tabBarLabel: t('Home'),
+              tabBarIcon: House,
+            } }
+          />
+        );
+
+      case RECENT_TAB:
+        return (
+          <Tab.Screen
+            key={ RECENT_TAB }
+            name={ RECENT_TAB }
+            component={ RecentNavigator }
+            options={ {
+              tabBarLabel: t('Recent'),
+              tabBarIcon: History,
+            } }
+          />
+        );
+
+      case SEARCH_TAB:
+        return (
+          <Tab.Screen
+            key={ SEARCH_TAB }
+            name={ SEARCH_TAB }
+            component={ SearchNavigator }
+            options={ {
+              tabBarLabel: t('Search'),
+              tabBarIcon: Search,
+            } }
+          />
+        );
+
+      case BOOKMARKS_TAB:
+        return (
+          <Tab.Screen
+            key={ BOOKMARKS_TAB }
+            name={ BOOKMARKS_TAB }
+            component={ BookmarksNavigator }
+            options={ {
+              tabBarLabel: t('Bookmarks'),
+              tabBarIcon: FolderHeart,
+            } }
+          />
+        );
+
+      case SETTINGS_SCREEN:
+        return (
+          <Tab.Screen
+            key={ SETTINGS_SCREEN }
+            name={ SETTINGS_SCREEN }
+            component={ SettingsScreen }
+            options={ {
+              tabBarLabel: t('Settings'),
+              tabBarIcon: Settings,
+            } }
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <Tab.Group
       screenOptions={ {
@@ -66,85 +211,108 @@ const renderTVTabs = (theme: Theme, isLocalLibrary: boolean) => {
         sceneStyle: { backgroundColor: theme.colors.background },
       } }
     >
-      { isLocalLibrary ? (
-        <Tab.Screen
-          key={ DOWNLOADS_SCREEN }
-          name={ DOWNLOADS_SCREEN }
-          component={ DownloadsScreen }
-          options={ {
-            tabBarLabel: t('Downloads'),
-            tabBarIcon: Download,
-          } }
-        />
-      ) : (
-        <Tab.Screen
-          key={ ACCOUNT_TAB }
-          name={ ACCOUNT_TAB }
-          component={ TVAccountNavigator }
-          options={ {
-            tabBarLabel: t('Account'),
-          } }
-        />
-      ) }
-      <Tab.Screen
-        key={ NOTIFICATIONS_TAB }
-        name={ NOTIFICATIONS_TAB }
-        component={ NotificationsNavigator }
-        options={ {
-          tabBarLabel: t('Notifications'),
-          tabBarIcon: Bell,
-        } }
-      />
-      <Tab.Screen
-        key={ HOME_TAB }
-        name={ HOME_TAB }
-        component={ HomeNavigator }
-        options={ {
-          tabBarLabel: t('Home'),
-          tabBarIcon: House,
-        } }
-      />
-      <Tab.Screen
-        key={ RECENT_TAB }
-        name={ RECENT_TAB }
-        component={ RecentNavigator }
-        options={ {
-          tabBarLabel: t('Recent'),
-          tabBarIcon: History,
-        } }
-      />
-      <Tab.Screen
-        key={ SEARCH_TAB }
-        name={ SEARCH_TAB }
-        component={ SearchNavigator }
-        options={ {
-          tabBarLabel: t('Search'),
-          tabBarIcon: Search,
-        } }
-      />
-      <Tab.Screen
-        key={ BOOKMARKS_TAB }
-        name={ BOOKMARKS_TAB }
-        component={ BookmarksNavigator }
-        options={ {
-          tabBarLabel: t('Bookmarks'),
-          tabBarIcon: FolderHeart,
-        } }
-      />
-      <Tab.Screen
-        key={ SETTINGS_SCREEN }
-        name={ SETTINGS_SCREEN }
-        component={ SettingsScreen }
-        options={ {
-          tabBarLabel: t('Settings'),
-          tabBarIcon: Settings,
-        } }
-      />
+      { navigationOrder.map(renderScreen) }
     </Tab.Group>
   );
 };
+const renderMobileTabs = (
+  theme: Theme,
+  mobileNavigationOrder: string[],
+  hiddenNavigationTabs: string[],
+) => {
+  const fallbackOrder = [
+    HOME_TAB,
+    SEARCH_TAB,
+    BOOKMARKS_TAB,
+    RECENT_TAB,
+    ACCOUNT_TAB,
+  ];
 
-const renderMobileTabs = (theme: Theme) => {
+  const availableRoutes = [
+    HOME_TAB,
+    SEARCH_TAB,
+    BOOKMARKS_TAB,
+    RECENT_TAB,
+    ACCOUNT_TAB,
+  ];
+
+  const navigationOrder = normalizeNavigationOrder(
+    mobileNavigationOrder,
+    availableRoutes,
+    fallbackOrder,
+  ).filter(route => !hiddenNavigationTabs.includes(route));
+
+  const renderScreen = (routeName: string) => {
+    switch (routeName) {
+      case HOME_TAB:
+        return (
+          <Tab.Screen
+            key={ HOME_TAB }
+            name={ HOME_TAB }
+            component={ HomeNavigator }
+            options={ {
+              tabBarLabel: t('Home'),
+              tabBarIcon: House,
+            } }
+          />
+        );
+
+      case SEARCH_TAB:
+        return (
+          <Tab.Screen
+            key={ SEARCH_TAB }
+            name={ SEARCH_TAB }
+            component={ SearchNavigator }
+            options={ {
+              tabBarLabel: t('Search'),
+              tabBarIcon: Search,
+            } }
+          />
+        );
+
+      case BOOKMARKS_TAB:
+        return (
+          <Tab.Screen
+            key={ BOOKMARKS_TAB }
+            name={ BOOKMARKS_TAB }
+            component={ BookmarksNavigator }
+            options={ {
+              tabBarLabel: t('Bookmarks'),
+              tabBarIcon: FolderHeart,
+            } }
+          />
+        );
+
+      case RECENT_TAB:
+        return (
+          <Tab.Screen
+            key={ RECENT_TAB }
+            name={ RECENT_TAB }
+            component={ RecentNavigator }
+            options={ {
+              tabBarLabel: t('Recent'),
+              tabBarIcon: History,
+            } }
+          />
+        );
+
+      case ACCOUNT_TAB:
+        return (
+          <Tab.Screen
+            key={ ACCOUNT_TAB }
+            name={ ACCOUNT_TAB }
+            component={ MobileAccountNavigator }
+            options={ {
+              tabBarLabel: t('Account'),
+            } }
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <Tab.Group
       screenOptions={ {
@@ -152,50 +320,7 @@ const renderMobileTabs = (theme: Theme) => {
         sceneStyle: { backgroundColor: theme.colors.background },
       } }
     >
-      <Tab.Screen
-        key={ HOME_TAB }
-        name={ HOME_TAB }
-        component={ HomeNavigator }
-        options={ {
-          tabBarLabel: t('Home'),
-          tabBarIcon: House,
-        } }
-      />
-      <Tab.Screen
-        key={ SEARCH_TAB }
-        name={ SEARCH_TAB }
-        component={ SearchNavigator }
-        options={ {
-          tabBarLabel: t('Search'),
-          tabBarIcon: Search,
-        } }
-      />
-      <Tab.Screen
-        key={ BOOKMARKS_TAB }
-        name={ BOOKMARKS_TAB }
-        component={ BookmarksNavigator }
-        options={ {
-          tabBarLabel: t('Bookmarks'),
-          tabBarIcon: FolderHeart,
-        } }
-      />
-      <Tab.Screen
-        key={ RECENT_TAB }
-        name={ RECENT_TAB }
-        component={ RecentNavigator }
-        options={ {
-          tabBarLabel: t('Recent'),
-          tabBarIcon: History,
-        } }
-      />
-      <Tab.Screen
-        key={ ACCOUNT_TAB }
-        name={ ACCOUNT_TAB }
-        component={ MobileAccountNavigator }
-        options={ {
-          tabBarLabel: t('Account'),
-        } }
-      />
+      { navigationOrder.map(renderScreen) }
     </Tab.Group>
   );
 };
@@ -203,11 +328,19 @@ const renderMobileTabs = (theme: Theme) => {
 /**
  * This is the main navigator for TV devices with a drawer.
  *
- * @returns {JSX.Element} The rendered `MainNavigator`.
+ * @returns {JSX.Element} The rendered MainNavigator.
  */
 export function TabsNavigator() {
   // isLocalLibrary fail
-  const { isTV, initialRoute, isLocalLibrary } = useConfigContext();
+  const {
+    isTV,
+    initialRoute,
+    isLocalLibrary,
+    tvNavigationOrder,
+    mobileNavigationOrder,
+    hiddenTVNavigationTabs,
+    hiddenMobileNavigationTabs,
+  } = useConfigContext();
   const { theme } = useAppTheme();
 
   return (
@@ -221,7 +354,7 @@ export function TabsNavigator() {
           headerShown: false,
         } }
       >
-        { isTV ? renderTVTabs(theme, isLocalLibrary) : renderMobileTabs(theme) }
+        { isTV ? renderTVTabs(theme, isLocalLibrary, tvNavigationOrder, hiddenTVNavigationTabs) : renderMobileTabs(theme, mobileNavigationOrder, hiddenMobileNavigationTabs) }
       </Tab.Navigator>
       { isTV && <SceneMask /> }
     </View>
