@@ -330,6 +330,11 @@ export function SettingsScreenComponent({
           : onConfigUpdate('accentColor', value) }
         onCustomChange={ onAccentColorInput }
       />
+      <SettingBase
+        title={ t('Mobile navigation order') }
+        IconComponent={ Dock }
+        onPress={ () => setNavigationOrderEditor('mobile') }
+      />
       <SettingSelect
         title={ t('Interface language') }
         IconComponent={ Globe }

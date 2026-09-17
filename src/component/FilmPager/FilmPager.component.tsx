@@ -80,15 +80,6 @@ const TabButton = memo(({
         >
           { title }
         </Animated.Text>
-        { sorting && isActive && (
-          <Animated.Text
-            style={ [
-              styles.sortingText,
-            ] }
-          >
-            { selectedSorting?.[id]?.label ?? sorting[0].label }
-          </Animated.Text>
-        ) }
       </Pressable>
       { sorting && (
         <ThemedDropdown
