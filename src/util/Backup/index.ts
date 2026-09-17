@@ -2,7 +2,8 @@ import { ApiInterface, ApiInterfaceConfig } from 'Api/type';
 import { DEVICE_CONFIG } from 'Context/ConfigContext';
 import { NOTIFICATIONS_STORAGE } from 'Context/ServiceContext';
 import * as Application from 'expo-application';
-import { Directory, File } from 'expo-file-system';
+import { File } from 'expo-file-system';
+import { StorageAccessFramework } from 'expo-file-system/legacy';
 import { getCurrentLanguage, isSupportedLanguage, LANGUAGE_STORAGE_KEY } from 'i18n/index';
 import { defaultConfig, DeviceConfigType } from 'src/config';
 import {
@@ -403,10 +404,17 @@ export const exportBackup = async (
 ): Promise<BackupWriteResult> => {
   const backup = collectBackup(sections, service);
 
-  let directory: Directory;
+  let directoryUri: string;
 
   try {
-    directory = await Directory.pickDirectoryAsync();
+    const permissions =
+      await StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+    if (!permissions.granted) {
+      return { status: 'cancelled' };
+    }
+
+    directoryUri = permissions.directoryUri;
   } catch (error) {
     if (isPickerCancelled(error)) {
       return { status: 'cancelled' };
@@ -416,17 +424,21 @@ export const exportBackup = async (
   }
 
   const requestedName = buildBackupFileName(new Date());
-  const file = directory.createFile(
+  const fileUri = await StorageAccessFramework.createFileAsync(
+    directoryUri,
     requestedName,
     BACKUP_MIME_TYPE
   );
 
-  file.write(JSON.stringify(backup, null, 2));
+  await StorageAccessFramework.writeAsStringAsync(
+    fileUri,
+    JSON.stringify(backup, null, 2)
+  );
 
   return {
     status: 'ok',
     fileName: resolveSavedName(
-      file.uri,
+      fileUri,
       requestedName
     ),
   };
