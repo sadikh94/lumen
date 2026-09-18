@@ -42,4 +42,5 @@ export const filmToFilmCard = (film: FilmInterface): FilmCardInterface => ({
   poster: film.poster,
   title: film.title,
   subtitle: film.releaseDate ?? '',
+  isPendingRelease: film.isPendingRelease,
 });

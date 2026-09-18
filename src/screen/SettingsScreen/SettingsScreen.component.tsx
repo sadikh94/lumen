@@ -170,6 +170,7 @@ export function SettingsScreenComponent({
   showVotesCount,
   showRecommendations,
   showAgeRating,
+  showPendingReleaseBadge,
   theme,
   themeScheme,
   isTV,
@@ -422,6 +423,13 @@ export function SettingsScreenComponent({
         IconComponent={ ShieldAlert }
         value={ showAgeRating }
         onChange={ (value) => onConfigUpdate('showAgeRating', value) }
+      />
+      <SettingSwitch
+        title={ t('Show pending release badge') }
+        subtitle={ t('Show an icon on posters for content awaiting release.') }
+        IconComponent={ Timer }
+        value={ showPendingReleaseBadge }
+        onChange={ (value) => onConfigUpdate('showPendingReleaseBadge', value) }
       />
       <SettingSwitch
         title={ t('Continue button enabled') }

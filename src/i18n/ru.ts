@@ -326,6 +326,8 @@ const ru: Translations = {
   'Show similar films at the bottom of a film page.': 'Показывать похожие фильмы внизу страницы фильма.',
   'Show age rating': 'Показывать возрастной рейтинг',
   'Show the age a film is rated for on its page.': 'Показывать возрастное ограничение фильма на его странице.',
+  'Show pending release badge': 'Показывать значок ожидаемого релиза',
+  'Show an icon on posters for content awaiting release.': 'Показывать на постерах значок ожидаемого релиза.',
   'Stop play on button TV': 'Воспроизведение по нажатию',
   'Toggle stop play on button TV.': 'Видео будет останавливаться при нажатии центральную кнопку, которая отвечает за паузу/плей, вместо включения интерфейса плеера.',
   'Player buffer time settings': 'Настройки буфера плеера',

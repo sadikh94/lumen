@@ -325,6 +325,8 @@ const en = {
   'Show similar films at the bottom of a film page.': 'Show similar films at the bottom of a film page.',
   'Show age rating': 'Show age rating',
   'Show the age a film is rated for on its page.': 'Show the age a film is rated for on its page.',
+  'Show pending release badge': 'Show pending release badge',
+  'Show an icon on posters for content awaiting release.': 'Show an icon on posters for content awaiting release.',
   'Stop play on button TV': 'Stop play on button TV',
   'Toggle stop play on button TV.': 'Toggle stop play on button TV.',
   'Player buffer time settings': 'Player buffer time settings',

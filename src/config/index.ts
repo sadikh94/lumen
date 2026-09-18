@@ -91,6 +91,7 @@ export type DeviceConfigType = {
   showVotesCount: boolean;
   showRecommendations: boolean;
   showAgeRating: boolean;
+  showPendingReleaseBadge: boolean;
 }
 
 export const defaultConfig: DeviceConfigType = {
@@ -169,6 +170,7 @@ export const defaultConfig: DeviceConfigType = {
   showVotesCount: true,
   showRecommendations: true,
   showAgeRating: false,
+  showPendingReleaseBadge: true,
 };
 
 export const CONFIG_KEY_SECTIONS = {
@@ -198,6 +200,7 @@ export const CONFIG_KEY_SECTIONS = {
   showVotesCount: BACKUP_SECTION.SETTINGS_APPEARANCE,
   showRecommendations: BACKUP_SECTION.SETTINGS_APPEARANCE,
   showAgeRating: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  showPendingReleaseBadge: BACKUP_SECTION.SETTINGS_APPEARANCE,
 
   strictConnectionCheck: BACKUP_SECTION.SETTINGS_NETWORK,
 

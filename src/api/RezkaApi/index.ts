@@ -54,6 +54,7 @@ import {
 
 const REZKA_CONFIG = 'rezkaConfig';
 const REZKA_PROFILE = 'rezkaProfile';
+const pendingReleaseFilmIds = new Set<string>();
 
 /** How long a provider gets to answer before it is called invalid. */
 const VALIDATE_URL_TIMEOUT_MS = 10000;
@@ -694,15 +695,16 @@ const RezkaApi: RezkaApiInterface = {
       const films: FilmCardInterface[] = [];
 
       const res = await this.postRequest(path, variables);
-
       const root = this.parseContent(`<div>${res}</div>`);
-
       const filmElements = root.querySelectorAll('.b-content__inline_item');
 
       filmElements.forEach((el) => {
         const film = parseFilmCard(el);
 
         if (film) {
+          film.isPendingRelease =
+            film.isPendingRelease || pendingReleaseFilmIds.has(film.id);
+
           films.push(film);
         }
       });
@@ -718,9 +720,20 @@ const RezkaApi: RezkaApiInterface = {
       key,
     });
 
+    if (menuItem.id === 'soon') {
+      filmsList.films.forEach((film) => {
+        pendingReleaseFilmIds.add(film.id);
+      });
+    }
+
+    filmsList.films = filmsList.films.map((film) => ({
+      ...film,
+      isPendingRelease:
+        film.isPendingRelease || pendingReleaseFilmIds.has(film.id),
+    }));
+
     return filmsList;
   },
-
   getCategoryMenu: (link) => {
     if (link.includes('/best/')) {
       return [

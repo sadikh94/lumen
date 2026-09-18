@@ -73,6 +73,18 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     color: colors.textOnContrast,
     borderBottomLeftRadius: scale(8),
   },
+  pendingReleaseBadge: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: scale(26),
+    height: scale(26),
+    backgroundColor: colors.button,
+    borderTopLeftRadius: scale(8),
+    zIndex: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   filmAdditionalText: {
     paddingHorizontal: scale(4),
     paddingVertical: scale(1),

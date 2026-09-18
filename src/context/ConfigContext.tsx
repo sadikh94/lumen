@@ -38,6 +38,8 @@ const IsTVContext = createContext<boolean>(defaultConfig.isTV);
  */
 const HiddenCountriesContext = createContext<Set<string>>(new Set<string>());
 
+const PendingReleaseBadgeContext = createContext<boolean>(defaultConfig.showPendingReleaseBadge);
+
 // External access to global config. Avoid using it!
 let globalConfig: any = null;
 export const getGlobalConfig = (): DeviceConfigType => {
@@ -109,9 +111,11 @@ export const ConfigProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ConfigContext.Provider value={ value }>
       <IsTVContext.Provider value={ config.isTV }>
-        <HiddenCountriesContext.Provider value={ hiddenCountries }>
-          { children }
-        </HiddenCountriesContext.Provider>
+        <PendingReleaseBadgeContext.Provider value={ config.showPendingReleaseBadge }>
+          <HiddenCountriesContext.Provider value={ hiddenCountries }>
+            { children }
+          </HiddenCountriesContext.Provider>
+        </PendingReleaseBadgeContext.Provider>
       </IsTVContext.Provider>
     </ConfigContext.Provider>
   );
@@ -135,3 +139,5 @@ export const useIsTV = () => useContext(IsTVContext);
  * `useConfigContext().hiddenCountries` -- see HiddenCountriesContext above.
  */
 export const useHiddenCountries = () => useContext(HiddenCountriesContext);
+
+export const useShowPendingReleaseBadge = () => useContext(PendingReleaseBadgeContext);
