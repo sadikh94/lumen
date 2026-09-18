@@ -1,4 +1,5 @@
 import { FilmGrid } from 'Component/FilmGrid';
+import { FilmList } from 'Component/FilmList';
 import { ThemedDropdown } from 'Component/ThemedDropdown';
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
 import { ThemedOverlayRef } from 'Component/ThemedOverlay/ThemedOverlay.type';
@@ -176,6 +177,7 @@ const TopMenu = memo(({
 
 export function FilmPagerComponent({
   pagerItems,
+  displayMode,
   disableEmptyComponent,
   isEmpty,
   hideGrid,
@@ -314,6 +316,17 @@ export function FilmPagerComponent({
     }
 
     const { films, pagination } = pagerItem;
+    const filmItems = (films ?? []).map((film) => ({ film }));
+
+    if (displayMode === 'list') {
+      return (
+        <FilmList
+          items={ filmItems }
+          ListEmptyComponent={ ListEmptyComponent }
+          onNextLoad={ (isRefresh) => onNextLoad(isRefresh, pagerItem) }
+        />
+      );
+    }
 
     return (
       <FilmGrid
@@ -330,6 +343,7 @@ export function FilmPagerComponent({
     );
   }, [
     centerEmptyComponent,
+    displayMode,
     disableEmptyComponent,
     disableStatusbarSafeArea,
     hideGrid,

@@ -17,6 +17,7 @@ import { AccentColor } from 'Theme/accentColors';
 
 
 export type TabPosition = 'top' | 'bottom';
+export type FilmDisplayMode = 'grid' | 'list';
 
 export type DeviceConfigType = {
   isConfigured: boolean;
@@ -37,6 +38,9 @@ export type DeviceConfigType = {
   initialRoute: string;
   homeDefaultTab: string;
   tabPosition: TabPosition;
+  homeDisplayMode: FilmDisplayMode;
+  bookmarksDisplayMode: FilmDisplayMode;
+  recentDisplayMode: FilmDisplayMode;
   playerRewindSeconds: number;
   playerBackwardRewindSeconds: number;
   playerShowBufferTime: boolean;
@@ -113,6 +117,9 @@ export const defaultConfig: DeviceConfigType = {
   initialRoute: HOME_SCREEN,
   homeDefaultTab: '',
   tabPosition: 'bottom',
+  homeDisplayMode: 'grid',
+  bookmarksDisplayMode: 'grid',
+  recentDisplayMode: 'list',
   playerRewindSeconds: 10,
   playerBackwardRewindSeconds: 10,
   playerShowBufferTime: false,
@@ -183,6 +190,9 @@ export const CONFIG_KEY_SECTIONS = {
   initialRoute: BACKUP_SECTION.SETTINGS_APPEARANCE,
   homeDefaultTab: BACKUP_SECTION.SETTINGS_APPEARANCE,
   tabPosition: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  homeDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  bookmarksDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  recentDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsTV: BACKUP_SECTION.SETTINGS_APPEARANCE,
   recentTwoColumnsTV: BACKUP_SECTION.SETTINGS_APPEARANCE,

@@ -58,6 +58,7 @@ function FilmGridItemCard({
   registerCard,
   handleOnPress,
   isRatingVisible,
+  filmActions,
 }: FilmGridItemProps) {
   const { scale } = useAppTheme();
   const { scrollTo } = useScrollContext();
@@ -132,14 +133,16 @@ function FilmGridItemCard({
   };
 
   return (
-    <Pressable
-      ref={ ref }
-      onPress={ onPress }
-      style={ style }
-      tvFocusable={ false }
-    >
-      { renderContent() }
-    </Pressable>
+    <View style={ style }>
+      <Pressable
+        ref={ ref }
+        onPress={ onPress }
+        tvFocusable={ false }
+      >
+        { renderContent() }
+      </Pressable>
+      { !item.isPlaceholder && filmActions?.(item.film) }
+    </View>
   );
 }
 
@@ -180,6 +183,7 @@ function FilmGridList({
   gridFocusKey,
   cardsFocusKey,
   handleOnPress,
+  filmActions,
   handleScrollEnd,
   onAtTopChange,
 }: FilmGridListProps) {
@@ -474,9 +478,10 @@ function FilmGridList({
           item.type === FilmGridItemType.FILM
           && visibleFilmIds.has(item.film.id)
         }
+        filmActions={ filmActions }
       />
     );
-  }, [styles, handleOnPress, lastRowIndex, registerCard, visibleFilmIds]);
+  }, [styles, handleOnPress, lastRowIndex, registerCard, visibleFilmIds, filmActions]);
 
   // Headers and cards differ wildly in height, so recycle them separately --
   // and so do real cards and their loading placeholders.

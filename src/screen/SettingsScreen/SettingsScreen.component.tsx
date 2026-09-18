@@ -122,6 +122,9 @@ export function SettingsScreenComponent({
   homeDefaultTab,
   tabPosition,
   numberOfColumnsMobile,
+  homeDisplayMode,
+  bookmarksDisplayMode,
+  recentDisplayMode,
   hiddenCountries,
   playerRewindSeconds,
   playerBackwardRewindSeconds,
@@ -379,6 +382,36 @@ export function SettingsScreenComponent({
         value={ numberOfColumnsMobile.toString() }
         options={ COLUMNS_MOBILE_OPTIONS }
         onChange={ (value) => onConfigUpdate('numberOfColumnsMobile', Number(value)) }
+      />
+      <SettingSelect
+        title={ t('Home display mode') }
+        IconComponent={ Grid3x2 }
+        value={ homeDisplayMode }
+        options={ [
+          { value: 'grid', label: t('Grid') },
+          { value: 'list', label: t('List') },
+        ] }
+        onChange={ (value) => onConfigUpdate('homeDisplayMode', value) }
+      />
+      <SettingSelect
+        title={ t('Bookmarks display mode') }
+        IconComponent={ Grid3x2 }
+        value={ bookmarksDisplayMode }
+        options={ [
+          { value: 'grid', label: t('Grid') },
+          { value: 'list', label: t('List') },
+        ] }
+        onChange={ (value) => onConfigUpdate('bookmarksDisplayMode', value) }
+      />
+      <SettingSelect
+        title={ t('Recent display mode') }
+        IconComponent={ Grid3x2 }
+        value={ recentDisplayMode }
+        options={ [
+          { value: 'grid', label: t('Grid') },
+          { value: 'list', label: t('List') },
+        ] }
+        onChange={ (value) => onConfigUpdate('recentDisplayMode', value) }
       />
       <SettingMultiSelect
         title={ t('Hidden countries') }

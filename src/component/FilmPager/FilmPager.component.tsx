@@ -1,4 +1,5 @@
 import { FilmGrid } from 'Component/FilmGrid';
+import { FilmList } from 'Component/FilmList';
 import { ThemedDropdown } from 'Component/ThemedDropdown';
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
 import { ThemedOverlayRef } from 'Component/ThemedOverlay/ThemedOverlay.type';
@@ -96,6 +97,7 @@ const TabButton = memo(({
 
 export const FilmPagerComponent = ({
   pagerItems,
+  displayMode,
   disableEmptyComponent,
   isEmpty,
   hideGrid,
@@ -294,6 +296,17 @@ export const FilmPagerComponent = ({
     }
 
     const { films, pagination } = pagerItem;
+    const filmItems = (films ?? []).map((film) => ({ film }));
+
+    if (displayMode === 'list') {
+      return (
+        <FilmList
+          items={ filmItems }
+          ListEmptyComponent={ ListEmptyComponent }
+          onNextLoad={ (isRefresh) => onNextLoad(isRefresh, pagerItem) }
+        />
+      );
+    }
 
     return (
       <FilmGrid
@@ -302,7 +315,6 @@ export const FilmPagerComponent = ({
         disableEmptyComponent={ disableEmptyComponent }
         disableStatusbarSafeArea={ disableStatusbarSafeArea }
         tabPosition={ tabPosition }
-        // empty flag it true, films array exist and this array is empty
         isEmpty={ isEmpty && films !== null && !films.length }
         hideGrid={ hideGrid }
         ListEmptyComponent={ ListEmptyComponent }
@@ -311,7 +323,7 @@ export const FilmPagerComponent = ({
       />
     );
   // eslint-disable-next-line max-len
-  }, [renderedIndexes, initialPage, disableEmptyComponent, disableStatusbarSafeArea, isEmpty, hideGrid, ListEmptyComponent, centerEmptyComponent, onNextLoad]);
+  }, [renderedIndexes, initialPage, displayMode, disableEmptyComponent, disableStatusbarSafeArea, isEmpty, hideGrid, ListEmptyComponent, centerEmptyComponent, onNextLoad]);
 
   const pages = useMemo(() => (pagerItems).map((item, idx) => (
     <Wrapper key={ item.menuItem.id }>

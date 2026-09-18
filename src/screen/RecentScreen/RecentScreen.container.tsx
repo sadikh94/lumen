@@ -23,11 +23,12 @@ import RecentScreenComponent from './RecentScreen.component';
 import RecentScreenComponentTV from './RecentScreen.component.atv';
 
 export function RecentScreenContainer() {
-  const { isTV, isLocalLibrary } = useConfigContext();
+  const { isTV, isLocalLibrary, recentDisplayMode } = useConfigContext();
   const { isSignedIn, currentService } = useServiceContext();
   const localHistory = useLocalHistory();
   const navigation = useNavigation();
   const hideConfirmOverlayRef = useRef<ThemedOverlayRef | null>(null);
+  const removeConfirmOverlayRef = useRef<ThemedOverlayRef | null>(null);
   const { isInternetAvailable } = useNetworkContext();
 
   const isRemote = isSignedIn && !isLocalLibrary;
@@ -197,6 +198,7 @@ export function RecentScreenContainer() {
   }, [isLocalLibrary, removeRecent]);
 
   const hideItemRef = useRef<RecentItemInterface | null>(null);
+  const removeItemRef = useRef<RecentItemInterface | null>(null);
 
   const hideItem = useCallback(() => {
     if (!hideItemRef.current) {
@@ -229,15 +231,35 @@ export function RecentScreenContainer() {
     hideConfirmOverlayRef.current?.open();
   }, [hideItem]);
 
+  const openRemoveConfirmOverlay = useCallback((item: RecentItemInterface) => {
+    removeItemRef.current = item;
+    removeConfirmOverlayRef.current?.open();
+  }, []);
+
+  const confirmRemoveItem = useCallback(() => {
+    if (!removeItemRef.current) {
+      return;
+    }
+
+    const item = removeItemRef.current;
+    removeItemRef.current = null;
+
+    removeConfirmOverlayRef.current?.close();
+    removeItem(item);
+  }, [removeItem]);
   const containerProps = {
+    displayMode: recentDisplayMode,
     isSignedIn,
     items: isLocalLibrary ? localItems : items,
     isLoading,
     hideConfirmOverlayRef,
+    removeConfirmOverlayRef,
     onNextLoad: handleNextLoad,
     handleOnPress,
     handleContinueWatching,
     removeItem,
+    openRemoveConfirmOverlay,
+    confirmRemoveItem,
     openHideConfirmOverlay,
     hideItem,
   };

@@ -56,6 +56,7 @@ export type FilmGridItem = FilmGridHeaderItem | FilmGridFilmItem;
 export interface FilmGridContainerProps {
   /** A flat grid of films. Mutually exclusive with `sections`. */
   films?: FilmCardInterface[];
+  filmActions?: (film: FilmCardInterface) => ReactNode;
   /** Films grouped under headers. Mutually exclusive with `films`. */
   sections?: FilmGridSection[];
   disableEmptyComponent?: boolean;
@@ -107,6 +108,7 @@ export interface FilmGridComponentProps extends FilmGridLayoutProps {
   /** Whether a next page requested by scrolling to the end is still in flight. */
   isLoadingNext: boolean;
   handleOnPress: (film: FilmCardInterface) => void;
+  filmActions?: (film: FilmCardInterface) => ReactNode;
   handleScrollEnd?: () => void;
   handleRefresh?: () => void;
 }
@@ -140,4 +142,5 @@ export interface FilmGridItemProps {
   isLastRow?: boolean;
   registerCard?: RegisterCard;
   handleOnPress: (film: FilmCardInterface) => void;
+  filmActions?: (film: FilmCardInterface) => ReactNode;
 }

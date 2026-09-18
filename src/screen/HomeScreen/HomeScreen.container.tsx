@@ -10,7 +10,7 @@ import HomeScreenComponentTV from './HomeScreen.component.atv';
 
 export function HomeScreenContainer() {
   const { currentService } = useServiceContext();
-  const { homeDefaultTab, tabPosition } = useConfigContext();
+  const { homeDefaultTab, tabPosition, homeDisplayMode } = useConfigContext();
   const isTV = useIsTV();
   const sortingOptions = useMemo(() => currentService.getFilmSortingOptions(), [currentService]);
   const menuItems = useMemo(() => currentService.getHomeMenu(), [currentService]);
@@ -35,6 +35,7 @@ export function HomeScreenContainer() {
   const containerProps = {
     ...handlers,
     tabPosition,
+    displayMode: homeDisplayMode,
   };
 
   return isTV ? <HomeScreenComponentTV { ...containerProps } /> : <HomeScreenComponent { ...containerProps } />;

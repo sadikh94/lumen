@@ -37,6 +37,7 @@ function FilmGridItemCard({
   item,
   handleOnPress,
   isRatingVisible,
+  filmActions,
 }: FilmGridItemProps) {
   const { isPlaceholder, film } = item;
   const { scale } = useAppTheme();
@@ -54,15 +55,15 @@ function FilmGridItemCard({
   }
 
   return (
-    <Pressable
-      style={ style }
-      onPress={ () => handleOnPress(film) }
-    >
-      <FilmCard
-        filmCard={ film }
-        isRatingVisible={ isRatingVisible }
-      />
-    </Pressable>
+    <View style={ style }>
+      <Pressable onPress={ () => handleOnPress(film) }>
+        <FilmCard
+          filmCard={ film }
+          isRatingVisible={ isRatingVisible }
+        />
+      </Pressable>
+      { filmActions?.(film) }
+    </View>
   );
 }
 
@@ -84,6 +85,7 @@ export function FilmGridComponent({
   ListEmptyComponent,
   centerEmptyComponent,
   handleOnPress,
+  filmActions,
   handleScrollEnd,
   handleRefresh,
   tabPosition = 'bottom',
@@ -126,6 +128,7 @@ export function FilmGridComponent({
           item.type === FilmGridItemType.FILM
           && visibleFilmIds.has(item.film.id)
         }
+        filmActions={ filmActions }
       />
     );
   }, [styles, handleOnPress, visibleFilmIds]);

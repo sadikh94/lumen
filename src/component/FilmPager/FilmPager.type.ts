@@ -1,11 +1,12 @@
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
-import { TabPosition } from '../../config';
+import { FilmDisplayMode, TabPosition } from '../../config';
 import { ComponentType, ReactElement, ReactNode } from 'react';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { MenuItemInterface } from 'Type/MenuItem.interface';
 import { PaginationInterface } from 'Type/Pagination.interface';
 
 export interface FilmPagerHandlers {
+  displayMode?: FilmDisplayMode;
   pagerItems: PagerItemInterface[];
   sorting?: DropdownItem[];
   selectedSorting?: Record<string, DropdownItem> | null;
