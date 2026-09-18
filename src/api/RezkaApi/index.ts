@@ -55,6 +55,50 @@ import {
 const REZKA_CONFIG = 'rezkaConfig';
 const REZKA_PROFILE = 'rezkaProfile';
 const pendingReleaseFilmIds = new Set<string>();
+let pendingReleaseFilmIdsLoaded = false;
+let pendingReleaseFilmIdsPromise: Promise<void> | null = null;
+
+const loadPendingReleaseFilmIds = async (api: RezkaApiInterface): Promise<void> => {
+  if (pendingReleaseFilmIdsLoaded) {
+    return;
+  }
+
+  if (pendingReleaseFilmIdsPromise) {
+    return pendingReleaseFilmIdsPromise;
+  }
+
+  pendingReleaseFilmIdsPromise = (async () => {
+    const firstPage = await api.getFilms(1, '/announce');
+
+    firstPage.films.forEach((film) => {
+      pendingReleaseFilmIds.add(film.id);
+    });
+
+    for (let page = 2; page <= firstPage.totalPages; page += 1) {
+      const filmsPage = await api.getFilms(page, '/announce');
+
+      filmsPage.films.forEach((film) => {
+        pendingReleaseFilmIds.add(film.id);
+      });
+    }
+
+    pendingReleaseFilmIdsLoaded = true;
+  })();
+
+  try {
+    await pendingReleaseFilmIdsPromise;
+  } finally {
+    pendingReleaseFilmIdsPromise = null;
+  }
+};
+
+const applyPendingReleaseFlags = (
+  films: FilmCardInterface[]
+): FilmCardInterface[] => films.map((film) => ({
+  ...film,
+  isPendingRelease:
+    film.isPendingRelease || pendingReleaseFilmIds.has(film.id),
+}));
 
 /** How long a provider gets to answer before it is called invalid. */
 const VALIDATE_URL_TIMEOUT_MS = 10000;
@@ -549,7 +593,12 @@ const RezkaApi: RezkaApiInterface = {
   async getBookmarkedFilms(bookmark, page) {
     const { id } = bookmark;
 
-    const filmsList = await this.getFilms(page, `/favorites/${id}`);
+    const [filmsList] = await Promise.all([
+      this.getFilms(page, `/favorites/${id}`),
+      loadPendingReleaseFilmIds(this),
+    ]);
+
+    filmsList.films = applyPendingReleaseFlags(filmsList.films);
 
     return filmsList;
   },
@@ -694,7 +743,11 @@ const RezkaApi: RezkaApiInterface = {
     if (key === '.b-newest_slider__wrapper') {
       const films: FilmCardInterface[] = [];
 
-      const res = await this.postRequest(path, variables);
+      const [res] = await Promise.all([
+        this.postRequest(path, variables),
+        loadPendingReleaseFilmIds(this),
+      ]);
+
       const root = this.parseContent(`<div>${res}</div>`);
       const filmElements = root.querySelectorAll('.b-content__inline_item');
 
@@ -702,15 +755,12 @@ const RezkaApi: RezkaApiInterface = {
         const film = parseFilmCard(el);
 
         if (film) {
-          film.isPendingRelease =
-            film.isPendingRelease || pendingReleaseFilmIds.has(film.id);
-
           films.push(film);
         }
       });
 
       return {
-        films,
+        films: applyPendingReleaseFlags(films),
         totalPages: 1,
       };
     }
@@ -724,13 +774,11 @@ const RezkaApi: RezkaApiInterface = {
       filmsList.films.forEach((film) => {
         pendingReleaseFilmIds.add(film.id);
       });
+    } else {
+      await loadPendingReleaseFilmIds(this);
     }
 
-    filmsList.films = filmsList.films.map((film) => ({
-      ...film,
-      isPendingRelease:
-        film.isPendingRelease || pendingReleaseFilmIds.has(film.id),
-    }));
+    filmsList.films = applyPendingReleaseFlags(filmsList.films);
 
     return filmsList;
   },

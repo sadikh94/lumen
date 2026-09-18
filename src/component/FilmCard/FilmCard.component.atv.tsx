@@ -34,7 +34,6 @@ export function FilmCardComponent({
   const { theme, scale } = useAppTheme();
   const showPendingReleaseBadge = useShowPendingReleaseBadge();
 
-  console.log('[FilmCard pending ATV]', title, { isPendingRelease, showPendingReleaseBadge });
 
   const renderType = () => (
     <ThemedText
