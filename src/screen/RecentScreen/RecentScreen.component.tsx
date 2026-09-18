@@ -14,6 +14,7 @@ import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { t } from 'i18n/translate';
 import Eye from 'lucide-react-native/icons/eye';
 import EyeOff from 'lucide-react-native/icons/eye-off';
+import Play from 'lucide-react-native/icons/play';
 import Trash2 from 'lucide-react-native/icons/trash-2';
 import { memo, useCallback } from 'react';
 import { View } from 'react-native';
@@ -31,6 +32,7 @@ function RecentItem({
   item,
   index,
   handleOnPress,
+  handleContinueWatching,
   removeItem,
   styles,
   openHideConfirmOverlay,
@@ -83,6 +85,15 @@ function RecentItem({
           </View>
           <View style={ styles.actionsColumn }>
             <ThemedPressable
+              onPress={ () => handleContinueWatching(item) }
+              style={ styles.deleteButton }
+            >
+              <Play
+                size={ scale(24) }
+                color={ theme.colors.icon }
+              />
+            </ThemedPressable>
+            <ThemedPressable
               onPress={ () => removeItem(item) }
               style={ styles.deleteButton }
             >
@@ -126,6 +137,7 @@ export function RecentScreenComponent({
   hideConfirmOverlayRef,
   onNextLoad,
   handleOnPress,
+  handleContinueWatching,
   removeItem,
   openHideConfirmOverlay,
   hideItem,
@@ -140,13 +152,14 @@ export function RecentScreenComponent({
       <MemoizedRecentItem
         item={ item }
         handleOnPress={ handleOnPress }
+        handleContinueWatching={ handleContinueWatching }
         index={ index }
         removeItem={ removeItem }
         styles={ styles }
         openHideConfirmOverlay={ openHideConfirmOverlay }
       />
     ),
-    [handleOnPress, openHideConfirmOverlay, removeItem, styles]
+    [handleOnPress, handleContinueWatching, openHideConfirmOverlay, removeItem, styles]
   );
 
   const renderHeader = useCallback(() => {

@@ -9,7 +9,7 @@ import { PlayerVideoSelectorRef } from 'Component/PlayerVideoSelector/PlayerVide
 import { ThemedOverlayRef } from 'Component/ThemedOverlay/ThemedOverlay.type';
 import { useConfigContext } from 'Context/ConfigContext';
 import { useServiceContext } from 'Context/ServiceContext';
-import { useLocalBookmarks } from 'Hooks/useLocalLibrary';
+import { useLocalBookmarks, useLocalHistory } from 'Hooks/useLocalLibrary';
 import { t } from 'i18n/translate';
 import { FILM_TRAILER_SCREEN, PLAYER_SCREEN } from 'Navigation/navigationRoutes';
 import { AppStackParamList } from 'Navigation/navigationTypes';
@@ -76,6 +76,8 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
     isDeepLink = true;
   }
 
+  const localHistory = useLocalHistory();
+
   const updateFilmVoiceData = async (data: FilmInterface | null) => {
     // logged in users already use service built-in system
     if (!data) {
@@ -83,44 +85,45 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
     }
 
     const savedTime = getSavedTime(data);
+    const localHistoryItem = isLocalLibrary
+      ? localHistory.find((item) => item.id === data.id)
+      : undefined;
 
-    if (!savedTime || !savedTime.voices || Object.keys(savedTime.voices).length === 0) {
+    const lastVoiceId = savedTime?.lastVoiceId ?? localHistoryItem?.voiceId;
+
+    if (!lastVoiceId) {
       return;
     }
 
-    // Find the last watched voice with saved timestamps
-    let lastVoiceId: string | null = null;
-    let lastVoiceData = null;
-
-    if (savedTime.lastVoiceId) {
-      lastVoiceId = savedTime.lastVoiceId;
-
-      const voiceData = savedTime.voices[lastVoiceId];
-      if (voiceData && voiceData.timestamps && Object.keys(voiceData.timestamps).length > 0) {
-        lastVoiceData = voiceData;
-      }
-    }
-
-    if (!lastVoiceId || !lastVoiceData) {
-      return;
-    }
+    const lastVoiceData = savedTime?.voices?.[lastVoiceId];
+    const historySelection = localHistoryItem?.voiceId === lastVoiceId
+      ? localHistoryItem
+      : undefined;
 
     data.voices = data.voices.map((voice) => {
       const isActive = voice.id === lastVoiceId;
 
       return {
         ...voice,
-        lastEpisodeId: isActive ? lastVoiceData.lastEpisodeId : voice.lastEpisodeId, // if we have saved voice data, then use its last saved episode is, otherwise fallback to default one
-        lastSeasonId: isActive ? lastVoiceData.lastSeasonId : voice.lastSeasonId,
+        lastEpisodeId: isActive
+          ? lastVoiceData?.lastEpisodeId
+            ?? historySelection?.episodeId
+            ?? voice.lastEpisodeId
+          : voice.lastEpisodeId,
+        lastSeasonId: isActive
+          ? lastVoiceData?.lastSeasonId
+            ?? historySelection?.seasonId
+            ?? voice.lastSeasonId
+          : voice.lastSeasonId,
         isActive,
       };
     });
 
     // load seasons if they're missing
     const activeVoice = data.voices.find((voice) => voice.isActive);
-    if (data?.hasSeasons && activeVoice && !activeVoice.seasons) {
-      const result = await currentService.getFilmSeasons(data, activeVoice);
 
+    if (data.hasSeasons && activeVoice && !activeVoice.seasons) {
+      const result = await currentService.getFilmSeasons(data, activeVoice);
       activeVoice.seasons = result.seasons;
     }
   };
@@ -178,6 +181,47 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
   );
 
   const localBookmarks = useLocalBookmarks();
+
+  const isFilmInRecentQuery = useQuery({
+    queryKey: [queryKeys.recent(), link],
+    enabled: !!film && !isLocalLibrary && isContinueBtnEnabled,
+    queryFn: async () => {
+      let page = 1;
+      let result = await currentService.getRecent(page);
+
+      while (true) {
+        if (result.items.some((item) => item.link === link)) {
+          return true;
+        }
+
+        if (page >= result.totalPages) {
+          return false;
+        }
+
+        page += 1;
+        result = await currentService.getRecent(page);
+      }
+    },
+  });
+
+  const isFilmInRecent = useMemo(() => {
+    if (!film || !isContinueBtnEnabled) {
+      return false;
+    }
+
+    if (isLocalLibrary) {
+      return localHistory.some((item) => item.link === link);
+    }
+
+    return isFilmInRecentQuery.data === true;
+  }, [
+    film,
+    isContinueBtnEnabled,
+    isLocalLibrary,
+    isFilmInRecentQuery.data,
+    link,
+    localHistory,
+  ]);
 
   // in local mode film.bookmarks is derived reactively from the local store, so the
   // bookmark button and overlay stay in sync with local writes (including the overlay's own)
@@ -555,35 +599,7 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
     postRating({ id: film.id, rating });
   };
 
-  const shouldDisplayContinueWatching = useMemo(() => {
-    if (!film || !isContinueBtnEnabled) {
-      return false;
-    }
-
-    const savedTime = getSavedTime(film);
-
-    if (!savedTime || !savedTime.voices || Object.keys(savedTime.voices).length === 0) {
-      return false;
-    }
-
-    // Check if there's at least one voice with saved timestamps
-    for (const voiceId of Object.keys(savedTime.voices)) {
-      const voiceData = savedTime.voices[voiceId];
-
-      if (voiceData && voiceData.timestamps && Object.keys(voiceData.timestamps).length > 0) {
-        // Check if any timestamp has meaningful progress (more than 5 seconds)
-        const hasProgress = Object.values(voiceData.timestamps).some(
-          (timestamp) => timestamp && timestamp.time > 5
-        );
-
-        if (hasProgress) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }, [film, isContinueBtnEnabled]);
+  const shouldDisplayContinueWatching = isFilmInRecent;
 
   const {
     mutate: resumeVoice,
@@ -695,13 +711,10 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
       return;
     }
 
-    // signed-in accounts track the watch state server side; local mode uses the saved time
-    const useAccountState = isSignedIn && !isLocalLibrary;
-
     resumeVoice({
       voice,
-      lastSeasonId: useAccountState ? voice.lastSeasonId : lastVoiceData.lastSeasonId,
-      lastEpisodeId: useAccountState ? voice.lastEpisodeId : lastVoiceData.lastEpisodeId,
+      lastSeasonId: lastVoiceData.lastSeasonId,
+      lastEpisodeId: lastVoiceData.lastEpisodeId,
     });
   };
 

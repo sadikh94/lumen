@@ -114,6 +114,71 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
       return null;
     };
 
+    const getSavedVoiceData = (saved: SavedTime | null, voiceId: string) => (
+      saved?.voices?.[voiceId] ?? null
+    );
+
+    const getSavedSelection = (
+      voice: FilmVoiceInterface,
+      saved: SavedTime | null
+    ) => {
+      const voiceData = getSavedVoiceData(saved, voice.id);
+
+      return {
+        seasonId: voiceData?.lastSeasonId ?? voice.lastSeasonId,
+        episodeId: voiceData?.lastEpisodeId ?? voice.lastEpisodeId,
+      };
+    };
+
+    const persistSelection = (
+      voice: FilmVoiceInterface,
+      seasonId?: string,
+      episodeId?: string
+    ) => {
+      const currentSavedTime = savedTime ?? getSavedTime(film);
+
+      const nextSavedTime: SavedTime = currentSavedTime
+        ? {
+          ...currentSavedTime,
+          voices: { ...currentSavedTime.voices },
+        }
+        : {
+          filmId: film.id,
+          voices: {},
+          lastVoiceId: null,
+        };
+
+      const previousVoiceData = nextSavedTime.voices[voice.id];
+
+      nextSavedTime.voices[voice.id] = {
+        timestamps: previousVoiceData?.timestamps ?? {},
+        lastSeasonId: seasonId ?? previousVoiceData?.lastSeasonId,
+        lastEpisodeId: episodeId ?? previousVoiceData?.lastEpisodeId,
+      };
+
+      nextSavedTime.lastVoiceId = voice.id;
+
+      setSavedTime(nextSavedTime);
+      setSavedTimeStorage(nextSavedTime, film);
+    };
+
+    const applySavedSelection = (saved: SavedTime | null) => {
+      if (!saved?.lastVoiceId) {
+        return;
+      }
+
+      const savedVoice = voices.find(({ id }) => id === saved.lastVoiceId);
+
+      if (!savedVoice) {
+        return;
+      }
+
+      const savedSelection = getSavedSelection(savedVoice, saved);
+
+      setSelectedVoice(savedVoice);
+      setSelectedSeasonId(savedSelection.seasonId);
+      setSelectedEpisodeId(savedSelection.episodeId);
+    };
     const initFirestoreSavedTime = async () => {
       if (firestoreSavedTimeRef.current || !firestoreDb || !profile) {
         return;
@@ -128,6 +193,7 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
         if (combinedSavedTime) {
           setSavedTime(combinedSavedTime);
           setSavedTimeStorage(combinedSavedTime, film);
+          applySavedSelection(combinedSavedTime);
         }
       }
     };
@@ -242,12 +308,40 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
 
         const { seasons = [] } = updatedVoice;
 
-        if (seasons.length > 0) {
-          const season = seasons[0];
-          const { seasonId, episodes: [{ episodeId }] = [] } = season;
-          setSelectedSeasonId(seasonId);
-          setSelectedEpisodeId(episodeId);
+        if (seasons.length === 0) {
+          persistSelection(updatedVoice);
+          return;
         }
+
+        const currentSavedTime = savedTime ?? getSavedTime(film);
+        const savedSelection = getSavedSelection(updatedVoice, currentSavedTime);
+
+        const currentSeason = seasons.find(
+          ({ seasonId }) => seasonId === selectedSeasonId
+        );
+
+        const savedSeason = seasons.find(
+          ({ seasonId }) => seasonId === savedSelection.seasonId
+        );
+
+        const season = currentSeason ?? savedSeason ?? seasons[0];
+        const { seasonId, episodes = [] } = season;
+
+        const currentEpisode = episodes.find(
+          ({ episodeId }) => episodeId === selectedEpisodeId
+        );
+
+        const savedEpisode = episodes.find(
+          ({ episodeId }) => episodeId === savedSelection.episodeId
+        );
+
+        const episode = currentEpisode ?? savedEpisode ?? episodes[0];
+        const episodeId = episode?.episodeId;
+
+        setSelectedSeasonId(seasonId);
+        setSelectedEpisodeId(episodeId);
+
+        persistSelection(updatedVoice, seasonId, episodeId);
       },
     });
 
@@ -293,6 +387,7 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
 
       if (!hasSeasons) {
         setSelectedVoice(voice);
+        persistSelection(voice);
         loadVoiceVideo(voice);
 
         return;
@@ -319,10 +414,12 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
       }
 
       setSelectedEpisodeId(episodeId);
+      const seasonId = selectedSeasonId ?? '1';
 
+      persistSelection(selectedVoice, seasonId, episodeId);
       loadEpisodeVideo({
+        seasonId,
         voice: selectedVoice,
-        seasonId: selectedSeasonId ?? '1',
         episodeId,
       });
     };
@@ -340,10 +437,15 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
     };
 
     const onOverlayOpen = () => {
-      if (!isOffline) {
-        setSavedTime(getSavedTime(film));
-        initFirestoreSavedTime();
+      if (isOffline) {
+        return;
       }
+
+      const storedSavedTime = getSavedTime(film);
+
+      setSavedTime(storedSavedTime);
+      applySavedSelection(storedSavedTime);
+      initFirestoreSavedTime();
     };
 
     const { mutate: loadEpisodesToDownload, isPending: isDownloadLoading } = useMutation({

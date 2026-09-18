@@ -8,9 +8,14 @@ import { useLocalHistory } from 'Hooks/useLocalLibrary';
 import { usePaginatedQuery } from 'Hooks/usePaginatedQuery';
 import { getCurrentLanguage } from 'i18n/index';
 import { t } from 'i18n/translate';
+import { PLAYER_SCREEN } from 'Navigation/navigationRoutes';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { RecentItemInterface } from 'Type/RecentItem.interface';
+import NotificationStore from 'Store/Notification.store';
+import RouterStore from 'Store/Router.store';
 import { removeLocalHistoryItem, setLocalHistoryWatched } from 'Util/LocalLibrary';
+import { navigate } from 'Util/Navigation';
+import { getSavedTime } from 'Util/Player';
 import { queryKeys } from 'Util/Query';
 import { openFilm } from 'Util/Router';
 
@@ -76,6 +81,86 @@ export function RecentScreenContainer() {
     await onNextLoad(isRefresh);
   };
 
+  const { mutate: continueWatching } = useMutation({
+    mutationFn: async (item: RecentItemInterface) => {
+      const film = await currentService.getFilm(item.link);
+
+      if (!film) {
+        throw new Error(t('No video available'));
+      }
+
+      const saved = getSavedTime(film);
+      const lastVoiceId = saved?.lastVoiceId;
+
+      if (!lastVoiceId || !saved?.voices?.[lastVoiceId]) {
+        throw new Error(t('No video available'));
+      }
+
+      const voiceData = saved.voices[lastVoiceId];
+      const voice = film.voices.find(({ id }) => id === lastVoiceId);
+
+      if (!voice) {
+        throw new Error(t('No video available'));
+      }
+
+      if (film.hasSeasons) {
+        const seasonId = voiceData?.lastSeasonId;
+        const episodeId = voiceData?.lastEpisodeId;
+
+        if (!seasonId || !episodeId) {
+          throw new Error(t('Current season or episode not saved.'));
+        }
+
+        const selectedVoice = {
+          ...voice,
+          lastSeasonId: seasonId,
+          lastEpisodeId: episodeId,
+        };
+
+        const video = await currentService.getFilmStreamsByEpisodeId(
+          film,
+          selectedVoice,
+          seasonId,
+          episodeId
+        );
+
+        return {
+          film,
+          video,
+          voice: selectedVoice,
+        };
+      }
+
+      const video = await currentService.getFilmStreamsByVoice(film, voice);
+
+      return {
+        film,
+        video,
+        voice,
+      };
+    },
+    onSuccess: ({ film, video, voice }) => {
+      if (!video) {
+        NotificationStore.displayMessage(t('No video available'));
+        return;
+      }
+
+      RouterStore.pushData(PLAYER_SCREEN, {
+        video,
+        film,
+        voice,
+      });
+
+      navigate(PLAYER_SCREEN);
+    },
+    onError: (error) => {
+      NotificationStore.displayError(error as Error);
+    },
+  });
+
+  const handleContinueWatching = useCallback((item: RecentItemInterface) => {
+    continueWatching(item);
+  }, [continueWatching]);
   const handleOnPress = useCallback((item: RecentItemInterface) => {
     openFilm({ link: item.link, poster: item.image }, navigation);
   }, [navigation]);
@@ -151,6 +236,7 @@ export function RecentScreenContainer() {
     hideConfirmOverlayRef,
     onNextLoad: handleNextLoad,
     handleOnPress,
+    handleContinueWatching,
     removeItem,
     openHideConfirmOverlay,
     hideItem,

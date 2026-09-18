@@ -8,6 +8,7 @@ export interface RecentScreenComponentProps {
   hideConfirmOverlayRef: RefObject<ThemedOverlayRef | null>;
   onNextLoad: (isRefresh: boolean) => Promise<void>;
   handleOnPress: (item: RecentItemInterface) => void;
+  handleContinueWatching: (item: RecentItemInterface) => void;
   removeItem: (item: RecentItemInterface) => void;
   openHideConfirmOverlay: (item: RecentItemInterface) => void;
   hideItem: () => void;
@@ -21,6 +22,7 @@ export interface RecentGridRowProps {
   item: RecentGridItem;
   index: number;
   handleOnPress: (item: RecentItemInterface) => void;
+  handleContinueWatching: (item: RecentItemInterface) => void;
   removeItem: (item: RecentItemInterface) => void;
   openHideConfirmOverlay: (item: RecentItemInterface) => void;
 }

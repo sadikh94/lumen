@@ -19,6 +19,7 @@ import { useServiceContext } from 'Context/ServiceContext';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { t } from 'i18n/translate';
 import EllipsisVertical from 'lucide-react-native/icons/ellipsis-vertical';
+import Play from 'lucide-react-native/icons/play';
 import Eye from 'lucide-react-native/icons/eye';
 import EyeOff from 'lucide-react-native/icons/eye-off';
 import Trash2 from 'lucide-react-native/icons/trash-2';
@@ -53,6 +54,7 @@ type RecentRowProps = {
   compactActions: boolean;
   isLastRow: boolean;
   handleOnPress: (item: RecentGridItem) => void;
+  handleContinueWatching: (item: RecentGridItem) => void;
   removeItem: (item: RecentGridItem) => void;
   openHideConfirmOverlay: (item: RecentGridItem) => void;
 };
@@ -67,6 +69,7 @@ function RecentRow({
   compactActions,
   isLastRow,
   handleOnPress,
+  handleContinueWatching,
   removeItem,
   openHideConfirmOverlay,
 }: RecentRowProps) {
@@ -130,20 +133,40 @@ function RecentRow({
   const renderActions = () => {
     if (compactActions) {
       return (
-        <ThemedButton
-          style={ [styles.actionButton, hasFocusedChild && styles.actionButtonUnzoomed] }
-          contentStyle={ styles.actionButtonContent }
-          IconComponent={ EllipsisVertical }
-          onPress={ () => actionsOverlayRef.current?.open() }
-          iconProps={ {
-            size: scale(ACTION_ICON_SIZE),
-          } }
-        />
+        <>
+          <ThemedButton
+            style={ [styles.actionButton, hasFocusedChild && styles.actionButtonUnzoomed] }
+            contentStyle={ styles.actionButtonContent }
+            IconComponent={ Play }
+            onPress={ () => handleContinueWatching(item) }
+            iconProps={ {
+              size: scale(ACTION_ICON_SIZE),
+            } }
+          />
+          <ThemedButton
+            style={ [styles.actionButton, hasFocusedChild && styles.actionButtonUnzoomed] }
+            contentStyle={ styles.actionButtonContent }
+            IconComponent={ EllipsisVertical }
+            onPress={ () => actionsOverlayRef.current?.open() }
+            iconProps={ {
+              size: scale(ACTION_ICON_SIZE),
+            } }
+          />
+        </>
       );
     }
 
     return (
       <>
+        <ThemedButton
+          style={ [styles.actionButton, hasFocusedChild && styles.actionButtonUnzoomed] }
+          contentStyle={ styles.actionButtonContent }
+          IconComponent={ Play }
+          onPress={ () => handleContinueWatching(item) }
+          iconProps={ {
+            size: scale(ACTION_ICON_SIZE),
+          } }
+        />
         <ThemedButton
           style={ [styles.actionButton, hasFocusedChild && styles.actionButtonUnzoomed] }
           contentStyle={ styles.actionButtonContent }
@@ -247,6 +270,7 @@ export function RecentScreenComponent({
   onNextLoad,
   handleOnPress,
   removeItem,
+  handleContinueWatching,
   openHideConfirmOverlay,
   hideItem,
 }: RecentScreenComponentProps) {
@@ -268,9 +292,10 @@ export function RecentScreenComponent({
       isLastRow={ index >= lastRowStart }
       handleOnPress={ handleOnPress }
       removeItem={ removeItem }
+      handleContinueWatching={ handleContinueWatching }
       openHideConfirmOverlay={ openHideConfirmOverlay }
     />
-  ), [handleOnPress, openHideConfirmOverlay, removeItem, styles, recentTwoColumnsTV, lastRowStart]);
+  ), [handleContinueWatching, handleOnPress, openHideConfirmOverlay, removeItem, styles, recentTwoColumnsTV, lastRowStart]);
 
   const renderContent = () => {
     if (!isSignedIn && !isLocalLibrary) {

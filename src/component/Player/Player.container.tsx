@@ -664,11 +664,13 @@ export function PlayerContainer({
   };
 
   const onPlaybackEnd = (currentTime: number, duration: number) => {
-    if (!playerAutoNextEpisode) {
+    if (currentTime < duration - 1) {
       return;
     }
 
-    if (currentTime >= duration - 1) {
+    updateTime();
+
+    if (playerAutoNextEpisode) {
       handleNewEpisode(RewindDirection.FORWARD);
     }
   };

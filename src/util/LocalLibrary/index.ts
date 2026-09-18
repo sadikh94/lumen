@@ -137,6 +137,7 @@ export const upsertLocalHistoryItem = (film: FilmInterface, voice: FilmVoiceInte
     link: film.link,
     poster: film.poster,
     title: film.title,
+    voiceId: voice.id,
     voiceTitle: voice.title,
     seasonId: voice.lastSeasonId,
     episodeId: voice.lastEpisodeId,
