@@ -367,7 +367,38 @@ const restoreSettings = (state: CloudSyncState): void => {
   const isTV = Boolean(getGlobalConfig().isTV);
   const currentPlatform = isTV ? 'atv' : 'mobile';
 
+  const hasNewShowRatingsSetting =
+    Object.prototype.hasOwnProperty.call(state.settings.metadata, 'showRatings')
+    || Object.prototype.hasOwnProperty.call(state.settings.values, 'showRatings');
+
   for (const [id, metadata] of Object.entries(state.settings.metadata)) {
+    // Migrate the old poster-rating setting without bringing the legacy
+    // ratingSource key back into the new Cloud Sync schema.
+    if (id === 'ratingSource') {
+      if (hasNewShowRatingsSetting) {
+        continue;
+      }
+
+      if (metadata.deleted) {
+        applyCloudConfig('showRatings', false);
+        continue;
+      }
+
+      if (!(id in state.settings.values)) {
+        continue;
+      }
+
+      const value = state.settings.values[id];
+
+      if (value === 'imdb' || value === 'kinopoisk') {
+        applyCloudConfig('showRatings', true);
+      } else if (value === 'off') {
+        applyCloudConfig('showRatings', false);
+      }
+
+      continue;
+    }
+
     const parsed = getCloudSyncSettingFromId(id);
 
     if (!parsed) {

@@ -26,7 +26,7 @@ const getRatingColor = (rating: number) => {
 export function FilmRating({ filmId, isVisible = true }: FilmRatingProps) {
   const styles = useThemedStyles(componentStyles);
   const { theme } = useAppTheme();
-  const { rating } = useFilmRatings(filmId, isVisible);
+  const { rating, ratingSource } = useFilmRatings(filmId, isVisible);
 
   if (typeof rating !== 'number' || !Number.isFinite(rating)) {
     return null;
@@ -45,6 +45,8 @@ export function FilmRating({ filmId, isVisible = true }: FilmRatingProps) {
           { color: theme.colors.textOnContrast },
         ] }
       >
+        {ratingSource}
+        {'\n'}
         {rating.toFixed(1)}
       </ThemedText>
     </View>

@@ -14,8 +14,9 @@ export const componentStyles = ({ scale, text }: Theme) => ({
     zIndex: 20,
   },
   text: {
-    fontSize: scale(text.xxs.fontSize),
+    fontSize: scale(text.xxs.fontSize * 0.7),
     fontWeight: '700' as const,
-    lineHeight: scale(text.xxs.fontSize + 2),
+    textAlign: 'center' as const,
+    lineHeight: scale(text.xxs.fontSize * 0.7 + 2),
   },
 });

@@ -154,7 +154,7 @@ const uk: Translations = {
   '{{seconds}} seconds': '{{seconds}} секунд',
   'No recent items': 'Немає нещодавніх фільмів',
   'You have not watched any films yet': 'Ви ще не подивились жодного фільму',
-  'Rating source': 'Джерело рейтингу',
+  'Show ratings': 'Показувати рейтинги',
   'Show movie ratings on posters.': 'Показувати рейтинг фільмів на постерах. Може збільшити кількість запитів до сервера.',
   'IMDb': 'IMDb',
   'Kinopoisk': 'Кінопошук',

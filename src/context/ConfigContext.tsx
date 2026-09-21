@@ -6,7 +6,7 @@ import {
   useMemo,
 } from 'react';
 import { useMMKVString } from 'react-native-mmkv';
-import { defaultConfig, DeviceConfigType } from 'src/config';
+import { defaultConfig, DeviceConfigType, migrateLegacyConfig } from 'src/config';
 import { getCloudSyncSettingId } from 'src/config/cloudSync';
 import { safeJsonParse } from 'Util/Json';
 import { storage } from 'Util/Storage';
@@ -46,13 +46,13 @@ const PendingReleaseBadgeContext = createContext<boolean>(defaultConfig.showPend
 let globalConfig: any = null;
 export const getGlobalConfig = (): DeviceConfigType => {
   if (!globalConfig) {
-    const storedConfig = storage.getConfigStorage().load<DeviceConfigType>(DEVICE_CONFIG);
+    const storedConfig = storage.getConfigStorage().load<Record<string, unknown>>(DEVICE_CONFIG);
 
-    // defaults first, so a key the stored blob predates is not read as undefined
+    // Migrate the old poster-rating setting before applying defaults.
     globalConfig = {
       ...defaultConfig,
       ...(globalConfig || {}),
-      ...(storedConfig || {}),
+      ...migrateLegacyConfig(storedConfig ?? {}),
     };
   }
 
@@ -99,11 +99,11 @@ export const ConfigProvider = ({ children }: { children: ReactNode }) => {
       return defaultConfig;
     }
 
-    const parsedConfig = safeJsonParse<DeviceConfigType>(deviceConfig) ?? {};
+    const parsedConfig = safeJsonParse<Record<string, unknown>>(deviceConfig) ?? {};
 
     return {
       ...defaultConfig,
-      ...parsedConfig,
+      ...migrateLegacyConfig(parsedConfig),
     };
   }, [deviceConfig]);
 

@@ -114,11 +114,6 @@ export const MOBILE_NAVIGATION_OPTIONS = [
   'Recent-tab',
   'Account-tab',
 ];
-export const RATING_SOURCE_OPTIONS = [
-  { value: 'off', get label() { return t('Off'); } },
-  { value: 'imdb', get label() { return t('IMDb'); } },
-  { value: 'kinopoisk', get label() { return t('Kinopoisk'); } },
-];
 
 export const THEME_SCHEME_OPTIONS = [
   {

@@ -1,4 +1,4 @@
-import { CONFIG_KEY_SECTIONS, DeviceConfigType } from 'src/config';
+import { CONFIG_KEY_SECTIONS, DeviceConfigType, migrateLegacyConfig } from 'src/config';
 import { DEVICE_CONFIG } from 'Context/ConfigContext';
 import { SavedTimestamp } from 'Component/Player/Player.type';
 import {
@@ -139,8 +139,9 @@ export const createLocalCloudSyncState = (): CloudSyncState => {
     });
   });
 
-  const storedConfig =
-    storage.getConfigStorage().load<DeviceConfigType>(DEVICE_CONFIG);
+  const storedConfig = migrateLegacyConfig(
+    storage.getConfigStorage().load<Record<string, unknown>>(DEVICE_CONFIG) ?? {}
+  );
 
   if (storedConfig) {
     const configKeys =

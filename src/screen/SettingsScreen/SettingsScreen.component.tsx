@@ -107,7 +107,6 @@ import {
   PLAYER_SUBTITLES_EDGE_OPTIONS,
   PLAYER_SUBTITLES_SIZE_OPTIONS,
   PLAYER_VOLUME_NORMALIZATION_OPTIONS,
-  RATING_SOURCE_OPTIONS,
   TELEGRAM_LINK,
   THEME_SCHEME_OPTIONS,
   TV_NAVIGATION_OPTIONS,
@@ -119,7 +118,7 @@ import { useTripleTap } from './useTripleTap';
 
 export function SettingsScreenComponent({
   initialRoute,
-  ratingSource,
+  showRatings,
   homeDefaultTab,
   tabPosition,
   numberOfColumnsMobile,
@@ -377,14 +376,12 @@ export function SettingsScreenComponent({
         options={ TAB_POSITION_OPTIONS }
         onChange={ (value) => onConfigUpdate('tabPosition', value) }
       />
-      <SettingSelect
-        title={ t('Rating source') }
+      <SettingSwitch
+        title={ t('Show ratings') }
         subtitle={ t('Show movie ratings on posters.') }
-        showSelectedValueInSubtitle
         IconComponent={ Tag }
-        value={ ratingSource }
-        options={ RATING_SOURCE_OPTIONS }
-        onChange={ (value) => onConfigUpdate('ratingSource', value) }
+        value={ showRatings }
+        onChange={ (value) => onConfigUpdate('showRatings', value) }
       />
       <SettingSelect
         title={ t('Columns in list') }

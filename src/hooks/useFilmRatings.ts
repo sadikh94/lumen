@@ -13,7 +13,7 @@ import { queryKeys } from 'Util/Query';
 const RATING_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 
 export const useFilmRatings = (filmId?: string, isVisible = true) => {
-  const { ratingSource } = useConfigContext();
+  const { showRatings } = useConfigContext();
   const { isInternetAvailable } = useNetworkContext();
   const { currentService } = useServiceContext();
 
@@ -25,7 +25,7 @@ export const useFilmRatings = (filmId?: string, isVisible = true) => {
 
   const enabled = (
     Boolean(filmId)
-    && ratingSource !== 'off'
+    && showRatings
     && isInternetAvailable
     && isVisible
   );
@@ -57,15 +57,22 @@ export const useFilmRatings = (filmId?: string, isVisible = true) => {
     refetchOnReconnect: false,
   });
 
-  const rating = ratingSource === 'imdb'
-    ? query.data?.imdb
-    : ratingSource === 'kinopoisk'
-      ? query.data?.kinopoisk
-      : undefined;
+  const rating = showRatings
+    ? query.data?.imdb ?? query.data?.kinopoisk
+    : undefined;
+
+  const ratingSource = showRatings
+    ? query.data?.imdb !== undefined
+      ? 'IMDb'
+      : query.data?.kinopoisk !== undefined
+        ? 'KP'
+        : undefined
+    : undefined;
 
   return {
     ...query,
     rating,
+    ratingSource,
   };
 };
 

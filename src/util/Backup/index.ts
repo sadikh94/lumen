@@ -5,7 +5,7 @@ import * as Application from 'expo-application';
 import { File } from 'expo-file-system';
 import { StorageAccessFramework } from 'expo-file-system/legacy';
 import { getCurrentLanguage, isSupportedLanguage, LANGUAGE_STORAGE_KEY } from 'i18n/index';
-import { defaultConfig, DeviceConfigType } from 'src/config';
+import { defaultConfig, DeviceConfigType, migrateLegacyConfig } from 'src/config';
 import {
   BACKUP_SECTION,
   BackupDataInterface,
@@ -215,7 +215,9 @@ const applySettings = (
     (acc: Record<string, unknown>, section) => ({
       ...acc,
       ...sanitizeConfig(
-        data[section]?.config,
+        migrateLegacyConfig(
+          (data[section]?.config ?? {}) as Record<string, unknown>
+        ),
         defaultConfig,
         getSectionConfigKeys(section)
       ),
