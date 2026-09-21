@@ -1,6 +1,7 @@
 import { Header } from 'Component/Header';
 import { Page } from 'Component/Page';
 import { ThemedButton } from 'Component/ThemedButton';
+import { ThemedSafeArea } from 'Component/ThemedSafeArea';
 import { ThemedPressable } from 'Component/ThemedPressable';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { ThemedText } from 'Component/ThemedText';
@@ -85,69 +86,71 @@ const NavigationOrderSettingComponent = ({
 
   return (
     <Page checkConnection={ false }>
-      <Header
-        title={ title }
-        onBack={ onBack }
-      />
+      <ThemedSafeArea>
+        <Header
+          title={ title }
+          onBack={ onBack }
+        />
 
-      <ThemedScrollView
-        contentContainerStyle={ styles.container }
-        autofocus
-      >
-        { orderedItems.map((item, index) => {
-          const { IconComponent } = item;
+        <ThemedScrollView
+          contentContainerStyle={ styles.container }
+          autofocus
+        >
+          { orderedItems.map((item, index) => {
+            const { IconComponent } = item;
 
-          return (
-            <View
-              key={ item.value }
-              style={ styles.item }
-              onLayout={ event => console.log('[ATV NavigationOrder item]', event.nativeEvent.layout) }
-            >
-              <View style={ styles.itemContent }>
-                <IconComponent
-                  style={ styles.itemIcon }
-                  size={ styles.itemIcon.width }
-                />
+            return (
+              <View
+                key={ item.value }
+                style={ styles.item }
+                onLayout={ event => console.log('[ATV NavigationOrder item]', event.nativeEvent.layout) }
+              >
+                <View style={ styles.itemContent }>
+                  <IconComponent
+                    style={ styles.itemIcon }
+                    size={ styles.itemIcon.width }
+                  />
 
-                <ThemedText style={ styles.label }>
-                  { item.label }
-                </ThemedText>
+                  <ThemedText style={ styles.label }>
+                    { item.label }
+                  </ThemedText>
+                </View>
+
+                <View style={ styles.actions } onLayout={ event => { const layout = event.nativeEvent.layout; event.currentTarget.measureInWindow((x, y, width, height) => { console.log('[ATV NavigationOrder actions]', { local: layout, window: { x, y, width, height } }); }); } }>
+                  <ThemedButton
+                    disabled={ !hiddenItems.includes(item.value) && orderedItems.filter(orderedItem => !hiddenItems.includes(orderedItem.value)).length <= 1 }
+                    style={ styles.button }
+                    contentStyle={ styles.buttonContent }
+                    IconComponent={ hiddenItems.includes(item.value) ? EyeOff : Eye }
+                    iconColor={ styles.buttonIcon.color }
+                    iconProps={ { size: styles.buttonIcon.width } }
+                    onPress={ () => toggleItemVisibility(item.value) }
+                  />
+                  <ThemedButton
+                    disabled={ index === 0 }
+                    style={ styles.button }
+                    contentStyle={ styles.buttonContent }
+                    IconComponent={ ChevronUp }
+                    iconColor={ styles.buttonIcon.color }
+                    iconProps={ { size: styles.buttonIcon.width } }
+                    onPress={ () => moveItem(index, -1) }
+                  />
+
+                  <ThemedButton
+                    disabled={ index === orderedItems.length - 1 }
+                    style={ styles.button }
+                    contentStyle={ styles.buttonContent }
+                    IconComponent={ ChevronDown }
+                    iconColor={ styles.buttonIcon.color }
+                    iconProps={ { size: styles.buttonIcon.width } }
+                    onPress={ () => moveItem(index, 1) }
+                  />
+                </View>
               </View>
-
-              <View style={ styles.actions } onLayout={ event => { const layout = event.nativeEvent.layout; event.currentTarget.measureInWindow((x, y, width, height) => { console.log('[ATV NavigationOrder actions]', { local: layout, window: { x, y, width, height } }); }); } }>
-                <ThemedButton
-                  disabled={ !hiddenItems.includes(item.value) && orderedItems.filter(orderedItem => !hiddenItems.includes(orderedItem.value)).length <= 1 }
-                  style={ styles.button }
-                  contentStyle={ styles.buttonContent }
-                  IconComponent={ hiddenItems.includes(item.value) ? EyeOff : Eye }
-                  iconColor={ styles.buttonIcon.color }
-                  iconProps={ { size: styles.buttonIcon.width } }
-                  onPress={ () => toggleItemVisibility(item.value) }
-                />
-                <ThemedButton
-                  disabled={ index === 0 }
-                  style={ styles.button }
-                  contentStyle={ styles.buttonContent }
-                  IconComponent={ ChevronUp }
-                  iconColor={ styles.buttonIcon.color }
-                  iconProps={ { size: styles.buttonIcon.width } }
-                  onPress={ () => moveItem(index, -1) }
-                />
-
-                <ThemedButton
-                  disabled={ index === orderedItems.length - 1 }
-                  style={ styles.button }
-                  contentStyle={ styles.buttonContent }
-                  IconComponent={ ChevronDown }
-                  iconColor={ styles.buttonIcon.color }
-                  iconProps={ { size: styles.buttonIcon.width } }
-                  onPress={ () => moveItem(index, 1) }
-                />
-              </View>
-            </View>
-          );
-        }) }
-      </ThemedScrollView>
+            );
+          }) }
+        </ThemedScrollView>
+      </ThemedSafeArea>
     </Page>
   );
 };

@@ -225,7 +225,8 @@ const renderMobileTabs = (
     SEARCH_TAB,
     BOOKMARKS_TAB,
     RECENT_TAB,
-    ACCOUNT_TAB,
+    NOTIFICATIONS_TAB,
+    DOWNLOADS_SCREEN,
   ];
 
   const availableRoutes = [
@@ -233,7 +234,8 @@ const renderMobileTabs = (
     SEARCH_TAB,
     BOOKMARKS_TAB,
     RECENT_TAB,
-    ACCOUNT_TAB,
+    NOTIFICATIONS_TAB,
+    DOWNLOADS_SCREEN,
   ];
 
   const navigationOrder = normalizeNavigationOrder(
@@ -296,14 +298,28 @@ const renderMobileTabs = (
           />
         );
 
-      case ACCOUNT_TAB:
+      case NOTIFICATIONS_TAB:
         return (
           <Tab.Screen
-            key={ ACCOUNT_TAB }
-            name={ ACCOUNT_TAB }
-            component={ MobileAccountNavigator }
+            key={ NOTIFICATIONS_TAB }
+            name={ NOTIFICATIONS_TAB }
+            component={ NotificationsNavigator }
             options={ {
-              tabBarLabel: t('Account'),
+              tabBarLabel: t('Notifications'),
+              tabBarIcon: Bell,
+            } }
+          />
+        );
+
+      case DOWNLOADS_SCREEN:
+        return (
+          <Tab.Screen
+            key={ DOWNLOADS_SCREEN }
+            name={ DOWNLOADS_SCREEN }
+            component={ DownloadsScreen }
+            options={ {
+              tabBarLabel: t('Downloads'),
+              tabBarIcon: Download,
             } }
           />
         );
@@ -321,6 +337,14 @@ const renderMobileTabs = (
       } }
     >
       { navigationOrder.map(renderScreen) }
+      <Tab.Screen
+        key={ ACCOUNT_TAB }
+        name={ ACCOUNT_TAB }
+        component={ MobileAccountNavigator }
+        options={ {
+          tabBarLabel: t('Account'),
+        } }
+      />
     </Tab.Group>
   );
 };

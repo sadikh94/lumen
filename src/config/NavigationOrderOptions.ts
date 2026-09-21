@@ -1,13 +1,14 @@
 import Bell from 'lucide-react-native/icons/bell';
+import Download from 'lucide-react-native/icons/download';
 import FolderHeart from 'lucide-react-native/icons/folder-heart';
 import House from 'lucide-react-native/icons/house';
 import History from 'lucide-react-native/icons/rotate-ccw-clock';
 import Search from 'lucide-react-native/icons/search';
-import UserCog from 'lucide-react-native/icons/user-cog';
+
 import { t } from 'i18n/translate';
 import {
-  ACCOUNT_TAB,
   BOOKMARKS_TAB,
+  DOWNLOADS_SCREEN,
   HOME_TAB,
   NOTIFICATIONS_TAB,
   RECENT_TAB,
@@ -65,8 +66,13 @@ export const getMobileNavigationOrderItems = (): NavigationOrderItem[] => [
     IconComponent: History,
   },
   {
-    value: ACCOUNT_TAB,
-    label: t('Account'),
-    IconComponent: UserCog,
+    value: NOTIFICATIONS_TAB,
+    label: t('Notifications'),
+    IconComponent: Bell,
+  },
+  {
+    value: DOWNLOADS_SCREEN,
+    label: t('Downloads'),
+    IconComponent: Download,
   },
 ];
