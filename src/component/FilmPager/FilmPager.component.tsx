@@ -31,6 +31,7 @@ const EMPTY_INDEXES: ReadonlySet<number> = new Set<number>();
 
 const TabButton = memo(({
   menuItem,
+  displayTitle,
   isActive,
   onPress,
   onLayout,
@@ -40,6 +41,7 @@ const TabButton = memo(({
   handleSelectSorting,
 }: {
   menuItem: PagerItemInterface['menuItem'];
+  displayTitle?: string;
   isActive: boolean;
   onPress: () => void;
   onLayout: (width: number) => void;
@@ -79,7 +81,7 @@ const TabButton = memo(({
             isActive && styles.activeTabText,
           ] }
         >
-          { title }
+          { displayTitle ?? title }
         </Animated.Text>
       </Pressable>
       { sorting && (
@@ -253,10 +255,11 @@ export const FilmPagerComponent = ({
               contentContainerStyle={ styles.tabBarContainer }
               accessibilityRole="tablist"
             >
-              { pagerItems.map(({ menuItem }, i) => (
+              { pagerItems.map(({ menuItem, displayTitle }, i) => (
                 <TabButton
                   key={ menuItem.id }
                   menuItem={ menuItem }
+                  displayTitle={ displayTitle }
                   isActive={ activeTab === i }
                   onPress={ () => handleTabPress(i) }
                   onLayout={ (width) => handleTabLayout(i, width) }

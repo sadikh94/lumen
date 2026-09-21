@@ -40,6 +40,7 @@ export type DeviceConfigType = {
   tabPosition: TabPosition;
   homeDisplayMode: FilmDisplayMode;
   bookmarksDisplayMode: FilmDisplayMode;
+  showBookmarkCounts: boolean;
   recentDisplayMode: FilmDisplayMode;
   playerRewindSeconds: number;
   playerBackwardRewindSeconds: number;
@@ -119,6 +120,7 @@ export const defaultConfig: DeviceConfigType = {
   tabPosition: 'bottom',
   homeDisplayMode: 'grid',
   bookmarksDisplayMode: 'grid',
+  showBookmarkCounts: false,
   recentDisplayMode: 'list',
   playerRewindSeconds: 10,
   playerBackwardRewindSeconds: 10,
@@ -192,6 +194,7 @@ export const CONFIG_KEY_SECTIONS = {
   tabPosition: BACKUP_SECTION.SETTINGS_APPEARANCE,
   homeDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
   bookmarksDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  showBookmarkCounts: BACKUP_SECTION.SETTINGS_APPEARANCE,
   recentDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,
   numberOfColumnsTV: BACKUP_SECTION.SETTINGS_APPEARANCE,

@@ -30,6 +30,7 @@ const EMPTY_INDEXES: ReadonlySet<number> = new Set<number>();
 
 const TabButton = memo(({
   menuItem,
+  displayTitle,
   isActive,
   focusKey,
   onPress,
@@ -40,6 +41,7 @@ const TabButton = memo(({
   handleSelectSorting,
 }: {
   menuItem: PagerItemInterface['menuItem'];
+  displayTitle?: string;
   isActive: boolean;
   focusKey: string;
   onPress: () => void;
@@ -84,7 +86,7 @@ const TabButton = memo(({
               isFocused && styles.tabTextFocused,
             ] }
           >
-            { title }
+            { displayTitle ?? title }
           </ThemedText>
         ) }
       </ThemedPressable>
@@ -153,6 +155,8 @@ const TopMenu = memo(({
             <TabButton
               key={ item.menuItem.id }
               menuItem={ item.menuItem }
+
+              displayTitle={ item.displayTitle }
               isActive={ activeIndex === idx }
               focusKey={ getTabFocusKey(item.menuItem.id) }
               onPress={ () => onTabSelect(idx) }

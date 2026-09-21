@@ -15,13 +15,19 @@ import { queryKeys } from 'Util/Query';
 import BookmarksScreenComponent from './BookmarksScreen.component';
 import BookmarksScreenComponentTV from './BookmarksScreen.component.atv';
 
-const buildLocalPagerItems = (blob: LocalBookmarksBlob): PagerItemInterface[] => (
+const buildLocalPagerItems = (
+  blob: LocalBookmarksBlob,
+  showBookmarkCounts: boolean
+): PagerItemInterface[] => (
   blob.categories.map((category) => ({
     menuItem: {
       id: category.id,
       title: category.title,
       path: '',
     },
+    displayTitle: showBookmarkCounts
+      ? `${category.title} (${category.filmIds.length})`
+      : undefined,
     films: getLocalFilmsForCategory(blob, category.id),
     pagination: {
       currentPage: 1,
@@ -31,7 +37,13 @@ const buildLocalPagerItems = (blob: LocalBookmarksBlob): PagerItemInterface[] =>
 );
 
 export function BookmarksScreenContainer() {
-  const { isTV, isLocalLibrary, tabPosition, bookmarksDisplayMode } = useConfigContext();
+  const {
+    isTV,
+    isLocalLibrary,
+    tabPosition,
+    bookmarksDisplayMode,
+    showBookmarkCounts,
+  } = useConfigContext();
   const { isSignedIn, currentService } = useServiceContext();
   const localBookmarks = useLocalBookmarks();
   const manageCategoriesOverlayRef = useRef<ThemedOverlayRef | null>(null);
@@ -69,11 +81,31 @@ export function BookmarksScreenContainer() {
     enabled: !isLocalLibrary,
   });
 
+  // The service title contains the category size, for example "Films (1200)".
+  // Keep menuItem.title untouched because it is also used by the API layer.
+  const displayPagerItems = useMemo(
+    () => pagerItems.map((item) => {
+      const bookmark = bookmarks?.find(({ id }) => id === item.menuItem.id);
+      const title = bookmark?.title ?? item.menuItem.title;
+      const titleWithoutCount = title.replace(/\s*\(\d+\)\s*$/, '');
+
+      return {
+        ...item,
+        displayTitle: showBookmarkCounts ? title : titleWithoutCount,
+      };
+    }),
+    [pagerItems, bookmarks, showBookmarkCounts]
+  );
+
   // local items are purely derived, so FilmPager's paging round-trips can never
   // write duplicates back into them
   const localPagerItems = useMemo(
-    () => (isLocalLibrary ? buildLocalPagerItems(localBookmarks) : []),
-    [localBookmarks, isLocalLibrary]
+    () => (
+      isLocalLibrary
+        ? buildLocalPagerItems(localBookmarks, showBookmarkCounts)
+        : []
+    ),
+    [localBookmarks, isLocalLibrary, showBookmarkCounts]
   );
 
   const openManageCategories = () => {
@@ -82,7 +114,7 @@ export function BookmarksScreenContainer() {
 
   const containerProps = {
     isLoading: isLocalLibrary ? false : !isSignedIn || isBookmarksLoading,
-    pagerItems: isLocalLibrary ? localPagerItems : pagerItems,
+    pagerItems: isLocalLibrary ? localPagerItems : displayPagerItems,
     isLocalLibrary,
     tabPosition,
     displayMode: bookmarksDisplayMode,

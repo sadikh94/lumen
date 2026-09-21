@@ -158,6 +158,7 @@ export function SettingsScreenComponent({
   isLocalLibrary,
   commentPostingTV,
   showVotesCount,
+  showBookmarkCounts,
   showRecommendations,
   showAgeRating,
   tvChannelsEnabled,
@@ -445,6 +446,13 @@ export function SettingsScreenComponent({
         IconComponent={ Users }
         value={ showVotesCount }
         onChange={ (value) => onConfigUpdate('showVotesCount', value) }
+      />
+      <SettingSwitch
+        title={ t('Show bookmark counts') }
+        subtitle={ t('Show the number of films in each bookmark category.') }
+        IconComponent={ Users }
+        value={ showBookmarkCounts }
+        onChange={ (value) => onConfigUpdate('showBookmarkCounts', value) }
       />
       <SettingSwitch
         title={ t('Recommendations') }

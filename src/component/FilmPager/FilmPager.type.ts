@@ -41,6 +41,7 @@ export type FilmPagerComponentProps = FilmPagerContainerProps;
 
 export interface PagerItemInterface {
   menuItem: MenuItemInterface;
+  displayTitle?: string;
   films: FilmCardInterface[] | null;
   pagination: PaginationInterface;
 }
