@@ -481,7 +481,11 @@ const en = {
   'Verifying that you are not a robot': 'Verifying that you are not a robot',
   'This can take a few seconds': 'This can take a few seconds',
   'Complete the check to continue, or press Back to cancel': 'Complete the check to continue, or press Back to cancel',
-};
+  'Google Drive sync': 'Google Drive sync',
+  'Google account connected': 'Google account connected',
+  'Not connected': 'Not connected',
+  'Sync now': 'Sync now',
+  'Synchronize your data with Google Drive.': 'Synchronize your data with Google Drive.',};
 
 export default en;
 export type Translations = typeof en

@@ -98,6 +98,35 @@ export const removeCategory = (
 /**
  * Adds or removes a film in a category. No-op if the category does not exist.
  */
+export const reorderCategories = (
+  blob: LocalBookmarksBlob,
+  fromIndex: number,
+  toIndex: number
+): LocalBookmarksBlob => {
+  if (
+    fromIndex < 0
+    || fromIndex >= blob.categories.length
+    || toIndex < 0
+    || toIndex >= blob.categories.length
+    || fromIndex === toIndex
+  ) {
+    return blob;
+  }
+
+  const categories = [...blob.categories];
+  const [movedCategory] = categories.splice(fromIndex, 1);
+
+  if (!movedCategory) {
+    return blob;
+  }
+
+  categories.splice(toIndex, 0, movedCategory);
+
+  return {
+    ...blob,
+    categories,
+  };
+};
 export const toggleBookmark = (
   blob: LocalBookmarksBlob,
   filmCard: FilmCardInterface,

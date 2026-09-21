@@ -482,6 +482,10 @@ const uk: Translations = {
   'Verifying that you are not a robot': 'Перевіряємо, що ви не робот',
   'This can take a few seconds': 'Це може зайняти кілька секунд',
   'Complete the check to continue, or press Back to cancel': 'Пройдіть перевірку, щоб продовжити, або натисніть «Назад» для скасування',
-};
+  'Google Drive sync': 'Синхронізація з Google Drive',
+  'Google account connected': 'Google-акаунт підключено',
+  'Not connected': 'Не підключено',
+  'Sync now': 'Синхронізувати зараз',
+  'Synchronize your data with Google Drive.': 'Синхронізувати дані з Google Drive.',};
 
 export default uk;

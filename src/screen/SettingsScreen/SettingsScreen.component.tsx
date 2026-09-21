@@ -17,6 +17,7 @@ import { SettingText } from 'Component/SettingText';
 import { ThemedSafeArea } from 'Component/ThemedSafeArea';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
+import { useCloudSyncContext } from 'Context/CloudSyncContext';
 import { normalizeAccentColor } from 'Theme/accentColors';
 import { t } from 'i18n/translate';
 import ALargeSmall from 'lucide-react-native/icons/a-large-small';
@@ -122,9 +123,6 @@ export function SettingsScreenComponent({
   homeDefaultTab,
   tabPosition,
   numberOfColumnsMobile,
-  homeDisplayMode,
-  bookmarksDisplayMode,
-  recentDisplayMode,
   hiddenCountries,
   playerRewindSeconds,
   playerBackwardRewindSeconds,
@@ -173,7 +171,6 @@ export function SettingsScreenComponent({
   showVotesCount,
   showRecommendations,
   showAgeRating,
-  showPendingReleaseBadge,
   theme,
   themeScheme,
   isTV,
@@ -208,6 +205,16 @@ export function SettingsScreenComponent({
   onPlayerQualityChange,
 }: SettingsScreenComponentProps) {
   const { handleTap } = useTripleTap();
+  const {
+    connected: cloudSyncConnected,
+    email: cloudSyncEmail,
+    lastSyncAt: cloudSyncLastSyncAt,
+    lastError: cloudSyncLastError,
+    syncing: cloudSyncSyncing,
+    connect: connectCloudSync,
+    disconnect: disconnectCloudSync,
+    syncNow: syncCloudSync,
+  } = useCloudSyncContext();
   const styles = useThemedStyles(componentStyles);
   const [currentGroup, setCurrentGroup] = useState<SETTING_GROUP | null>(takeHandedOverGroup);
   const [navigationOrderEditor, setNavigationOrderEditor] = useState<'tv' | 'mobile' | null>(null);
@@ -334,11 +341,13 @@ export function SettingsScreenComponent({
           : onConfigUpdate('accentColor', value) }
         onCustomChange={ onAccentColorInput }
       />
-      <SettingBase
-        title={ t('Mobile navigation order') }
-        IconComponent={ Dock }
-        onPress={ () => setNavigationOrderEditor('mobile') }
-      />
+      { !isTV && (
+        <SettingBase
+          title={ t('Mobile navigation order') }
+          IconComponent={ Dock }
+          onPress={ () => setNavigationOrderEditor('mobile') }
+        />
+      ) }
       <SettingSelect
         title={ t('Interface language') }
         IconComponent={ Globe }
@@ -382,36 +391,6 @@ export function SettingsScreenComponent({
         value={ numberOfColumnsMobile.toString() }
         options={ COLUMNS_MOBILE_OPTIONS }
         onChange={ (value) => onConfigUpdate('numberOfColumnsMobile', Number(value)) }
-      />
-      <SettingSelect
-        title={ t('Home display mode') }
-        IconComponent={ Grid3x2 }
-        value={ homeDisplayMode }
-        options={ [
-          { value: 'grid', label: t('Grid') },
-          { value: 'list', label: t('List') },
-        ] }
-        onChange={ (value) => onConfigUpdate('homeDisplayMode', value) }
-      />
-      <SettingSelect
-        title={ t('Bookmarks display mode') }
-        IconComponent={ Grid3x2 }
-        value={ bookmarksDisplayMode }
-        options={ [
-          { value: 'grid', label: t('Grid') },
-          { value: 'list', label: t('List') },
-        ] }
-        onChange={ (value) => onConfigUpdate('bookmarksDisplayMode', value) }
-      />
-      <SettingSelect
-        title={ t('Recent display mode') }
-        IconComponent={ Grid3x2 }
-        value={ recentDisplayMode }
-        options={ [
-          { value: 'grid', label: t('Grid') },
-          { value: 'list', label: t('List') },
-        ] }
-        onChange={ (value) => onConfigUpdate('recentDisplayMode', value) }
       />
       <SettingMultiSelect
         title={ t('Hidden countries') }
@@ -458,13 +437,6 @@ export function SettingsScreenComponent({
         onChange={ (value) => onConfigUpdate('showAgeRating', value) }
       />
       <SettingSwitch
-        title={ t('Show pending release badge') }
-        subtitle={ t('Show an icon on posters for content awaiting release.') }
-        IconComponent={ Timer }
-        value={ showPendingReleaseBadge }
-        onChange={ (value) => onConfigUpdate('showPendingReleaseBadge', value) }
-      />
-      <SettingSwitch
         title={ t('Continue button enabled') }
         subtitle={ t('Toggle continue button.') }
         IconComponent={ ArrowRight }
@@ -483,6 +455,34 @@ export function SettingsScreenComponent({
 
   const renderNetwork = () => (
     <ThemedScrollView>
+        <SettingBase
+        title={ t('Google Drive sync') }
+        subtitle={
+          cloudSyncConnected
+            ? cloudSyncEmail
+              ? `Connected as ${cloudSyncEmail}`
+              : t('Google account connected')
+            : t('Not connected')
+        }
+        IconComponent={ cloudSyncConnected ? Cloud : CloudOff }
+        onPress={ cloudSyncConnected ? disconnectCloudSync : connectCloudSync }
+        withLoader
+      />
+      <SettingBase
+        title={ t('Sync now') }
+        subtitle={
+          cloudSyncLastError
+            ? cloudSyncLastError
+            : cloudSyncLastSyncAt
+              ? `Last synced: ${new Date(cloudSyncLastSyncAt).toLocaleString()}`
+              : t('Synchronize your data with Google Drive.')
+        }
+        IconComponent={ RefreshCw }
+        isEnabled={ cloudSyncConnected && !cloudSyncSyncing }
+        onPress={ syncCloudSync }
+        withLoader
+        isLoading={ cloudSyncSyncing }
+      />
       <SettingSwitch
         title={ t('Official mode') }
         subtitle={ t('Links will be used as in the official application.') }
@@ -550,6 +550,7 @@ export function SettingsScreenComponent({
         value={ userAgent }
         onChange={ onUserAgentChange }
       />
+
     </ThemedScrollView>
   );
 

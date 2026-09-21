@@ -56,7 +56,6 @@ export type FilmGridItem = FilmGridHeaderItem | FilmGridFilmItem;
 export interface FilmGridContainerProps {
   /** A flat grid of films. Mutually exclusive with `sections`. */
   films?: FilmCardInterface[];
-  filmActions?: (film: FilmCardInterface) => ReactNode;
   /** Films grouped under headers. Mutually exclusive with `films`. */
   sections?: FilmGridSection[];
   disableEmptyComponent?: boolean;
@@ -88,6 +87,7 @@ export interface FilmGridContainerProps {
   ListMenuComponent?: ReactNode;
   /** Fired when grid focus enters (true) or leaves (false) the first row. */
   onAtTopChange?: (atTop: boolean) => void;
+  filmActions?: (film: FilmCardInterface) => ReactNode;
 }
 
 type FilmGridLayoutProps = Omit<FilmGridContainerProps, 'films' | 'sections' | 'onNextLoad'>;
@@ -108,7 +108,6 @@ export interface FilmGridComponentProps extends FilmGridLayoutProps {
   /** Whether a next page requested by scrolling to the end is still in flight. */
   isLoadingNext: boolean;
   handleOnPress: (film: FilmCardInterface) => void;
-  filmActions?: (film: FilmCardInterface) => ReactNode;
   handleScrollEnd?: () => void;
   handleRefresh?: () => void;
 }

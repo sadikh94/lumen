@@ -123,26 +123,27 @@ function FilmGridItemCard({
     }
 
     return (
-      <FilmCard
-        filmCard={ film }
-        isFocused={ focused }
-        disableScaleTransition={ isInstantZoom }
-        isRatingVisible={ isRatingVisible }
-      />
+      <View style={ { position: 'relative' } }>
+        <FilmCard
+          filmCard={ film }
+          isFocused={ focused }
+          disableScaleTransition={ isInstantZoom }
+          isRatingVisible={ isRatingVisible }
+        />
+        { filmActions?.(film) }
+      </View>
     );
   };
 
   return (
-    <View style={ style }>
-      <Pressable
-        ref={ ref }
-        onPress={ onPress }
-        tvFocusable={ false }
-      >
-        { renderContent() }
-      </Pressable>
-      { !item.isPlaceholder && filmActions?.(item.film) }
-    </View>
+    <Pressable
+      ref={ ref }
+      onPress={ onPress }
+      style={ style }
+      tvFocusable={ false }
+    >
+      { renderContent() }
+    </Pressable>
   );
 }
 
@@ -474,11 +475,11 @@ function FilmGridList({
         isLastRow={ item.scrollIndex === lastRowIndex }
         registerCard={ registerCard }
         handleOnPress={ handleOnPress }
+        filmActions={ filmActions }
         isRatingVisible={
           item.type === FilmGridItemType.FILM
           && visibleFilmIds.has(item.film.id)
         }
-        filmActions={ filmActions }
       />
     );
   }, [styles, handleOnPress, lastRowIndex, registerCard, visibleFilmIds, filmActions]);

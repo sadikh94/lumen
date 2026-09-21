@@ -130,6 +130,7 @@ export interface DoubleTapAction {
 export interface SavedTimestamp {
   time: number;
   progress: number;
+  updatedAt?: number;
   deviceId?: string;
 }
 

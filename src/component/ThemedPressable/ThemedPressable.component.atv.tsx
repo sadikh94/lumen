@@ -15,6 +15,7 @@ export const ThemedPressableComponent = ({
   onFocus,
   onBlur,
   onEnterPress,
+  onArrowPress,
   children,
   style,
   contentStyle,
@@ -43,6 +44,7 @@ export const ThemedPressableComponent = ({
       scrollTo?.(layout, props, details);
     },
     onBlur,
+    onArrowPress,
     extraProps,
     onEnterPress: onEnterPress ?? onPress,
   });

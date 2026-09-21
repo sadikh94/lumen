@@ -23,6 +23,7 @@ export type ThemedPressableContainerProps ={
   onFocus?: () => void;
   onBlur?: () => void;
   onEnterPress?: () => void;
+  onArrowPress?: (direction: string) => boolean;
   extraProps?: any;
   focusKey?: string;
   autofocus?: boolean;

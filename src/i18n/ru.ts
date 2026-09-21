@@ -482,6 +482,10 @@ const ru: Translations = {
   'Verifying that you are not a robot': 'Проверяем, что вы не робот',
   'This can take a few seconds': 'Это может занять несколько секунд',
   'Complete the check to continue, or press Back to cancel': 'Пройдите проверку, чтобы продолжить, или нажмите «Назад» для отмены',
-};
+  'Google Drive sync': 'Синхронизация с Google Drive',
+  'Google account connected': 'Google аккаунт подключён',
+  'Not connected': 'Не подключено',
+  'Sync now': 'Синхронизировать сейчас',
+  'Synchronize your data with Google Drive.': 'Синхронизировать данные с Google Drive.',};
 
 export default ru;

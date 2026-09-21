@@ -7,8 +7,10 @@ import {
 } from 'react';
 import { useMMKVString } from 'react-native-mmkv';
 import { defaultConfig, DeviceConfigType } from 'src/config';
+import { getCloudSyncSettingId } from 'src/config/cloudSync';
 import { safeJsonParse } from 'Util/Json';
 import { storage } from 'Util/Storage';
+import { mutateCloudSync } from 'Util/CloudSync';
 
 export const DEVICE_CONFIG = 'deviceConfig';
 
@@ -57,6 +59,38 @@ export const getGlobalConfig = (): DeviceConfigType => {
   return globalConfig;
 };
 
+/**
+ * Applies a setting received from Cloud Sync without creating another
+ * Cloud Sync mutation. The MMKV write still updates ConfigProvider consumers.
+ */
+export const applyCloudConfig = (
+  key: keyof DeviceConfigType,
+  value: unknown,
+): void => {
+  if (globalConfig) {
+    if (value === undefined) {
+      delete globalConfig[key];
+    } else {
+      globalConfig[key] = value;
+    }
+  }
+
+  const storageInstance = storage.getConfigStorage();
+  const currentConfig =
+    storageInstance.load<DeviceConfigType>(DEVICE_CONFIG) ??
+    ({} as DeviceConfigType);
+
+  if (value === undefined) {
+    delete currentConfig[key];
+    storageInstance.save(DEVICE_CONFIG, currentConfig);
+    return;
+  }
+
+  storageInstance.save(DEVICE_CONFIG, {
+    ...currentConfig,
+    [key]: value,
+  });
+};
 export const ConfigProvider = ({ children }: { children: ReactNode }) => {
   const [deviceConfig, setDeviceConfig] = useMMKVString(DEVICE_CONFIG, storage.getConfigStorage().getMMKVInstance());
 
@@ -87,6 +121,15 @@ export const ConfigProvider = ({ children }: { children: ReactNode }) => {
         [key]: value,
       });
     });
+      const cloudSyncId = getCloudSyncSettingId(key);
+
+      if (cloudSyncId) {
+        mutateCloudSync({
+          entity: 'setting',
+          id: cloudSyncId,
+          value,
+        });
+      }
   }, [setDeviceConfig]);
 
   const value = useMemo(() => ({

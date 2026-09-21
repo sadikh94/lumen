@@ -10,6 +10,7 @@ import {
 import { NotificationInterface } from 'Type/Notification.interface';
 import { uuid } from 'Util/Download';
 import { storage } from 'Util/Storage';
+import { mutateCloudSync, mutateCloudSyncBatch } from 'Util/CloudSync';
 
 import {
   addCategory,
@@ -21,6 +22,7 @@ import {
   parseScheduleMarks,
   removeCategory,
   removeHistoryItem,
+  reorderCategories,
   setHistoryWatched,
   setScheduleMark,
   toggleBookmark,
@@ -44,6 +46,66 @@ export const LOCAL_HISTORY_KEY = 'localHistory';
 export const LOCAL_SCHEDULE_MARKS_KEY = 'localScheduleMarks';
 
 const getLocalLibraryStorage = () => storage.getLocalLibraryStorage();
+
+const getBookmarkMembershipId = (
+  categoryId: string,
+  filmId: string,
+): string => `${categoryId}:${filmId}`;
+
+const syncBookmarkCategory = (
+  category: LocalCategoryInterface,
+  position: number,
+): void => {
+  mutateCloudSync({
+    entity: 'bookmark-category',
+    id: category.id,
+    value: {
+      id: category.id,
+      title: category.title,
+      createdAt: category.createdAt,
+      position,
+    },
+  });
+};
+
+const syncBookmarkMembership = (
+  category: LocalCategoryInterface,
+  filmId: string,
+  filmCard: FilmCardInterface,
+): void => {
+  const position = category.filmIds.indexOf(filmId);
+
+  if (position < 0) {
+    mutateCloudSync({
+      entity: 'bookmark-membership',
+      id: getBookmarkMembershipId(category.id, filmId),
+      deleted: true,
+    });
+    return;
+  }
+
+  mutateCloudSync({
+    entity: 'bookmark-membership',
+    id: getBookmarkMembershipId(category.id, filmId),
+    value: {
+      categoryId: category.id,
+      filmId,
+      position,
+      film: filmCard,
+    },
+  });
+};
+
+const syncBookmarkMembershipDeletion = (
+  categoryId: string,
+  filmId: string,
+): void => {
+  mutateCloudSync({
+    entity: 'bookmark-membership',
+    id: getBookmarkMembershipId(categoryId, filmId),
+    deleted: true,
+  });
+};
 
 export const getLocalBookmarks = (): LocalBookmarksBlob => (
   parseBookmarksBlob(getLocalLibraryStorage().loadString(LOCAL_BOOKMARKS_KEY))
@@ -78,8 +140,10 @@ export const ensureDefaultLocalCategory = (title: string) => {
   }
 
   const blob = emptyBookmarksBlob();
+  const category = createCategoryObject(blob, title);
 
-  saveLocalBookmarks(addCategory(blob, createCategoryObject(blob, title)));
+  saveLocalBookmarks(addCategory(blob, category));
+  syncBookmarkCategory(category, blob.categories.length);
 };
 
 /**
@@ -95,21 +159,143 @@ export const createLocalCategory = (title: string): CategoryTitleError | null =>
     return error;
   }
 
-  saveLocalBookmarks(addCategory(blob, createCategoryObject(blob, title)));
+  const category = createCategoryObject(blob, title);
+
+  saveLocalBookmarks(addCategory(blob, category));
+  syncBookmarkCategory(category, blob.categories.length);
 
   return null;
 };
 
 export const deleteLocalCategory = (categoryId: string) => {
-  saveLocalBookmarks(removeCategory(getLocalBookmarks(), categoryId));
+  const blob = getLocalBookmarks();
+  const category = blob.categories.find((item) => item.id === categoryId);
+
+  if (!category) {
+    return;
+  }
+
+  saveLocalBookmarks(removeCategory(blob, categoryId));
+
+  mutateCloudSync({
+    entity: 'bookmark-category',
+    id: categoryId,
+    deleted: true,
+  });
+
+  category.filmIds.forEach((filmId) => {
+    syncBookmarkMembershipDeletion(categoryId, filmId);
+  });
 };
 
+export const reorderLocalCategories = (
+  fromIndex: number,
+  toIndex: number,
+): void => {
+  const blob = getLocalBookmarks();
+
+  if (
+    fromIndex < 0
+    || fromIndex >= blob.categories.length
+    || toIndex < 0
+    || toIndex >= blob.categories.length
+    || fromIndex === toIndex
+  ) {
+    return;
+  }
+
+  const updatedBlob = reorderCategories(blob, fromIndex, toIndex);
+
+  if (updatedBlob === blob) {
+    return;
+  }
+
+  saveLocalBookmarks(updatedBlob);
+
+  mutateCloudSyncBatch(
+    updatedBlob.categories.map((category) => ({
+      entity: 'bookmark-category' as const,
+      id: category.id,
+      value: {
+        id: category.id,
+        title: category.title,
+        createdAt: category.createdAt,
+        position: updatedBlob.categories.indexOf(category),
+      },
+    })),
+  );
+};
 export const toggleLocalBookmark = (
   filmCard: FilmCardInterface,
   categoryId: string,
   isBookmarked: boolean
 ) => {
-  saveLocalBookmarks(toggleBookmark(getLocalBookmarks(), filmCard, categoryId, isBookmarked));
+  const blob = getLocalBookmarks();
+  const category = blob.categories.find((item) => item.id === categoryId);
+
+  if (!category) {
+    return;
+  }
+
+  const updatedBlob = toggleBookmark(
+    blob,
+    filmCard,
+    categoryId,
+    isBookmarked,
+  );
+
+  saveLocalBookmarks(updatedBlob);
+
+  const updatedCategory = updatedBlob.categories.find(
+    (item) => item.id === categoryId,
+  );
+
+  if (!updatedCategory) {
+    return;
+  }
+
+  const mutations = isBookmarked
+    ? updatedCategory.filmIds.flatMap((filmId) => {
+        const film = updatedBlob.films[filmId];
+
+        return film
+          ? [{
+              entity: 'bookmark-membership' as const,
+              id: getBookmarkMembershipId(categoryId, filmId),
+              value: {
+                categoryId,
+                filmId,
+                position: updatedCategory.filmIds.indexOf(filmId),
+                film,
+              },
+            }]
+          : [];
+      })
+    : [
+        {
+          entity: 'bookmark-membership' as const,
+          id: getBookmarkMembershipId(categoryId, filmCard.id),
+          deleted: true,
+        },
+        ...updatedCategory.filmIds.flatMap((filmId) => {
+          const film = updatedBlob.films[filmId];
+
+          return film
+            ? [{
+                entity: 'bookmark-membership' as const,
+                id: getBookmarkMembershipId(categoryId, filmId),
+                value: {
+                  categoryId,
+                  filmId,
+                  position: updatedCategory.filmIds.indexOf(filmId),
+                  film,
+                },
+              }]
+            : [];
+        }),
+      ];
+
+  mutateCloudSyncBatch(mutations);
 };
 
 export const getLocalHistory = (): LocalHistoryItemInterface[] => (
@@ -132,7 +318,7 @@ const saveLocalHistory = (items: LocalHistoryItemInterface[]) => {
  * receives saveWatch: playback start and episode/voice change.
  */
 export const upsertLocalHistoryItem = (film: FilmInterface, voice: FilmVoiceInterface) => {
-  saveLocalHistory(upsertHistoryItem(getLocalHistory(), {
+  const item: LocalHistoryItemInterface = {
     id: film.id,
     link: film.link,
     poster: film.poster,
@@ -143,26 +329,78 @@ export const upsertLocalHistoryItem = (film: FilmInterface, voice: FilmVoiceInte
     episodeId: voice.lastEpisodeId,
     updatedAt: Date.now(),
     isWatched: false,
-  }));
+  };
+
+  saveLocalHistory(upsertHistoryItem(getLocalHistory(), item));
+
+  mutateCloudSync({
+    entity: 'history',
+    id: item.id,
+    value: item,
+  });
 };
 
 export const removeLocalHistoryItem = (filmId: string) => {
   saveLocalHistory(removeHistoryItem(getLocalHistory(), filmId));
+
+  mutateCloudSync({
+    entity: 'history',
+    id: filmId,
+    deleted: true,
+  });
 };
 
 export const setLocalHistoryWatched = (filmId: string, isWatched: boolean) => {
-  saveLocalHistory(setHistoryWatched(getLocalHistory(), filmId, isWatched));
+  const history = getLocalHistory();
+  const existing = history.find((item) => item.id === filmId);
+
+  if (!existing) {
+    return;
+  }
+
+  const updatedItem: LocalHistoryItemInterface = {
+    ...existing,
+    isWatched,
+    updatedAt: Date.now(),
+  };
+
+  saveLocalHistory(setHistoryWatched(history, filmId, isWatched));
+
+  mutateCloudSync({
+    entity: 'history',
+    id: filmId,
+    value: updatedItem,
+  });
 };
 
 const getAllLocalScheduleMarks = (): LocalScheduleMarks => (
   parseScheduleMarks(getLocalLibraryStorage().loadString(LOCAL_SCHEDULE_MARKS_KEY))
 );
 
-export const setLocalScheduleMark = (filmId: string, scheduleItemId: string, isWatched: boolean) => {
+export const setLocalScheduleMark = (
+  filmId: string,
+  scheduleItemId: string,
+  isWatched: boolean
+) => {
   getLocalLibraryStorage().save(
     LOCAL_SCHEDULE_MARKS_KEY,
-    setScheduleMark(getAllLocalScheduleMarks(), filmId, scheduleItemId, isWatched)
+    setScheduleMark(
+      getAllLocalScheduleMarks(),
+      filmId,
+      scheduleItemId,
+      isWatched,
+    )
   );
+
+  mutateCloudSync({
+    entity: 'schedule-mark',
+    id: `${filmId}:${scheduleItemId}`,
+    value: {
+      filmId,
+      scheduleItemId,
+      isWatched,
+    },
+  });
 };
 
 /**
@@ -182,4 +420,35 @@ export const applyLocalScheduleMarks = (film: FilmInterface) => {
       }
     });
   });
+};
+
+export const getLocalScheduleMarks = (): LocalScheduleMarks => (
+  storage.getLocalLibraryStorage().load<LocalScheduleMarks>(LOCAL_SCHEDULE_MARKS_KEY) ?? {}
+);
+/**
+ * Replaces the complete local bookmarks state during Cloud Sync restore.
+ * Intentionally does not emit Cloud Sync mutations.
+ */
+export const replaceLocalBookmarks = (blob: LocalBookmarksBlob): void => {
+  storage.getLocalLibraryStorage().save(LOCAL_BOOKMARKS_KEY, blob);
+};
+
+/**
+ * Replaces the complete local history state during Cloud Sync restore.
+ * Intentionally does not emit Cloud Sync mutations.
+ */
+export const replaceLocalHistory = (
+  items: LocalHistoryItemInterface[],
+): void => {
+  storage.getLocalLibraryStorage().save(LOCAL_HISTORY_KEY, items);
+};
+
+/**
+ * Replaces the complete local schedule marks during Cloud Sync restore.
+ * Intentionally does not emit Cloud Sync mutations.
+ */
+export const replaceLocalScheduleMarks = (
+  marks: LocalScheduleMarks,
+): void => {
+  storage.getLocalLibraryStorage().save(LOCAL_SCHEDULE_MARKS_KEY, marks);
 };

@@ -1,4 +1,4 @@
-import { Theme, ThemedStyles } from 'Theme/types';
+﻿import { Theme, ThemedStyles } from 'Theme/types';
 
 export const componentStyles = ({ scale, colors, text }: Theme) => ({
   overlay: {
@@ -31,6 +31,29 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
     alignItems: 'center',
     gap: scale(12),
     paddingVertical: scale(2),
+    borderWidth: scale(2),
+    borderColor: 'transparent',
+    borderRadius: scale(4),
+  },
+  rowMoving: {
+    borderColor: colors.primary,
+  },
+  rowDrag: {
+    flex: 1,
+  },
+  rowDragContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
+    paddingHorizontal: scale(4),
+  },
+  rowHandle: {
+    width: scale(28),
+    height: scale(28),
+    padding: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowTitle: {
     flex: 1,

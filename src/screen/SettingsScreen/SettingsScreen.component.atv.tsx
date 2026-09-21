@@ -14,6 +14,7 @@ import { SettingSwitch } from 'Component/SettingSwitch';
 import { SettingText } from 'Component/SettingText';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
+import { useCloudSyncContext } from 'Context/CloudSyncContext';
 import { normalizeAccentColor } from 'Theme/accentColors';
 import { t } from 'i18n/translate';
 import ALargeSmall from 'lucide-react-native/icons/a-large-small';
@@ -119,9 +120,6 @@ export function SettingsScreenComponent({
   homeDefaultTab,
   tabPosition,
   numberOfColumnsTV,
-  homeDisplayMode,
-  bookmarksDisplayMode,
-  recentDisplayMode,
   recentTwoColumnsTV,
   hiddenCountries,
   playerRewindSeconds,
@@ -162,7 +160,6 @@ export function SettingsScreenComponent({
   showVotesCount,
   showRecommendations,
   showAgeRating,
-  showPendingReleaseBadge,
   tvChannelsEnabled,
   isTvChannelsSupported,
   tvSearchEnabled,
@@ -211,6 +208,16 @@ export function SettingsScreenComponent({
   onTvChannelsAddToHome,
 }: SettingsScreenComponentProps) {
   const styles = useThemedStyles(componentStyles);
+  const {
+    connected: cloudSyncConnected,
+    email: cloudSyncEmail,
+    lastSyncAt: cloudSyncLastSyncAt,
+    lastError: cloudSyncLastError,
+    syncing: cloudSyncSyncing,
+    connect: connectCloudSync,
+    disconnect: disconnectCloudSync,
+    syncNow: syncCloudSync,
+  } = useCloudSyncContext();
   const [currentGroup, setCurrentGroup] = useState<SETTING_GROUP>(
     () => takeHandedOverGroup() ?? SETTING_GROUP.APPEARANCE
   );
@@ -386,37 +393,7 @@ export function SettingsScreenComponent({
         IconComponent={ Grid3x2 }
         value={ numberOfColumnsTV.toString() }
         options={ COLUMNS_TV_OPTIONS }
-          onChange={ (value) => onConfigUpdate('numberOfColumnsTV', Number(value)) }
-      />
-      <SettingSelect
-        title={ t('Home display mode') }
-        IconComponent={ Grid3x2 }
-        value={ homeDisplayMode }
-        options={ [
-          { value: 'grid', label: t('Grid') },
-          { value: 'list', label: t('List') },
-        ] }
-        onChange={ (value) => onConfigUpdate('homeDisplayMode', value) }
-      />
-      <SettingSelect
-        title={ t('Bookmarks display mode') }
-        IconComponent={ Grid3x2 }
-        value={ bookmarksDisplayMode }
-        options={ [
-          { value: 'grid', label: t('Grid') },
-          { value: 'list', label: t('List') },
-        ] }
-        onChange={ (value) => onConfigUpdate('bookmarksDisplayMode', value) }
-      />
-      <SettingSelect
-        title={ t('Recent display mode') }
-        IconComponent={ Grid3x2 }
-        value={ recentDisplayMode }
-        options={ [
-          { value: 'grid', label: t('Grid') },
-          { value: 'list', label: t('List') },
-        ] }
-        onChange={ (value) => onConfigUpdate('recentDisplayMode', value) }
+        onChange={ (value) => onConfigUpdate('numberOfColumnsTV', Number(value)) }
       />
       <SettingMultiSelect
         title={ t('Hidden countries') }
@@ -484,13 +461,6 @@ export function SettingsScreenComponent({
         onChange={ (value) => onConfigUpdate('showAgeRating', value) }
       />
       <SettingSwitch
-        title={ t('Show pending release badge') }
-        subtitle={ t('Show an icon on posters for content awaiting release.') }
-        IconComponent={ Timer }
-        value={ showPendingReleaseBadge }
-        onChange={ (value) => onConfigUpdate('showPendingReleaseBadge', value) }
-      />
-      <SettingSwitch
         title={ t('Continue button enabled') }
         subtitle={ t('Toggle continue button.') }
         IconComponent={ ArrowRight }
@@ -534,7 +504,34 @@ export function SettingsScreenComponent({
 
   const renderNetwork = () => (
     <ThemedScrollView>
-      <SettingSwitch
+      <SettingBase
+      title={ t('Google Drive sync') }
+      subtitle={
+        cloudSyncConnected
+          ? cloudSyncEmail
+            ? `Connected as ${cloudSyncEmail}`
+            : t('Google account connected')
+          : t('Not connected')
+      }
+      IconComponent={ cloudSyncConnected ? Cloud : CloudOff }
+      onPress={ cloudSyncConnected ? disconnectCloudSync : connectCloudSync }
+      withLoader
+    />
+    <SettingBase
+      title={ t('Sync now') }
+      subtitle={
+        cloudSyncLastError
+          ? cloudSyncLastError
+          : cloudSyncLastSyncAt
+            ? `Last synced: ${new Date(cloudSyncLastSyncAt).toLocaleString()}`
+            : t('Synchronize your data with Google Drive.')
+      }
+      IconComponent={ RefreshCw }
+      isEnabled={ cloudSyncConnected && !cloudSyncSyncing }
+      onPress={ syncCloudSync }
+      withLoader
+      isLoading={ cloudSyncSyncing }
+    />    <SettingSwitch
         title={ t('Official mode') }
         subtitle={ t('Links will be used as in the official application.') }
         IconComponent={ ShieldCheck }

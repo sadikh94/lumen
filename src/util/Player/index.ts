@@ -16,6 +16,7 @@ import { FilmVoiceInterface } from 'Type/FilmVoice.interface';
 import { ProfileInterface } from 'Type/Profile.interface';
 import { getFormattedDate } from 'Util/Date';
 import { getDeviceId } from 'Util/DeviceId';
+import { mutateCloudSync } from 'Util/CloudSync';
 import { safeJsonParse } from 'Util/Json';
 import { storage } from 'Util/Storage';
 
@@ -72,6 +73,7 @@ const prepareSavedTimeObject = (
   voiceData.timestamps[formatTimestampKey(voice)] = {
     time,
     progress,
+    updatedAt: Date.now(),
     deviceId: getDeviceId(),
   };
 
@@ -91,6 +93,17 @@ export const updateSavedTime = (film: FilmInterface, voice: FilmVoiceInterface, 
     key,
     newSavedTime
   );
+
+  const timestampKey = formatTimestampKey(voice);
+  const timestamp = newSavedTime.voices[voice.id]?.timestamps[timestampKey];
+
+  if (timestamp && timestampKey !== '0') {
+    mutateCloudSync({
+      entity: 'player-time',
+      id: `${film.id}:${voice.id}:${timestampKey}`,
+      value: timestamp,
+    });
+  }
 };
 
 export const setSavedTime = (savedTime: SavedTime, film: FilmInterface) => {
