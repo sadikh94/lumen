@@ -1,5 +1,5 @@
 import { useFilmPager } from 'Component/FilmPager/useFilmPager';
-import { useIsTV } from 'Context/ConfigContext';
+import { useConfigContext, useIsTV } from 'Context/ConfigContext';
 import { useServiceContext } from 'Context/ServiceContext';
 import { useMemo } from 'react';
 import { queryKeys } from 'Util/Query';
@@ -11,6 +11,7 @@ import { CategoryScreenContainerProps } from './CategoryScreen.type';
 export function CategoryScreenContainer({ route }: CategoryScreenContainerProps) {
   const { link } = route.params as { link: string };
   const isTV = useIsTV();
+  const { tabPosition } = useConfigContext();
   const { currentService } = useServiceContext();
   const menuItems = useMemo(() => currentService.getCategoryMenu(link), [currentService, link]);
 
@@ -24,6 +25,7 @@ export function CategoryScreenContainer({ route }: CategoryScreenContainerProps)
     pagerItems,
     onPreLoad,
     onNextLoad,
+    tabPosition,
   };
 
   return isTV ? <CategoryScreenComponentTV { ...containerProps } /> : <CategoryScreenComponent { ...containerProps } />;
