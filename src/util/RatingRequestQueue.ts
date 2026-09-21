@@ -13,8 +13,8 @@ type QueueTask<T> = {
 };
 
 const MAX_CONCURRENT = 1;
-const MAX_PENDING = 8;
-const MIN_REQUEST_INTERVAL = 300;
+const MAX_PENDING = 5;
+const MIN_REQUEST_INTERVAL = 500;
 const NEW_REQUESTS_BEFORE_OLD = 5;
 
 let activeRequests = 0;
