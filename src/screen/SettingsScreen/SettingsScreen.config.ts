@@ -136,6 +136,39 @@ export const THEME_SCHEME_OPTIONS = [
   },
 ];
 
+export const SCROLL_TOP_BUTTON_CORNER_TV_OPTIONS = [
+  {
+    value: 'off',
+    get label() {
+      return t('Off');
+    },
+  },
+  {
+    value: 'top-left',
+    get label() {
+      return t('Top left');
+    },
+  },
+  {
+    value: 'top-right',
+    get label() {
+      return t('Top right');
+    },
+  },
+  {
+    value: 'bottom-left',
+    get label() {
+      return t('Bottom left');
+    },
+  },
+  {
+    value: 'bottom-right',
+    get label() {
+      return t('Bottom right');
+    },
+  },
+];
+
 export const APP_LANGUAGE_OPTIONS = [
   { value: 'uk', label: 'Українська' },
   { value: 'en', label: 'English' },

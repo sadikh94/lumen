@@ -26,6 +26,7 @@ import ArrowDown10 from 'lucide-react-native/icons/arrow-down-1-0';
 import ArrowDownUp from 'lucide-react-native/icons/arrow-down-up';
 import ArrowLeftRight from 'lucide-react-native/icons/arrow-left-right';
 import ArrowRight from 'lucide-react-native/icons/arrow-right';
+import ArrowUp from 'lucide-react-native/icons/arrow-up';
 import AudioLines from 'lucide-react-native/icons/audio-lines';
 import BookImage from 'lucide-react-native/icons/book-image';
 import Brush from 'lucide-react-native/icons/brush';
@@ -169,6 +170,7 @@ export function SettingsScreenComponent({
   isContinueBtnEnabled,
   isLocalLibrary,
   commentPostingMobile,
+  scrollToTopButtonEnabled,
   showVotesCount,
   showBookmarkCounts,
   showRecommendations,
@@ -463,6 +465,13 @@ export function SettingsScreenComponent({
         IconComponent={ MessageSquarePlus }
         value={ commentPostingMobile }
         onChange={ (value) => onConfigUpdate('commentPostingMobile', value) }
+      />
+      <SettingSwitch
+        title={ t('Scroll to top button') }
+        subtitle={ t('Show a floating button to jump back to the top after scrolling down.') }
+        IconComponent={ ArrowUp }
+        value={ scrollToTopButtonEnabled }
+        onChange={ (value) => onConfigUpdate('scrollToTopButtonEnabled', value) }
       />
     </ThemedScrollView>
   );

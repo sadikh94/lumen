@@ -489,6 +489,13 @@ const uk: Translations = {
   'Google Drive sync': 'Синхронізація з Google Drive',
   'Google account connected': 'Google-акаунт підключено',
   'Not connected': 'Не підключено',
+  'Scroll to top button': 'Кнопка прокрутки нагору',
+  'Show a floating button to jump back to the top after scrolling down.': 'Показувати плаваючу кнопку для швидкого повернення нагору після прокрутки вниз.',
+  'Corner of the screen the floating scroll-to-top button appears in.': 'Кут екрана, у якому з\'являється плаваюча кнопка прокрутки нагору.',
+  'Top left': 'Зверху зліва',
+  'Top right': 'Зверху справа',
+  'Bottom left': 'Знизу зліва',
+  'Bottom right': 'Знизу справа',
   'Sync now': 'Синхронізувати зараз',
   'Synchronize your data with Google Drive.': 'Синхронізувати дані з Google Drive.',};
 

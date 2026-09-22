@@ -13,6 +13,7 @@ export function HomeScreenComponent({
         { ...pagerHandlers }
         menuDefaultFocus
         tabPosition={ tabPosition }
+        showScrollToTopButton
       />
     </Page>
   );

@@ -98,6 +98,9 @@ export type DeviceConfigType = {
   showRecommendations: boolean;
   showAgeRating: boolean;
   showPendingReleaseBadge: boolean;
+  scrollToTopButtonEnabled: boolean;
+  scrollToTopButtonCornerMobile: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  scrollToTopButtonCornerTV: 'off' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 
 export const migrateLegacyConfig = <T extends Record<string, unknown>>(raw: T): T => {
@@ -197,6 +200,9 @@ export const defaultConfig: DeviceConfigType = {
   showRecommendations: true,
   showAgeRating: false,
   showPendingReleaseBadge: true,
+  scrollToTopButtonEnabled: true,
+  scrollToTopButtonCornerMobile: 'bottom-right',
+  scrollToTopButtonCornerTV: 'off',
 };
 
 export const CONFIG_KEY_SECTIONS = {
@@ -232,6 +238,9 @@ export const CONFIG_KEY_SECTIONS = {
   showRecommendations: BACKUP_SECTION.SETTINGS_APPEARANCE,
   showAgeRating: BACKUP_SECTION.SETTINGS_APPEARANCE,
   showPendingReleaseBadge: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  scrollToTopButtonEnabled: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  scrollToTopButtonCornerMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  scrollToTopButtonCornerTV: BACKUP_SECTION.SETTINGS_APPEARANCE,
 
   strictConnectionCheck: BACKUP_SECTION.SETTINGS_NETWORK,
 

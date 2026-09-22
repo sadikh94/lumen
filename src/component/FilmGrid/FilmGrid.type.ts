@@ -88,6 +88,8 @@ export interface FilmGridContainerProps {
   /** Fired when grid focus enters (true) or leaves (false) the first row. */
   onAtTopChange?: (atTop: boolean) => void;
   filmActions?: (film: FilmCardInterface) => ReactNode;
+  /** Shows a floating button that scrolls the grid back to the top after scrolling down. */
+  showScrollToTopButton?: boolean;
 }
 
 type FilmGridLayoutProps = Omit<FilmGridContainerProps, 'films' | 'sections' | 'onNextLoad'>;

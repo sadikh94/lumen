@@ -12,6 +12,7 @@ export function HomeScreenComponent({
       <FilmPager
         { ...pagerHandlers }
         tabPosition={ tabPosition }
+        showScrollToTopButton
       />
     </Page>
   );

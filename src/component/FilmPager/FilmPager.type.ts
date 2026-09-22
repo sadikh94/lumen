@@ -35,6 +35,8 @@ export interface FilmPagerContainerProps extends FilmPagerHandlers {
   // Fires when grid focus enters/leaves the first row, so the screen can
   // collapse its own headers alongside the pager menu.
   onAtTopChange?: (atTop: boolean) => void;
+  /** Shows a floating button that scrolls the active tab's grid back to the top. */
+  showScrollToTopButton?: boolean;
 }
 
 export type FilmPagerComponentProps = FilmPagerContainerProps;

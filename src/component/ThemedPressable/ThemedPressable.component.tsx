@@ -48,7 +48,7 @@ export const ThemedPressableComponent = ({
   const state = { isFocused: false };
 
   return (
-    <View style={ [typeof style === 'function' ? style(state) : style, { overflow: 'hidden' }] } onLayout={ event => { const { x, width, height } = event.nativeEvent.layout; console.log('[ThemedPressable layout]', { x, width, height, right: x + width }); } }>
+    <View style={ [typeof style === 'function' ? style(state) : style, { overflow: 'hidden' }] }>
       { renderTopAdditionalElement(state) }
       <Pressable
         ref={ ref }

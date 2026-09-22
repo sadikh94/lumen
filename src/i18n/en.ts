@@ -488,6 +488,13 @@ const en = {
   'Google Drive sync': 'Google Drive sync',
   'Google account connected': 'Google account connected',
   'Not connected': 'Not connected',
+  'Scroll to top button': 'Scroll to top button',
+  'Show a floating button to jump back to the top after scrolling down.': 'Show a floating button to jump back to the top after scrolling down.',
+  'Corner of the screen the floating scroll-to-top button appears in.': 'Corner of the screen the floating scroll-to-top button appears in.',
+  'Top left': 'Top left',
+  'Top right': 'Top right',
+  'Bottom left': 'Bottom left',
+  'Bottom right': 'Bottom right',
   'Sync now': 'Sync now',
   'Synchronize your data with Google Drive.': 'Synchronize your data with Google Drive.',};
 

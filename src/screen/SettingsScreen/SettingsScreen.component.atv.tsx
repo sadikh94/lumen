@@ -22,6 +22,7 @@ import AlignVerticalJustifyEnd from 'lucide-react-native/icons/align-vertical-ju
 import ArrowDown10 from 'lucide-react-native/icons/arrow-down-1-0';
 import ArrowDownUp from 'lucide-react-native/icons/arrow-down-up';
 import ArrowRight from 'lucide-react-native/icons/arrow-right';
+import ArrowUp from 'lucide-react-native/icons/arrow-up';
 import AudioLines from 'lucide-react-native/icons/audio-lines';
 import Blend from 'lucide-react-native/icons/blend';
 import BookImage from 'lucide-react-native/icons/book-image';
@@ -107,6 +108,7 @@ import {
   TELEGRAM_LINK,
   MOBILE_NAVIGATION_OPTIONS,
   TV_NAVIGATION_OPTIONS,
+  SCROLL_TOP_BUTTON_CORNER_TV_OPTIONS,
   THEME_SCHEME_OPTIONS,
   TV_SCREENS,
 } from './SettingsScreen.config';
@@ -147,6 +149,7 @@ export function SettingsScreenComponent({
   playerAutoNextEpisode,
   playerKeepTimeOnVoiceChange,
   sortVoicesByRating,
+  scrollToTopButtonCornerTV,
   playerBufferTimeSetting,
   playerBackBufferTimeSetting,
   checkForUpdates,
@@ -512,6 +515,14 @@ export function SettingsScreenComponent({
         value={ tvSearchEnabled }
         isHidden={ !isTvSearchSupported }
         onChange={ (value) => onConfigUpdate('tvSearchEnabled', value) }
+      />
+      <SettingSelect
+        title={ t('Scroll to top button') }
+        subtitle={ t('Corner of the screen the floating scroll-to-top button appears in.') }
+        IconComponent={ ArrowUp }
+        value={ scrollToTopButtonCornerTV }
+        options={ SCROLL_TOP_BUTTON_CORNER_TV_OPTIONS }
+        onChange={ (value) => onConfigUpdate('scrollToTopButtonCornerTV', value) }
       />
     </ThemedScrollView>
   );

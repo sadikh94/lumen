@@ -16,7 +16,6 @@ export const WrapperComponent = ({
       style={ [{
         marginHorizontal: isTV ? scale(theme.spacing.wrapperPaddingTV) : scale(theme.spacing.wrapperPadding),
       }, style] }
-      onLayout={ event => { const { x, width } = event.nativeEvent.layout; console.log('[Wrapper layout]', { x, width, right: x + width, isTV }); } }
     >
       { children }
     </View>

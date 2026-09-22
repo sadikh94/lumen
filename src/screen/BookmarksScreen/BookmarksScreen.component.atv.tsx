@@ -97,6 +97,7 @@ export function BookmarksScreenComponent({
           centerEmptyComponent
           menuDefaultFocus
           menuTrailingComponent={ isLocalLibrary ? renderManageButton() : undefined }
+          showScrollToTopButton
         />
       </View>
     );

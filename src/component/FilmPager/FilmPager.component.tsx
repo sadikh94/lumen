@@ -1,4 +1,4 @@
-import { FilmGrid } from 'Component/FilmGrid';
+﻿import { FilmGrid } from 'Component/FilmGrid';
 import { FilmList } from 'Component/FilmList';
 import { ThemedDropdown } from 'Component/ThemedDropdown';
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
@@ -114,6 +114,7 @@ export const FilmPagerComponent = ({
   onPreLoad,
   onNextLoad,
   handleSelectSorting,
+  showScrollToTopButton,
 }: FilmPagerComponentProps) => {
   const { scale, theme } = useAppTheme();
   const styles = useThemedStyles(componentStyles);
@@ -323,10 +324,11 @@ export const FilmPagerComponent = ({
         ListEmptyComponent={ ListEmptyComponent }
         centerEmptyComponent={ centerEmptyComponent }
         onNextLoad={ (isRefresh) => onNextLoad(isRefresh, pagerItem) }
+        showScrollToTopButton={ showScrollToTopButton && idx === activeIndex }
       />
     );
   // eslint-disable-next-line max-len
-  }, [renderedIndexes, initialPage, displayMode, disableEmptyComponent, disableStatusbarSafeArea, isEmpty, hideGrid, ListEmptyComponent, centerEmptyComponent, onNextLoad]);
+  }, [renderedIndexes, initialPage, displayMode, disableEmptyComponent, disableStatusbarSafeArea, isEmpty, hideGrid, ListEmptyComponent, centerEmptyComponent, onNextLoad, showScrollToTopButton, activeIndex]);
 
   const pages = useMemo(() => (pagerItems).map((item, idx) => (
     <Wrapper key={ item.menuItem.id }>

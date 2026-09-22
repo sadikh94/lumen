@@ -197,6 +197,7 @@ export function FilmPagerComponent({
   onPreLoad,
   onNextLoad,
   handleSelectSorting,
+  showScrollToTopButton,
 }: FilmPagerComponentProps) {
   const { scale, theme } = useAppTheme();
   const styles = useThemedStyles(componentStyles);
@@ -343,6 +344,7 @@ export function FilmPagerComponent({
         ListEmptyComponent={ ListEmptyComponent }
         centerEmptyComponent={ centerEmptyComponent }
         onNextLoad={ (isRefresh) => onNextLoad(isRefresh, pagerItem) }
+        showScrollToTopButton={ showScrollToTopButton }
       />
     );
   }, [
@@ -356,6 +358,7 @@ export function FilmPagerComponent({
     ListEmptyComponent,
     onNextLoad,
     renderedIndexes,
+    showScrollToTopButton,
   ]);
 
   const pages = useMemo(() => pagerItems.map((item, idx) => (

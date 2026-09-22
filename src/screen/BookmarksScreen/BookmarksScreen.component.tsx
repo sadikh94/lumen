@@ -94,6 +94,7 @@ export function BookmarksScreenComponent({
           isEmpty={ isLocalLibrary }
           ListEmptyComponent={ renderEmptyCategory() }
           centerEmptyComponent
+          showScrollToTopButton
           // the local library renders its own header above the pager, which already
           // carries the status bar inset -- the grid must not add it a second time
         />

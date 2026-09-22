@@ -5,6 +5,8 @@ import { FilmCard } from 'Component/FilmCard';
 import { POSTER_ASPECT_HEIGHT, POSTER_ASPECT_WIDTH } from 'Component/FilmCard/FilmCard.config';
 import { INFO_HEIGHT } from 'Component/FilmCard/FilmCard.style.atv';
 import { FilmCardThumbnail } from 'Component/FilmCard/FilmCard.thumbnail.atv';
+import { ScrollToTopButton } from 'Component/ScrollToTopButton';
+import { SCROLL_SHOW_THRESHOLD } from 'Component/ScrollToTopButton/ScrollToTopButton.config';
 import { ScrollContext, useScrollContext } from 'Component/ThemedScrollView/ScrollContext';
 import { ThemedText } from 'Component/ThemedText';
 import { useConfigContext } from 'Context/ConfigContext';
@@ -13,7 +15,7 @@ import { FOCUS_SCROLL_EVENT_THROTTLE, useFocusScroll } from 'Hooks/useFocusScrol
 import { useLatest } from 'Hooks/useLatest';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { NativeScrollEvent, NativeSyntheticEvent, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { useAppTheme } from 'Theme/context';
 import { ThemedStyles } from 'Theme/types';
@@ -187,6 +189,7 @@ function FilmGridList({
   filmActions,
   handleScrollEnd,
   onAtTopChange,
+  showScrollToTopButton,
 }: FilmGridListProps) {
   const styles = useThemedStyles(componentStyles);
   const { scale, theme: { dimensions } } = useAppTheme();
@@ -220,6 +223,16 @@ function FilmGridList({
     viewPosition: FOCUSED_ROW_VIEW_POSITION,
     isAnimated: isScrollAnimated,
   });
+
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setIsScrolledDown(e.nativeEvent.contentOffset.y > SCROLL_SHOW_THRESHOLD);
+  }, []);
+
+  const handleScrollToTop = useCallback(() => {
+    scrollToOffset(0);
+  }, [scrollToOffset]);
 
   const lastIndexRef = useRef(-1);
   // Whether the focused row sits in the preload zone at the end of the grid --
@@ -542,6 +555,7 @@ function FilmGridList({
             viewabilityConfig={ viewabilityConfig }
             onViewableItemsChanged={ onViewableItemsChanged }
             onLoad={ handleLoad }
+            onScroll={ showScrollToTopButton ? onScroll : undefined }
             scrollEventThrottle={ FOCUS_SCROLL_EVENT_THROTTLE }
             onEndReached={ handleScrollEnd }
             onEndReachedThreshold={ 0.5 }
@@ -555,6 +569,13 @@ function FilmGridList({
             ListEmptyComponent={ disableEmptyComponent || hideGrid ? null : ListEmptyComponent }
             showsVerticalScrollIndicator={ false }
           />
+        
+        { showScrollToTopButton && (
+          <ScrollToTopButton
+            visible={ isScrolledDown }
+            onPress={ handleScrollToTop }
+          />
+        ) }
         </View>
       </ScrollContext.Provider>
     </FocusContext.Provider>
