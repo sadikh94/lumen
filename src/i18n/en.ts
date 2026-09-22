@@ -153,6 +153,8 @@ const en = {
   'No recent items': 'No recent items',
   'You have not watched any films yet': 'You have not watched any films yet',
   'Show ratings': 'Show ratings',
+  'Show account avatar': 'Show account avatar',
+  'Show your account avatar instead of the account icon.': 'Show your account avatar instead of the account icon.',
   'Show movie ratings on posters.': 'Show movie ratings on posters. May increase server requests.',
   'IMDb': 'IMDb',
   'Kinopoisk': 'Kinopoisk',

@@ -77,6 +77,7 @@ export type DeviceConfigType = {
   playerSavedBrightness?: number;
   sortVoicesByRating: boolean;
   showRatings: boolean;
+  showAccountAvatar: boolean;
   playerStopPlayOnButtonTV: boolean;
   playerStopPlayShowInterfaceTV: boolean;
   playerBufferTimeSetting?: number;
@@ -181,6 +182,7 @@ export const defaultConfig: DeviceConfigType = {
   playerBackBufferTimeSetting: 30,
   sortVoicesByRating: false,
   showRatings: false,
+  showAccountAvatar: true,
   checkForUpdates: true,
   strictConnectionCheck: true,
   playerDefaultAspectRatio: ASPECT_RATIO_OPTIONS[0],
@@ -220,6 +222,7 @@ export const CONFIG_KEY_SECTIONS = {
   isTVAwake: BACKUP_SECTION.SETTINGS_APPEARANCE,
   sortVoicesByRating: BACKUP_SECTION.SETTINGS_APPEARANCE,
   showRatings: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  showAccountAvatar: BACKUP_SECTION.SETTINGS_APPEARANCE,
   isContinueBtnEnabled: BACKUP_SECTION.SETTINGS_APPEARANCE,
   commentPostingMobile: BACKUP_SECTION.SETTINGS_APPEARANCE,
   commentPostingTV: BACKUP_SECTION.SETTINGS_APPEARANCE,

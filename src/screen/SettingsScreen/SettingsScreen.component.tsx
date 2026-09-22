@@ -76,6 +76,7 @@ import Tag from 'lucide-react-native/icons/tag';
 import Timer from 'lucide-react-native/icons/timer';
 import TvMinimalPlay from 'lucide-react-native/icons/tv-minimal-play';
 import UserCog from 'lucide-react-native/icons/user-cog';
+import UserRound from 'lucide-react-native/icons/user-round';
 import Users from 'lucide-react-native/icons/users';
 import Volume2 from 'lucide-react-native/icons/volume-2';
 import { reactNativeDownloads } from 'Modules/react-native-downloads';
@@ -119,6 +120,7 @@ import { useTripleTap } from './useTripleTap';
 export function SettingsScreenComponent({
   initialRoute,
   showRatings,
+  showAccountAvatar,
   homeDefaultTab,
   tabPosition,
   numberOfColumnsMobile,
@@ -382,6 +384,13 @@ export function SettingsScreenComponent({
         IconComponent={ Tag }
         value={ showRatings }
         onChange={ (value) => onConfigUpdate('showRatings', value) }
+      />
+      <SettingSwitch
+        title={ t('Show account avatar') }
+        subtitle={ t('Show your account avatar instead of the account icon.') }
+        IconComponent={ UserRound }
+        value={ showAccountAvatar }
+        onChange={ (value) => onConfigUpdate('showAccountAvatar', value) }
       />
       <SettingSelect
         title={ t('Columns in list') }

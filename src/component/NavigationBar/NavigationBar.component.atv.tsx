@@ -5,6 +5,7 @@ import { ThemedImage } from 'Component/ThemedImage';
 import { ThemedPressable } from 'Component/ThemedPressable';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { ThemedText } from 'Component/ThemedText';
+import { useConfigContext } from 'Context/ConfigContext';
 import { useNavigationContext } from 'Context/NavigationContext';
 import { useServiceContext } from 'Context/ServiceContext';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
@@ -12,6 +13,7 @@ import { t } from 'i18n/translate';
 import { ACCOUNT_TAB, DOWNLOADS_SCREEN, SETTINGS_SCREEN } from 'Navigation/navigationRoutes';
 import PanelLeft from 'lucide-react-native/icons/panel-left';
 import PanelRight from 'lucide-react-native/icons/panel-right';
+import UserRound from 'lucide-react-native/icons/user-round';
 import { ComponentType, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -65,6 +67,7 @@ const NavigationTab = ({
 }: NavigationTabProps) => {
   const { theme } = useAppTheme();
   const { isSignedIn } = useServiceContext();
+  const { showAccountAvatar } = useConfigContext();
 
   const renderLabel = (isFocused: boolean) => {
     if (typeof label === 'function') {
@@ -117,16 +120,30 @@ const NavigationTab = ({
     return (
       <>
         <View style={ styles.profileAvatarContainer }>
-          { avatar ? (
-            <ThemedImage
-              src={ avatar }
-              style={ styles.profileAvatar }
-            />
+          { showAccountAvatar ? (
+            avatar ? (
+              <ThemedImage
+                src={ avatar }
+                style={ styles.profileAvatar }
+              />
+            ) : (
+              <Image
+                source={ require('../../../assets/images/no_avatar.png') }
+                style={ styles.profileAvatar }
+              />
+            )
           ) : (
-            <Image
-              source={ require('../../../assets/images/no_avatar.png') }
-              style={ styles.profileAvatar }
-            />
+            <View
+              style={ [
+                styles.profileAvatar,
+                { backgroundColor: 'transparent', borderWidth: 0, alignItems: 'center', justifyContent: 'center' },
+              ] }
+            >
+              <UserRound
+                size={ styles.tabIcon.width }
+                color={ isActiveTab ? theme.colors.textSecondary : '#8F9190' }
+              />
+            </View>
           ) }
         </View>
         <View style={ styles.profile }>

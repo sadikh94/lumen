@@ -155,6 +155,8 @@ const ru: Translations = {
   'No recent items': 'Нет недавних фильмов',
   'You have not watched any films yet': 'Вы пока не посмотрели ни одного фильма',
   'Show ratings': 'Показывать рейтинги',
+  'Show account avatar': 'Показывать аватар аккаунта',
+  'Show your account avatar instead of the account icon.': 'Показывать аватар аккаунта вместо значка аккаунта.',
   'Show movie ratings on posters.': 'Показывать рейтинг фильмов на постерах. Может увеличить количество запросов к серверу.',
   'IMDb': 'IMDb',
   'Kinopoisk': 'Кинопоиск',

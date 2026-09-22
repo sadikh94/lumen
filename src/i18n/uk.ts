@@ -155,6 +155,8 @@ const uk: Translations = {
   'No recent items': 'Немає нещодавніх фільмів',
   'You have not watched any films yet': 'Ви ще не подивились жодного фільму',
   'Show ratings': 'Показувати рейтинги',
+  'Show account avatar': 'Показувати аватар облікового запису',
+  'Show your account avatar instead of the account icon.': 'Показувати аватар облікового запису замість значка облікового запису.',
   'Show movie ratings on posters.': 'Показувати рейтинг фільмів на постерах. Може збільшити кількість запитів до сервера.',
   'IMDb': 'IMDb',
   'Kinopoisk': 'Кінопошук',
