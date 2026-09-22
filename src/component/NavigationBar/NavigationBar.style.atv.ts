@@ -16,6 +16,7 @@ export const NAVIGATION_BAR_ANIMATION_DURATION_MS = 300;
 
 export const componentStyles = ({ scale, colors, text }: Theme) => ({
   bar: {
+    position: 'absolute',
     left: 0,
     top: 0,
     width: scale(NAVIGATION_BAR_TV_WIDTH),
