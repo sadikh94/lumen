@@ -135,9 +135,9 @@ export const executePostFormData = async (
     });
 
     const response = await postFetch(uri, {
-      'Content-Type': 'multipart/form-data',
-      ...headers,
-    }, formDataObject, signal);
+        'Content-Type': 'multipart/form-data',
+        ...headers,
+      }, formDataObject, signal);
 
     handleRequestError(response);
 

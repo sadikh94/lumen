@@ -398,7 +398,7 @@ export function PlayerComponent({
         <ThemedText style={ styles.title } numberOfLines={ 1 }>
           { title }
         </ThemedText>
-        { hasSeasons && (
+        { hasSeasons && voice.lastSeasonId && voice.lastEpisodeId && (
           <ThemedText style={ styles.title }>
             { t('Season {{season}} - Episode {{episode}}', {
               season: voice.lastSeasonId,
@@ -413,12 +413,21 @@ export function PlayerComponent({
 
   const renderSubtitle = () => {
     const { releaseDate, countries, ratings } = film;
+    const rating = ratings?.[0]?.text;
+    const country = countries?.[0]?.name;
+
+    const subtitle = [
+      rating,
+      country && releaseDate ? `${country}, ${releaseDate}` : country ?? releaseDate,
+    ].filter(Boolean).join(' • ');
+
+    if (!subtitle) {
+      return null;
+    }
 
     return (
       <ThemedText style={ styles.subtitle }>
-        {
-          `${releaseDate} • ${ratings ? ratings[0].text : ''} • ${countries ? countries[0].name : ''}`
-        }
+        { subtitle }
       </ThemedText>
     );
   };

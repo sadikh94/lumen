@@ -295,11 +295,13 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
     });
 
     /** Series: resolve the season list for a voice and preselect its first episode */
+    const [isAutoLoadingSeasons, setIsAutoLoadingSeasons] = useState(false);
     const { mutate: loadVoiceSeasons, isPending: isVoiceSeasonsLoading } = useMutation({
       mutationFn: (voice: FilmVoiceInterface) => (
         isOffline ? Promise.resolve(voice) : currentService.getFilmSeasons(film, voice)
       ),
       onSuccess: (updatedVoice) => {
+        setIsAutoLoadingSeasons(false);
         setSelectedVoice(updatedVoice);
 
         if (isDownloader) {
@@ -343,8 +345,32 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
 
         persistSelection(updatedVoice, seasonId, episodeId);
       },
+      onError: () => {
+        setIsAutoLoadingSeasons(false);
+      },
     });
 
+    const autoLoadedSeasonsVoiceRef = useRef<string | null>(null);
+
+    /**
+     * Cloud Sync can restore a selected voice without its season/episode data.
+     * Resolve seasons automatically for series before the selector needs them.
+     */
+    useEffect(() => {
+      if (
+        isOffline
+        || !film.hasSeasons
+        || !selectedVoice?.id
+        || selectedVoice.seasons?.length
+        || autoLoadedSeasonsVoiceRef.current === selectedVoice.id
+      ) {
+        return;
+      }
+
+      autoLoadedSeasonsVoiceRef.current = selectedVoice.id;
+      setIsAutoLoadingSeasons(true);
+      loadVoiceSeasons(selectedVoice);
+    }, [film.hasSeasons, isOffline, loadVoiceSeasons, selectedVoice]);
     const { mutate: loadEpisodeVideo, isPending: isEpisodeVideoLoading } = useMutation({
       mutationFn: ({
         voice,
@@ -599,7 +625,8 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
     const isLoading = isVoiceVideoLoading
       || isVoiceSeasonsLoading
       || isEpisodeVideoLoading
-      || isDownloadLoading;
+      || isDownloadLoading
+      || isAutoLoadingSeasons;
 
     const containerProps = {
       overlayRef,

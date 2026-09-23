@@ -4,6 +4,7 @@ export type CloudSyncSettingScope = 'global' | 'mobile' | 'atv' | 'local';
 
 const LOCAL_ONLY_SETTINGS = new Set<keyof DeviceConfigType>([
   'isTV',
+  'isLocalLibrary',
 ]);
 
 const MOBILE_SETTINGS = new Set<keyof DeviceConfigType>([

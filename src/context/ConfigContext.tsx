@@ -121,16 +121,17 @@ export const ConfigProvider = ({ children }: { children: ReactNode }) => {
         [key]: value,
       });
     });
-      const cloudSyncId = getCloudSyncSettingId(key);
 
-      if (cloudSyncId) {
-        mutateCloudSync({
-          entity: 'setting',
-          id: cloudSyncId,
-          value,
-        });
-      }
-  }, [setDeviceConfig]);
+    const cloudSyncId = getCloudSyncSettingId(key);
+
+    if (cloudSyncId) {
+      mutateCloudSync({
+        entity: 'setting',
+        id: cloudSyncId,
+        value,
+      });
+    }
+  }, [deviceConfig, setDeviceConfig]);
 
   const value = useMemo(() => ({
     ...config,

@@ -95,7 +95,13 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
       return;
     }
 
-    const lastVoiceData = savedTime?.voices?.[lastVoiceId];
+    const hasLastVoice = data.voices.some((voice) => voice.id === lastVoiceId);
+
+    // Cloud Sync can contain a voice that no longer exists in the current
+    // service response. Do not apply stale voice selection.
+    const lastVoiceData = hasLastVoice
+      ? savedTime?.voices?.[lastVoiceId]
+      : undefined;
     const historySelection = localHistoryItem?.voiceId === lastVoiceId
       ? localHistoryItem
       : undefined;
@@ -120,7 +126,8 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
     });
 
     // load seasons if they're missing
-    const activeVoice = data.voices.find((voice) => voice.isActive);
+    const activeVoice = data.voices.find((voice) => voice.isActive)
+      ?? (!hasLastVoice ? data.voices[0] : undefined);
 
     if (data.hasSeasons && activeVoice && !activeVoice.seasons) {
       const result = await currentService.getFilmSeasons(data, activeVoice);

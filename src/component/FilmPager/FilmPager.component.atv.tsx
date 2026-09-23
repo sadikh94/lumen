@@ -86,7 +86,7 @@ const TabButton = memo(({
               isFocused && styles.tabTextFocused,
             ] }
           >
-            { displayTitle ?? title }
+            { displayTitle || title }
           </ThemedText>
         ) }
       </ThemedPressable>

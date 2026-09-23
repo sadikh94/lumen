@@ -16,6 +16,9 @@ import { useConfigContext } from './ConfigContext';
 // How long to wait for the first network reading before assuming there is a connection.
 // Only a guard against the reading never landing at all - the real one arrives in a tick.
 const NETWORK_PROBE_TIMEOUT = 3000;
+// How long a known-bad reading has to persist before the offline screen shows,
+// so a resume-from-background blip doesn't trigger it.
+const OFFLINE_DEBOUNCE_MS = 3000;
 
 interface NetworkContextInterface {
   // known to be online - false while the first network reading is still pending, so
@@ -112,6 +115,23 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
   // pending is neither online nor offline - only a known-bad state blocks the page
   const isOffline = isNetworkStateKnown && !isInternetAvailable;
 
+  // A resume from background briefly reports a stale/incorrect reading before the
+  // real one lands, which would otherwise flash the offline screen for no reason.
+  // Debounce the transition into offline; recovery back to online stays immediate.
+  const [debouncedIsOffline, setDebouncedIsOffline] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isOffline) {
+      setDebouncedIsOffline(false);
+
+      return undefined;
+    }
+
+    const timeout = setTimeout(() => setDebouncedIsOffline(true), OFFLINE_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeout);
+  }, [isOffline]);
+
   const handleConnectionError = useCallback((error: Error) => {
     const msg = error instanceof Error ? error.message : String(error);
 
@@ -134,11 +154,11 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo(() => ({
     isInternetAvailable,
-    isOffline,
+    isOffline: debouncedIsOffline,
     handleConnectionError,
   }), [
     isInternetAvailable,
-    isOffline,
+    debouncedIsOffline,
     handleConnectionError,
   ]);
 
