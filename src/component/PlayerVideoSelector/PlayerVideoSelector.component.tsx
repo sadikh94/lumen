@@ -28,6 +28,7 @@ export function PlayerVideoSelectorComponent({
   selectedSeasonId,
   selectedEpisodeId,
   handleSelectVoice,
+  handleSelectSeason,
   setSelectedSeasonId,
   seasons,
   episodes,
@@ -46,6 +47,7 @@ export function PlayerVideoSelectorComponent({
   handleDownload,
   isOffline,
   playerAskQuality,
+  playerCompactSelector,
   handleQualitySelect,
 }: PlayerVideoSelectorComponentProps) {
   const { theme, scale } = useAppTheme();
@@ -252,9 +254,51 @@ export function PlayerVideoSelectorComponent({
     );
   };
 
+  const renderCompactSeriesSelection = () => {
+    if (!seasons.length || isDownloader) {
+      return null;
+    }
+
+    const seasonValue = selectedSeasonId ?? seasons[0].seasonId;
+    const episodeValue = episodes.some(
+      ({ episodeId }) => episodeId === selectedEpisodeId
+    )
+      ? selectedEpisodeId ?? ''
+      : episodes[0]?.episodeId ?? '';
+
+    return (
+      <View style={ styles.compactSelectorsContainer }>
+        <ThemedDropdown
+          data={ seasons.map(({ seasonId, name }) => ({
+            label: name,
+            value: seasonId,
+          })) }
+          value={ seasonValue }
+          onChange={ (item) => handleSelectSeason(item.value) }
+          header={ t('Season') }
+          style={ styles.compactSelector }
+          closeOnChange
+        />
+        <ThemedDropdown
+          data={ episodes.map(({ episodeId, name }) => ({
+            label: name,
+            value: episodeId,
+          })) }
+          value={ episodeValue }
+          onChange={ (item) => handleSelectEpisode(item.value) }
+          header={ t('Episode') }
+          style={ styles.compactSelector }
+          closeOnChange
+        />
+      </View>
+    );
+  };
   const renderSeriesSelection = () => {
     if (!seasons.length) {
       return null;
+    }
+    if (playerCompactSelector && !isDownloader) {
+      return renderCompactSeriesSelection();
     }
 
     return (

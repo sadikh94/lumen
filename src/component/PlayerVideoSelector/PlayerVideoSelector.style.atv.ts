@@ -70,6 +70,14 @@ export const componentStyles = ({ scale, colors, text }: Theme) => ({
   voicesContainer: {
     flex: 1,
   },
+  compactSelectorsContainer: {
+    width: '100%',
+    gap: scale(10),
+    marginTop: scale(10),
+  },
+  compactSelector: {
+    width: '100%',
+  },
   buttonProgressContainer: {
     position: 'absolute',
     top: 0,

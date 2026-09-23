@@ -34,8 +34,10 @@ export type PlayerVideoSelectorComponentProps = {
   episodesToDownload: Record<string, boolean>;
   streamQualities: string[] | null;
   playerAskQuality: boolean;
+  playerCompactSelector: boolean;
   handleSelectVoice: (voiceId: string) => void;
   setSelectedSeasonId: (id: string) => void;
+  handleSelectSeason: (seasonId: string) => void;
   handleSelectEpisode: (episodeId: string) => void;
   calculateProgressThreshold: (progress: number) => number;
   onOverlayOpen: () => void;

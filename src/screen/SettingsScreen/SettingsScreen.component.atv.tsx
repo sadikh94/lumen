@@ -155,6 +155,7 @@ export function SettingsScreenComponent({
   checkForUpdates,
   playerSaveQuality,
   playerAskQuality,
+  playerCompactSelector,
   strictConnectionCheck,
   playerDefaultAspectRatio,
   playerDefaultSpeed,
@@ -742,6 +743,12 @@ export function SettingsScreenComponent({
         IconComponent={ CircleQuestionMark }
         value={ playerAskQuality }
         onChange={ (value) => onConfigUpdate('playerAskQuality', value) }
+      />
+      <SettingSwitch
+        title={ t('Compact season and episode selector') }
+        subtitle={ t('Use dropdowns instead of buttons to choose the season and episode.') }
+        value={ playerCompactSelector }
+        onChange={ (value) => onConfigUpdate('playerCompactSelector', value) }
       />
       <SettingSelect
         title={ t('Player forward rewind seconds') }

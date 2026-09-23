@@ -85,6 +85,7 @@ export type DeviceConfigType = {
   checkForUpdates: boolean;
   playerSaveQuality: boolean;
   playerAskQuality: boolean;
+  playerCompactSelector: boolean;
   strictConnectionCheck: boolean;
   playerDefaultAspectRatio: string;
   playerDefaultSpeed: number;
@@ -162,6 +163,7 @@ export const defaultConfig: DeviceConfigType = {
   downloadsMaxParallel: DEFAULT_MAX_PARALLEL_DOWNLOADS,
   playerSaveQuality: true,
   playerAskQuality: false,
+  playerCompactSelector: false,
   playerAutoNextEpisode: true,
   playerKeepTimeOnVoiceChange: false,
   playerAutoFrameRateEnabled: false,
@@ -250,6 +252,7 @@ export const CONFIG_KEY_SECTIONS = {
 
   playerSaveQuality: BACKUP_SECTION.SETTINGS_PLAYER,
   playerAskQuality: BACKUP_SECTION.SETTINGS_PLAYER,
+  playerCompactSelector: BACKUP_SECTION.SETTINGS_PLAYER,
   playerRewindSeconds: BACKUP_SECTION.SETTINGS_PLAYER,
   playerBackwardRewindSeconds: BACKUP_SECTION.SETTINGS_PLAYER,
   playerDefaultAspectRatio: BACKUP_SECTION.SETTINGS_PLAYER,

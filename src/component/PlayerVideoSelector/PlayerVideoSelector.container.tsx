@@ -39,7 +39,14 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
     ref
   ) => {
     const { voices = [] } = film;
-    const { isTV, isFirestore, isLocalLibrary, playerAskQuality, sortVoicesByRating } = useConfigContext();
+    const {
+      isTV,
+      isFirestore,
+      isLocalLibrary,
+      playerAskQuality,
+      playerCompactSelector,
+      sortVoicesByRating,
+    } = useConfigContext();
     const { selectedVoice: contextVoice, updateSelectedVoice } = usePlayerContext();
     const [selectedVoice, setSelectedVoice] = useState<FilmVoiceInterface>(
       // eslint-disable-next-line max-len
@@ -427,6 +434,19 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
       }, 0);
     };
 
+    const handleSelectSeason = (seasonId: string) => {
+      setSelectedSeasonId(seasonId);
+
+      const season = (selectedVoice.seasons ?? []).find(
+        ({ seasonId: currentSeasonId }) => currentSeasonId === seasonId
+      );
+
+      const episodeId = season?.episodes?.[0]?.episodeId;
+
+      setSelectedEpisodeId(episodeId);
+      persistSelection(selectedVoice, seasonId, episodeId);
+    };
+
     const handleSelectEpisode = (episodeId: string) => {
       if (isDownloader) {
         const key = formatDownloadKey(selectedSeasonId, episodeId);
@@ -646,7 +666,9 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
       qualityOverlayRef,
       streamQualities,
       playerAskQuality,
+      playerCompactSelector,
       handleSelectVoice,
+      handleSelectSeason,
       setSelectedSeasonId,
       handleSelectEpisode,
       calculateProgressThreshold,
