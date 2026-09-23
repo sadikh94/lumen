@@ -5,6 +5,8 @@ import { ThemedButton } from 'Component/ThemedButton';
 import { ThemedDropdown } from 'Component/ThemedDropdown';
 import { ThemedGroup } from 'Component/ThemedGroup';
 import { ThemedOverlay } from 'Component/ThemedOverlay';
+import { ThemedPressable } from 'Component/ThemedPressable';
+import { ThemedText } from 'Component/ThemedText';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { ThemedSimpleList } from 'Component/ThemedSimpleList';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
@@ -156,13 +158,15 @@ export function PlayerVideoSelectorComponent({
     const averageProgress = totalProgress / season.episodes.length;
 
     return (
-      <View style={ styles.buttonProgressContainer }>
+      <View
+          style={ styles.buttonProgressContainer }
+          pointerEvents="none"
+        >
         <View style={ styles.buttonProgressOutline } />
         <View
           style={ [
             styles.buttonProgressMask,
             isSelected && styles.buttonProgressMaskSelected,
-            isFocused && styles.buttonProgressMaskFocused,
             { width: `${100 - averageProgress}%` },
           ] }
         />
@@ -188,16 +192,27 @@ export function PlayerVideoSelectorComponent({
               const { seasonId, name } = season;
 
               return (
-                <ThemedButton
+                <ThemedPressable
                   key={ seasonId }
-                  title={ name }
-                  selected={ selectedSeasonId === seasonId }
+                  style={ [
+                    styles.season,
+                    selectedSeasonId === seasonId && styles.seasonSelected,
+                  ] }
+                  contentStyle={ styles.seasonContent }
                   onPress={ () => setSelectedSeasonId(seasonId) }
-                  style={ styles.button }
                   topAdditionalElement={
                     (isFocused, isSelected) => renderSeasonTimeline(season, isFocused, isSelected)
                   }
-                />
+                >
+                  <ThemedText
+                    style={ [
+                      styles.seasonText,
+                      selectedSeasonId === seasonId && styles.seasonTextSelected,
+                    ] }
+                  >
+                    { name }
+                  </ThemedText>
+                </ThemedPressable>
               );
             }) }
           </View>
@@ -205,8 +220,7 @@ export function PlayerVideoSelectorComponent({
       </View>
     );
   };
-
-  const renderEpisodeTimeline = (episodeId: string, isFocused: boolean, isSelected: boolean) => {
+  const renderEpisodeTimeline = (episodeId: string, isSelected: boolean) => {
     if (!savedTime) {
       return null;
     }
@@ -222,13 +236,15 @@ export function PlayerVideoSelectorComponent({
     }
 
     return (
-      <View style={ styles.buttonProgressContainer }>
+      <View
+          style={ styles.buttonProgressContainer }
+          pointerEvents="none"
+        >
         <View style={ styles.buttonProgressOutline } />
         <View
           style={ [
             styles.buttonProgressMask,
             isSelected && styles.buttonProgressMaskSelected,
-            isFocused && styles.buttonProgressMaskFocused,
             { width: `${100 - calculateProgressThreshold(progress)}%` },
           ] }
         />
@@ -251,26 +267,33 @@ export function PlayerVideoSelectorComponent({
             style={ styles.row }
             key={ `${listRow[0].episodeId}-row` }
           >
-            { listRow.map((season) => {
-              const { episodeId, name } = season;
+            { listRow.map((episode) => {
+              const { episodeId, name } = episode;
               const isSelectedForDownload = isDownloader
-                  && episodesToDownload[formatDownloadKey(selectedSeasonId, episodeId)];
+                && episodesToDownload[formatDownloadKey(selectedSeasonId, episodeId)];
 
               return (
-                <ThemedButton
+                <ThemedPressable
                   key={ episodeId }
-                  title={ name }
-                  selected={ selectedEpisodeId === episodeId }
-                  autofocus={ selectedEpisodeId === episodeId }
-                  onPress={ () => handleSelectEpisode(episodeId) }
                   style={ [
-                    styles.button,
-                    isSelectedForDownload ? styles.episodeDownloadSelected : undefined,
+                    styles.episode,
+                    selectedEpisodeId === episodeId && styles.episodeSelected,
+                    isSelectedForDownload && styles.episodeDownloadSelected,
                   ] }
-                  topAdditionalElement={
-                    (isFocused, isSelected) => renderEpisodeTimeline(episodeId, isFocused, isSelected)
-                  }
-                />
+                  contentStyle={ styles.episodeContent }
+                  onPress={ () => handleSelectEpisode(episodeId) }
+                  autofocus={ selectedEpisodeId === episodeId }
+                  topAdditionalElement={ (_, isSelected) => renderEpisodeTimeline(episodeId, isSelected) }
+                >
+                  <ThemedText
+                    style={ [
+                      styles.episodeText,
+                      selectedEpisodeId === episodeId && styles.episodeTextSelected,
+                    ] }
+                  >
+                    { name }
+                  </ThemedText>
+                </ThemedPressable>
               );
             }) }
           </View>
@@ -278,7 +301,6 @@ export function PlayerVideoSelectorComponent({
       </View>
     );
   };
-
   const renderSeriesSelection = () => {
     if (!seasons.length) {
       return null;
