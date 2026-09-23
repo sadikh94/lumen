@@ -19,6 +19,53 @@ function getLatestTimestamp(
   );
 }
 
+export function getLastSavedEpisode(
+  voice: SavedTimeVoice | null
+): { seasonId?: string; episodeId?: string } {
+  if (!voice) {
+    return {};
+  }
+
+  if (voice.lastSeasonId && voice.lastEpisodeId) {
+    return {
+      seasonId: voice.lastSeasonId,
+      episodeId: voice.lastEpisodeId,
+    };
+  }
+
+  let latestKey: string | undefined;
+  let latestTimestamp: SavedTimestamp | null = null;
+
+  for (const [key, timestamp] of Object.entries(voice.timestamps ?? {})) {
+    if (key === '0' || !timestamp) {
+      continue;
+    }
+
+    if (
+      !latestTimestamp
+      || (timestamp.updatedAt ?? 0) >= (latestTimestamp.updatedAt ?? 0)
+    ) {
+      latestKey = key;
+      latestTimestamp = timestamp;
+    }
+  }
+
+  if (!latestKey) {
+    return {};
+  }
+
+  const separatorIndex = latestKey.indexOf('-');
+
+  if (separatorIndex <= 0 || separatorIndex >= latestKey.length - 1) {
+    return {};
+  }
+
+  return {
+    seasonId: latestKey.slice(0, separatorIndex),
+    episodeId: latestKey.slice(separatorIndex + 1),
+  };
+}
+
 export function combineSavedTimeData(
   data1: SavedTimestamp | null,
   data2: SavedTimestamp | null
@@ -75,6 +122,16 @@ export function combineSavedTimeVoice(
 
   if (sourceVoice.lastEpisodeId !== undefined) {
     combinedVoice.lastEpisodeId = sourceVoice.lastEpisodeId;
+  }
+
+  const recoveredEpisode = getLastSavedEpisode(combinedVoice);
+
+  if (recoveredEpisode.seasonId !== undefined) {
+    combinedVoice.lastSeasonId = recoveredEpisode.seasonId;
+  }
+
+  if (recoveredEpisode.episodeId !== undefined) {
+    combinedVoice.lastEpisodeId = recoveredEpisode.episodeId;
   }
 
   return combinedVoice;

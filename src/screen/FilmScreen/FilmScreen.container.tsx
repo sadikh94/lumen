@@ -703,7 +703,12 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
     }
 
     // Find the voice object in the film
-    const voice = film.voices.find((v) => v.id === lastVoiceId);
+    let voice = film.voices.find((v) => v.id === lastVoiceId);
+
+    // see RecentScreen.container.tsx for why a lone voice can carry a different id
+    if (!voice && film.voices.length === 1) {
+      [voice] = film.voices;
+    }
 
     if (!voice) {
       playFilm();

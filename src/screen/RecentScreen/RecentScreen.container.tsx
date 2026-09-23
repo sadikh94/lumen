@@ -16,6 +16,7 @@ import RouterStore from 'Store/Router.store';
 import { removeLocalHistoryItem, setLocalHistoryWatched } from 'Util/LocalLibrary';
 import { navigate } from 'Util/Navigation';
 import { getSavedTime } from 'Util/Player';
+import { getLastSavedEpisode } from 'Util/Player/savedTimeUtil';
 import { queryKeys } from 'Util/Query';
 import { openFilm } from 'Util/Router';
 
@@ -91,13 +92,18 @@ export function RecentScreenContainer() {
       }
 
       const saved = getSavedTime(film);
-      const lastVoiceId = saved?.lastVoiceId;
+      const historyItem = localHistory.find(
+        (historyEntry) =>
+          historyEntry.id === film.id || historyEntry.link === item.link
+      );
 
-      if (!lastVoiceId || !saved?.voices?.[lastVoiceId]) {
+      const lastVoiceId = saved?.lastVoiceId ?? historyItem?.voiceId;
+
+      if (!lastVoiceId) {
         throw new Error(t('No video available'));
       }
 
-      const voiceData = saved.voices[lastVoiceId];
+      const voiceData = saved?.voices?.[lastVoiceId] ?? null;
       const voice = film.voices.find(({ id }) => id === lastVoiceId);
 
       if (!voice) {
@@ -105,8 +111,9 @@ export function RecentScreenContainer() {
       }
 
       if (film.hasSeasons) {
-        const seasonId = voiceData?.lastSeasonId;
-        const episodeId = voiceData?.lastEpisodeId;
+        const savedEpisode = getLastSavedEpisode(voiceData);
+        const seasonId = savedEpisode.seasonId ?? historyItem?.seasonId;
+        const episodeId = savedEpisode.episodeId ?? historyItem?.episodeId;
 
         if (!seasonId || !episodeId) {
           throw new Error(t('Current season or episode not saved.'));
