@@ -20,7 +20,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { BackHandler, Share } from 'react-native';
+import { AppState, BackHandler, Share } from 'react-native';
 import {
   BandwidthData,
   onProgressData,
@@ -174,6 +174,14 @@ export function PlayerContainer({
   // the quality whose failure has already been acted on - see handlePlaybackError
   const handledErrorQuality = useRef<string | null>(null);
 
+  const episodeTransitionRef = useRef(false);
+  // prevents auto-next and manual next/previous from changing the player concurrently
+  const autoNextEpisodeRef = useRef<string | null>(null);
+  // prevents the same episode end from starting auto-next more than once
+  const appBackgroundAtRef = useRef<number | null>(null);
+  // records how long the app stayed outside the foreground
+  const streamRecoveryRef = useRef(false);
+  // prevents foreground stream recovery from racing another source replacement
   const firestoreSavedTimeRef = useRef(false);
   const firestoreDb = useMemo(() => (
     isFirestore && isSignedIn && !isOffline && !isLocalLibrary
@@ -576,18 +584,57 @@ export function PlayerContainer({
     updatePlayerStream(newVideo, selectedQuality, newVoice, carriedTime);
   };
 
-  const handleNewEpisode = async (direction: RewindDirection) => {
+  const getFreshEpisodeVideo = async (
+    voiceArg: FilmVoiceInterface,
+    seasonId: string,
+    episodeId: string
+  ): Promise<FilmVideoInterface> => {
+    let lastError: unknown = null;
+
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const newVideo = await currentService.getFilmStreamsByEpisodeId(
+          film,
+          voiceArg,
+          seasonId,
+          episodeId
+        );
+
+        if (newVideo?.streams?.length) {
+          return newVideo;
+        }
+
+        lastError = new Error(t('Failed to load the video'));
+      } catch (error) {
+        lastError = error;
+      }
+
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+
+    throw lastError instanceof Error
+      ? lastError
+      : new Error(t('Failed to load the video'));
+  };
+
+  const handleNewEpisode = async (direction: RewindDirection): Promise<boolean> => {
+    if (episodeTransitionRef.current) {
+      return false;
+    }
+
     const { hasSeasons } = film;
 
     if (!hasSeasons) {
-      return;
+      return false;
     }
 
     const { seasons = [], lastSeasonId, lastEpisodeId } = selectedVoice;
     const seasonIndex = seasons.findIndex((s) => s.seasonId === lastSeasonId);
 
     if (seasonIndex === -1) {
-      return;
+      return false;
     }
 
     const season = seasons[seasonIndex];
@@ -598,7 +645,7 @@ export function PlayerContainer({
     );
 
     if (episodeIndex === -1) {
-      return;
+      return false;
     }
 
     let newEpisodeIndex = episodeIndex;
@@ -613,7 +660,7 @@ export function PlayerContainer({
         if (newSeasonIndex < 0) {
           NotificationStore.displayMessage(t('No more episodes available'));
 
-          return;
+          return false;
         }
 
         const { episodes: np = [] } = seasons[newSeasonIndex];
@@ -629,7 +676,7 @@ export function PlayerContainer({
         if (newSeasonIndex > seasons.length - 1) {
           NotificationStore.displayMessage(t('No more episodes available'));
 
-          return;
+          return false;
         }
 
         newEpisodeIndex = 0;
@@ -639,11 +686,12 @@ export function PlayerContainer({
     const { seasonId } = seasons[newSeasonIndex];
     const { episodeId } = episodes[newEpisodeIndex];
 
+    episodeTransitionRef.current = true;
+
     try {
       setIsLoading(true);
 
-      const newVideo = await currentService.getFilmStreamsByEpisodeId(
-        film,
+      const newVideo = await getFreshEpisodeVideo(
         selectedVoice,
         seasonId,
         episodeId
@@ -656,12 +704,89 @@ export function PlayerContainer({
       };
 
       changePlayerVideo(newVideo, newVoice);
+
+      return true;
     } catch (error) {
       NotificationStore.displayError(error as Error);
+
+      return false;
     } finally {
+      episodeTransitionRef.current = false;
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextState) => {
+      if (nextState !== 'active') {
+        if (appBackgroundAtRef.current === null) {
+          appBackgroundAtRef.current = Date.now();
+        }
+
+        return;
+      }
+
+      const backgroundAt = appBackgroundAtRef.current;
+      appBackgroundAtRef.current = null;
+
+      if (backgroundAt === null || Date.now() - backgroundAt < 60_000) {
+        return;
+      }
+
+      if (isOffline || episodeTransitionRef.current || streamRecoveryRef.current) {
+        return;
+      }
+
+      if (status !== 'error' && !hasPlaybackError) {
+        return;
+      }
+
+      streamRecoveryRef.current = true;
+
+      try {
+        const resumeTime = Math.max(
+          lastPositionRef.current,
+          Number.isFinite(player.currentTime) ? player.currentTime : 0
+        );
+
+        const newVideo = film.hasSeasons
+          ? selectedVoice.lastSeasonId && selectedVoice.lastEpisodeId
+            ? await getFreshEpisodeVideo(
+                selectedVoice,
+                selectedVoice.lastSeasonId,
+                selectedVoice.lastEpisodeId
+              )
+            : null
+          : await currentService.getFilmStreamsByVoice(film, selectedVoice);
+
+        if (!newVideo?.streams?.length) {
+          return;
+        }
+
+        setPlaybackFailed(false);
+        setSelectedVideo(newVideo);
+        setSelectedSubtitle(newVideo.subtitles?.find(({ isDefault }) => isDefault));
+        updatePlayerStream(newVideo, selectedQuality, selectedVoice, resumeTime);
+      } catch (error) {
+        NotificationStore.displayError(error as Error);
+      } finally {
+        streamRecoveryRef.current = false;
+      }
+    });
+
+    return () => subscription.remove();
+  }, [
+    currentService,
+    film,
+    getFreshEpisodeVideo,
+    hasPlaybackError,
+    isOffline,
+    player,
+    selectedQuality,
+    selectedVoice,
+    status,
+    updatePlayerStream,
+  ]);
 
   const onPlaybackEnd = (currentTime: number, duration: number) => {
     if (currentTime < duration - 1) {
@@ -670,9 +795,18 @@ export function PlayerContainer({
 
     updateTime();
 
-    if (playerAutoNextEpisode) {
-      handleNewEpisode(RewindDirection.FORWARD);
+    if (!playerAutoNextEpisode || episodeTransitionRef.current) {
+      return;
     }
+
+    const episodeKey = `${selectedVoice.id}:${selectedVoice.lastSeasonId ?? ''}:${selectedVoice.lastEpisodeId ?? ''}`;
+
+    if (autoNextEpisodeRef.current === episodeKey) {
+      return;
+    }
+
+    autoNextEpisodeRef.current = episodeKey;
+    void handleNewEpisode(RewindDirection.FORWARD);
   };
 
   useEvent(player, 'onProgress', ({ currentTime, bufferDuration }: onProgressData) => {

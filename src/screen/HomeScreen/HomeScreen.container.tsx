@@ -27,6 +27,7 @@ export function HomeScreenContainer() {
     menuItems,
     sorting: sortingOptions,
     initialIndex,
+    prefetchAdjacent: true,
     fetchFilms: (menuItem: MenuItemInterface, page: number, sort?: string, isRefresh?: boolean) => {
       return currentService.getHomeMenuFilms(menuItem, page, sort, { isRefresh });
     },
