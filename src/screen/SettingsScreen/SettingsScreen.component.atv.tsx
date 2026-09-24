@@ -38,6 +38,7 @@ import Columns2 from 'lucide-react-native/icons/columns-2';
 import DatabaseBackup from 'lucide-react-native/icons/database-backup';
 import Dock from 'lucide-react-native/icons/dock';
 import Download from 'lucide-react-native/icons/download';
+import ListVideo from 'lucide-react-native/icons/list-video';
 import MoveVertical from 'lucide-react-native/icons/move-vertical';
 import ExternalLink from 'lucide-react-native/icons/external-link';
 import EyeOff from 'lucide-react-native/icons/eye-off';
@@ -747,6 +748,7 @@ export function SettingsScreenComponent({
       <SettingSwitch
         title={ t('Compact season and episode selector') }
         subtitle={ t('Use dropdowns instead of buttons to choose the season and episode.') }
+        IconComponent={ ListVideo }
         value={ playerCompactSelector }
         onChange={ (value) => onConfigUpdate('playerCompactSelector', value) }
       />
