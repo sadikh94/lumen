@@ -107,7 +107,7 @@ export const ThemedPressableComponent = ({
         unstable_pressDelay={ pressDelay }
         hitSlop={ hitSlop }
         style={ [{
-          alignSelf: 'flex-start',
+          flex: 1,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',

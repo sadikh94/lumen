@@ -3,6 +3,7 @@ import { Theme, ThemedStyles } from 'Theme/types';
 export const componentStyles = ({ scale, colors, text }: Theme) => ({
   tabBarOuter: {
     width: '100%',
+    paddingRight: scale(6.67),
   },
   tabBarRow: {
     flexDirection: 'row',

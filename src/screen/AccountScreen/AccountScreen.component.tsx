@@ -80,7 +80,7 @@ export function AccountScreenComponent({
   openDownloads,
 }: AccountScreenComponentProps) {
   const { scale, theme } = useAppTheme();
-  const { showAccountAvatar } = useConfigContext();
+  const { showAccountAvatar, newHomeInterface } = useConfigContext();
   const styles = useThemedStyles(componentStyles);
   const { top } = useSafeAreaInsets();
 
@@ -303,7 +303,7 @@ export function AccountScreenComponent({
       <ThemedSafeArea edges={ ['left', 'right'] }>
         <ScrollView style={ { paddingTop: top } } contentContainerStyle={ styles.scrollView }>
           <Wrapper style={ styles.wrapper }>
-            { renderTopBar() }
+            { !newHomeInterface && renderTopBar() }
             { renderContent() }
           </Wrapper>
         </ScrollView>

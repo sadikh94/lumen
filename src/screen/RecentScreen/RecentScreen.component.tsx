@@ -8,13 +8,17 @@ import { useConfigContext } from 'Context/ConfigContext';
 import { useServiceContext } from 'Context/ServiceContext';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { ThemedPressable } from 'Component/ThemedPressable';
+import { ThemedText } from 'Component/ThemedText';
 import Play from 'lucide-react-native/icons/play';
 import Trash2 from 'lucide-react-native/icons/trash-2';
 import Eye from 'lucide-react-native/icons/eye';
 import EyeOff from 'lucide-react-native/icons/eye-off';
+import Bell from 'lucide-react-native/icons/bell';
+import { ACCOUNT_TAB } from 'Navigation/navigationRoutes';
 import { t } from 'i18n/translate';
 import { useCallback, useMemo } from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from 'Theme/context';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { FilmType } from 'Type/FilmType.type';
@@ -37,10 +41,11 @@ export function RecentScreenComponent({
   confirmRemoveItem,
   openHideConfirmOverlay,
   hideItem,
+  openNotifications,
 }: RecentScreenComponentProps) {
   const styles = useThemedStyles(componentStyles);
-  const { isSignedIn } = useServiceContext();
-  const { isLocalLibrary } = useConfigContext();
+  const { isSignedIn, badgeData } = useServiceContext();
+  const { isLocalLibrary, showRecentNotifications } = useConfigContext();
 
   const filmItems = useMemo(() => (
     items.map((item): FilmCardInterface => ({
@@ -75,6 +80,8 @@ export function RecentScreenComponent({
     [items],
   );
   const { scale, theme } = useAppTheme();
+  const badge = badgeData[ACCOUNT_TAB] ?? 0;
+  const { top } = useSafeAreaInsets();
 
   const renderFilmActions = useCallback((film: FilmCardInterface) => {
     const item = recentItemsById.get(film.id);
@@ -241,6 +248,39 @@ export function RecentScreenComponent({
     <Page>
       { renderConfirmOverlay() }
       { renderContent() }
+      { showRecentNotifications && (
+        <>
+          <ThemedPressable
+            style={ [
+              styles.recentTopAction,
+              { top: top + scale(4) },
+            ] }
+            contentStyle={ {
+              width: '100%',
+              height: '100%',
+              padding: 0,
+              backgroundColor: 'transparent',
+            } }
+            onPress={ openNotifications }
+            disableRipple
+          >
+            <Bell
+              size={ scale(22) }
+              color={ theme.colors.icon }
+            />
+          </ThemedPressable>
+          { badge > 0 && (
+            <ThemedText
+              style={ [
+                styles.recentTopBadge,
+                { top: top + scale(7) },
+              ] }
+            >
+              { badge }
+            </ThemedText>
+          ) }
+        </>
+      ) }
     </Page>
   );
 }

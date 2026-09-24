@@ -89,6 +89,7 @@ const NavigationOrderSettingComponent = ({
       <ThemedSafeArea>
         <Header
           title={ title }
+          disableBackRipple
           onBack={ onBack }
         />
 
@@ -103,7 +104,6 @@ const NavigationOrderSettingComponent = ({
               <View
                 key={ item.value }
                 style={ styles.item }
-                onLayout={ event => console.log('[ATV NavigationOrder item]', event.nativeEvent.layout) }
               >
                 <View style={ styles.itemContent }>
                   <IconComponent

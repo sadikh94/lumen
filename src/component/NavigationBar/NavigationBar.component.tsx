@@ -6,7 +6,7 @@ import { useConfigContext } from 'Context/ConfigContext';
 import { useServiceContext } from 'Context/ServiceContext';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import UserRound from 'lucide-react-native/icons/user-round';
-import { ACCOUNT_TAB } from 'Navigation/navigationRoutes';
+import { ACCOUNT_TAB, NOTIFICATIONS_TAB } from 'Navigation/navigationRoutes';
 import { ComponentType, useCallback } from 'react';
 import { Image, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -36,6 +36,9 @@ export function NavigationBarComponent({
   ) => {
     const { options } = descriptors[route.key] ?? {};
     const { tabBarIcon: IconComponent } = options as { tabBarIcon: ComponentType<any> };
+    const badgeCount = route.name === NOTIFICATIONS_TAB
+      ? badgeData[ACCOUNT_TAB] ?? 0
+      : 0;
 
     return (
       <Animated.View style={ [styles.tab, focused && styles.tabFocused] }>
@@ -46,9 +49,14 @@ export function NavigationBarComponent({
             color={ theme.colors.icon }
           />
         ) }
+        { badgeCount > 0 && (
+          <ThemedText style={ styles.badge }>
+            { badgeCount }
+          </ThemedText>
+        ) }
       </Animated.View>
     );
-  }, [descriptors, scale, styles, theme]);
+  }, [descriptors, scale, styles, theme, badgeData]);
 
   const renderAccountTab = useCallback((
     route: NavigationRoute<ParamListBase, string>,

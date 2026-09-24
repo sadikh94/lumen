@@ -17,6 +17,7 @@ export interface RecentScreenComponentProps {
   confirmRemoveItem: () => void;
   openHideConfirmOverlay: (item: RecentItemInterface) => void;
   hideItem: () => void;
+  openNotifications: () => void;
 }
 
 export type RecentGridItem = RecentItemInterface & {

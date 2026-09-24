@@ -8,7 +8,7 @@ import { useLocalHistory } from 'Hooks/useLocalLibrary';
 import { usePaginatedQuery } from 'Hooks/usePaginatedQuery';
 import { getCurrentLanguage } from 'i18n/index';
 import { t } from 'i18n/translate';
-import { PLAYER_SCREEN } from 'Navigation/navigationRoutes';
+import { NOTIFICATIONS_SCREEN, PLAYER_SCREEN } from 'Navigation/navigationRoutes';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { RecentItemInterface } from 'Type/RecentItem.interface';
 import NotificationStore from 'Store/Notification.store';
@@ -169,6 +169,9 @@ export function RecentScreenContainer() {
   const handleContinueWatching = useCallback((item: RecentItemInterface) => {
     continueWatching(item);
   }, [continueWatching]);
+  const openNotifications = useCallback(() => {
+    navigation.navigate(NOTIFICATIONS_SCREEN);
+  }, [navigation]);
   const handleOnPress = useCallback((item: RecentItemInterface) => {
     openFilm({ link: item.link, poster: item.image }, navigation);
   }, [navigation]);
@@ -269,6 +272,7 @@ export function RecentScreenContainer() {
     confirmRemoveItem,
     openHideConfirmOverlay,
     hideItem,
+    openNotifications,
   };
 
   return isTV ? <RecentScreenComponentTV { ...containerProps } /> : <RecentScreenComponent { ...containerProps } />;

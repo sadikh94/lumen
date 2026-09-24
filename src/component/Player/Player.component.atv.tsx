@@ -17,6 +17,7 @@ import { useConfigContext } from 'Context/ConfigContext';
 import { usePlayerContext } from 'Context/PlayerContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLatest } from 'Hooks/useLatest';
+import { usePictureInPicture } from 'Hooks/usePictureInPicture';
 import { useRestartableTimeout } from 'Hooks/useRestartableTimeout';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
 import { t } from 'i18n/translate';
@@ -28,6 +29,7 @@ import ListVideo from 'lucide-react-native/icons/list-video';
 import Maximize2 from 'lucide-react-native/icons/maximize-2';
 import MessageSquareText from 'lucide-react-native/icons/message-square-text';
 import Pause from 'lucide-react-native/icons/pause';
+import PictureInPicture2 from 'lucide-react-native/icons/picture-in-picture-2';
 import Play from 'lucide-react-native/icons/play';
 import Server from 'lucide-react-native/icons/server';
 import Settings2 from 'lucide-react-native/icons/settings-2';
@@ -205,6 +207,11 @@ export function PlayerComponent({
   const controlsTimeout = useRestartableTimeout();
   const { ref: topRowRef, focusKey: topRowFocusKey } = useFocusable();
   const { ref: bottomRowRef, focusKey: bottomRowFocusKey } = useFocusable();
+  const {
+    ref: videoViewRef,
+    isSupported: isPipSupported,
+    enter: enterPictureInPicture,
+  } = usePictureInPicture(isPlaying);
 
   // the remote listeners below are registered once per player and the auto hide
   // timeout fires seconds after it was armed, so both have to read the current
@@ -587,6 +594,13 @@ export function PlayerComponent({
     );
   };
 
+  const enablePIP = () => {
+    setShowControls(false);
+    // let the controls unmount first, they would otherwise be captured in the
+    // picture in picture window
+    setTimeout(enterPictureInPicture, 0);
+  };
+
   // a video that is not ready to play yet gets a spinner in place of the icon,
   // rather than a play button that only starts once the loading is done
   const getPlayPauseIcon = () => {
@@ -625,6 +639,13 @@ export function PlayerComponent({
                 onInteraction={ handleUserInteraction }
               />
             </>
+          ) }
+          { isPipSupported && (
+            <PlayerTopAction
+              IconComponent={ PictureInPicture2 }
+              action={ enablePIP }
+              onInteraction={ handleUserInteraction }
+            />
           ) }
           <PlayerTopAction
             IconComponent={ Gauge }
@@ -987,11 +1008,12 @@ export function PlayerComponent({
       ] }
     >
       <VideoView
+        ref={ videoViewRef }
         style={ styles.video }
         player={ player }
         resizeMode={ selectedAspectRatio }
         controls={ false }
-        pictureInPicture={ false }
+        pictureInPicture={ isPipSupported }
       />
       { renderError() }
       { renderTapSurface() }

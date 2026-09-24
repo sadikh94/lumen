@@ -1,3 +1,4 @@
+import ListVideo from 'lucide-react-native/icons/list-video';
 import { Header } from 'Component/Header';
 import { Page } from 'Component/Page';
 import { getAspectRatio } from 'Component/Player/Player.config';
@@ -29,6 +30,7 @@ import ArrowRight from 'lucide-react-native/icons/arrow-right';
 import ArrowUp from 'lucide-react-native/icons/arrow-up';
 import AudioLines from 'lucide-react-native/icons/audio-lines';
 import BookImage from 'lucide-react-native/icons/book-image';
+import Bell from 'lucide-react-native/icons/bell';
 import Brush from 'lucide-react-native/icons/brush';
 import CalendarDays from 'lucide-react-native/icons/calendar-days';
 import Subtitles from 'lucide-react-native/icons/captions';
@@ -122,6 +124,8 @@ export function SettingsScreenComponent({
   initialRoute,
   showRatings,
   showAccountAvatar,
+  newHomeInterface,
+  showRecentNotifications,
   homeDefaultTab,
   tabPosition,
   numberOfColumnsMobile,
@@ -347,11 +351,27 @@ export function SettingsScreenComponent({
         onCustomChange={ onAccentColorInput }
       />
       { !isTV && (
-        <SettingBase
-          title={ t('Mobile navigation order') }
-          IconComponent={ Dock }
-          onPress={ () => setNavigationOrderEditor('mobile') }
-        />
+        <>
+          <SettingBase
+            title={ t('Mobile navigation order') }
+            IconComponent={ Dock }
+            onPress={ () => setNavigationOrderEditor('mobile') }
+          />
+          <SettingSwitch
+            title={ t('New home interface') }
+            subtitle={ t('Move Settings to Home and allow sorting or hiding the Account tab.') }
+            IconComponent={ Settings2 }
+            value={ newHomeInterface }
+            onChange={ (value) => onConfigUpdate('newHomeInterface', value) }
+          />
+          <SettingSwitch
+            title={ t('Episode updates in Recent') }
+            subtitle={ t('Show the episode update button in the top-right corner of Recent.') }
+            IconComponent={ Bell }
+            value={ showRecentNotifications }
+            onChange={ (value) => onConfigUpdate('showRecentNotifications', value) }
+          />
+        </>
       ) }
       <SettingSelect
         title={ t('Interface language') }
@@ -698,6 +718,7 @@ export function SettingsScreenComponent({
       <SettingSwitch
         title={ t('Compact season and episode selector') }
         subtitle={ t('Use dropdowns instead of buttons to choose the season and episode.') }
+        IconComponent={ ListVideo }
         value={ playerCompactSelector }
         onChange={ (value) => onConfigUpdate('playerCompactSelector', value) }
       />
@@ -975,7 +996,7 @@ export function SettingsScreenComponent({
         items={
           isTVNavigation
             ? getTVNavigationOrderItems()
-            : getMobileNavigationOrderItems()
+            : getMobileNavigationOrderItems(newHomeInterface)
         }
         value={ isTVNavigation ? tvNavigationOrder : mobileNavigationOrder }
         hiddenItems={ isTVNavigation ? hiddenTVNavigationTabs : hiddenMobileNavigationTabs }
@@ -1000,6 +1021,7 @@ export function SettingsScreenComponent({
       <ThemedSafeArea>
         <Header
           title={ renderTitle() }
+          disableBackRipple
           onBack={ currentGroup ? handleBackToGroups : undefined }
         />
         <View style={ styles.content }>

@@ -79,6 +79,7 @@ export function BookmarksScreenComponent({
           { ...pagerHandlers }
           pagerItems={ pagerItems }
           tabPosition={ tabPosition }
+          tabBarRightPadding={ 9 }
           TabBarActionComponent={ isLocalLibrary && (
             <ThemedButton
               style={ { width: scale(44), backgroundColor: 'transparent' } }

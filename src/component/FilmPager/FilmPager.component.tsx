@@ -1,4 +1,4 @@
-﻿import { FilmGrid } from 'Component/FilmGrid';
+import { FilmGrid } from 'Component/FilmGrid';
 import { FilmList } from 'Component/FilmList';
 import { ThemedDropdown } from 'Component/ThemedDropdown';
 import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
@@ -106,6 +106,7 @@ export const FilmPagerComponent = ({
   disableStatusbarSafeArea,
   tabPosition = 'bottom',
   TabBarActionComponent,
+  tabBarRightPadding,
   ListEmptyComponent,
   centerEmptyComponent,
   sorting,
@@ -241,10 +242,15 @@ export const FilmPagerComponent = ({
     <View
       style={ [
         styles.tabBarOuter,
+        tabBarRightPadding !== undefined && { paddingRight: tabBarRightPadding },
         tabPosition === 'top' && { paddingTop: safeAreaTop },
       ] }
     >
-      <Wrapper>
+      <Wrapper
+        style={ tabBarRightPadding !== undefined && {
+          marginRight: 0,
+        } }
+      >
         <View style={ styles.tabBarRow }>
           { pagerItems.length > 1 && (
             <ScrollView

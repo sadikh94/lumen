@@ -26,6 +26,10 @@ export type AppStackParamList = {
   Error: undefined
   Player: undefined
   FilmTrailer: undefined
+  Settings: undefined
+  Notifications: undefined
+  Downloads: undefined
+  MyComments: undefined
 }
 
 export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<

@@ -30,6 +30,8 @@ export interface FilmPagerContainerProps extends FilmPagerHandlers {
   menuDefaultFocus?: boolean;
   tabPosition?: TabPosition;
   TabBarActionComponent?: ReactNode;
+  /** Optional right padding for the tab bar outer container. */
+  tabBarRightPadding?: number;
   /** Optional focusable control rendered after the TV tab list. */
   menuTrailingComponent?: ReactNode;
   // Fires when grid focus enters/leaves the first row, so the screen can

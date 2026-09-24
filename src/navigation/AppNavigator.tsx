@@ -15,6 +15,10 @@ import { useMemo } from 'react';
 import { ErrorScreen } from 'Screen/ErrorScreen';
 import { FilmTrailerScreen } from 'Screen/FilmTrailerScreen';
 import { PlayerScreen } from 'Screen/PlayerScreen';
+import { DownloadsScreen } from 'Screen/DownloadsScreen';
+import { MyCommentsScreen } from 'Screen/MyCommentsScreen';
+import { NotificationsScreen } from 'Screen/NotificationsScreen';
+import { SettingsScreen } from 'Screen/SettingsScreen';
 import { WelcomeScreen } from 'Screen/WelcomeScreen';
 import { useAppTheme } from 'Theme/context';
 import { navigationRef, useBackButtonHandler } from 'Util/Navigation';
@@ -25,14 +29,23 @@ import {
   exitRoutesMobile,
   exitRoutesTV,
   FILM_TRAILER_SCREEN,
+  MY_COMMENTS_SCREEN,
+  MY_COMMENTS_TAB,
+  NOTIFICATIONS_SCREEN,
+  NOTIFICATIONS_TAB,
   PLAYER_SCREEN,
+  SETTINGS_SCREEN,
   TABS_SCREEN,
   WELCOME_SCREEN,
 } from './navigationRoutes';
 import type { AppStackParamList, NavigationProps } from './navigationTypes';
 import { TabsNavigator } from './TabsNavigator';
+import { createFilmNavigator } from './FilmNavigator';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
+
+const NotificationsNavigator = createFilmNavigator(NOTIFICATIONS_TAB, NotificationsScreen);
+const MyCommentsNavigator = createFilmNavigator(MY_COMMENTS_TAB, MyCommentsScreen);
 
 const AppStack = () => {
   const { isConfigured } = useConfigContext();
@@ -78,6 +91,22 @@ const AppStack = () => {
       <Stack.Screen
         name={ FILM_TRAILER_SCREEN }
         component={ FilmTrailerScreen }
+      />
+      <Stack.Screen
+        name={ SETTINGS_SCREEN }
+        component={ SettingsScreen }
+      />
+      <Stack.Screen
+        name={ NOTIFICATIONS_SCREEN }
+        component={ NotificationsNavigator }
+      />
+      <Stack.Screen
+        name={ DOWNLOADS_SCREEN }
+        component={ DownloadsScreen }
+      />
+      <Stack.Screen
+        name={ MY_COMMENTS_SCREEN }
+        component={ MyCommentsNavigator }
       />
     </Stack.Navigator>
   );

@@ -16,6 +16,7 @@ import House from 'lucide-react-native/icons/house';
 import History from 'lucide-react-native/icons/rotate-ccw-clock';
 import Search from 'lucide-react-native/icons/search';
 import Settings from 'lucide-react-native/icons/settings';
+import UserRound from 'lucide-react-native/icons/user-round';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { AccountScreen } from 'Screen/AccountScreen';
@@ -56,10 +57,20 @@ const Tab = createBottomTabNavigator();
 // NOTE: `create*Navigator` returns a new component on every call, so they have to be created
 // once at module level. Calling them inline in JSX would give the screens a new component
 // identity on every render of `TabsNavigator` and remount them, ex. when the config changes.
-const HomeNavigator = createFilmNavigator(HOME_SCREEN, HomeScreen);
+const HomeNavigator = createFilmNavigator(HOME_SCREEN, HomeScreen, [
+  {
+    name: SETTINGS_SCREEN,
+    component: SettingsScreen,
+  },
+]);
 const SearchNavigator = createFilmNavigator(SEARCH_SCREEN, SearchScreen);
 const BookmarksNavigator = createFilmNavigator(BOOKMARKS_SCREEN, BookmarksScreen);
-const RecentNavigator = createFilmNavigator(RECENT_SCREEN, RecentScreen);
+const RecentNavigator = createFilmNavigator(RECENT_SCREEN, RecentScreen, [
+  {
+    name: NOTIFICATIONS_SCREEN,
+    component: NotificationsScreen,
+  },
+]);
 const NotificationsNavigator = createFilmNavigator(NOTIFICATIONS_SCREEN, NotificationsScreen);
 const TVAccountNavigator = createAccountNavigator(ACCOUNT_SCREEN, AccountScreenContainer);
 const MobileAccountNavigator = createAccountNavigator(ACCOUNT_SCREEN, AccountScreen);
@@ -253,6 +264,7 @@ const renderMobileTabs = (
   theme: Theme,
   mobileNavigationOrder: string[],
   hiddenNavigationTabs: string[],
+  newHomeInterface: boolean,
 ) => {
   const fallbackOrder = [
     HOME_TAB,
@@ -261,6 +273,7 @@ const renderMobileTabs = (
     RECENT_TAB,
     NOTIFICATIONS_TAB,
     DOWNLOADS_SCREEN,
+    ...(newHomeInterface ? [ACCOUNT_TAB] : []),
   ];
 
   const availableRoutes = [
@@ -270,6 +283,7 @@ const renderMobileTabs = (
     RECENT_TAB,
     NOTIFICATIONS_TAB,
     DOWNLOADS_SCREEN,
+    ...(newHomeInterface ? [ACCOUNT_TAB] : []),
   ];
 
   const navigationOrder = normalizeNavigationOrder(
@@ -358,6 +372,27 @@ const renderMobileTabs = (
           />
         );
 
+      case ACCOUNT_TAB:
+        return (
+          <Tab.Screen
+            key={ ACCOUNT_TAB }
+            name={ ACCOUNT_TAB }
+            component={ MobileAccountNavigator }
+            listeners={ ({ navigation }) => ({
+              tabPress: (event) => {
+                event.preventDefault();
+                navigation.navigate(ACCOUNT_TAB, {
+                  screen: ACCOUNT_SCREEN,
+                });
+              },
+            }) }
+            options={ {
+              tabBarLabel: t('Account'),
+              tabBarIcon: UserRound,
+            } }
+          />
+        );
+
       default:
         return null;
     }
@@ -371,14 +406,16 @@ const renderMobileTabs = (
       } }
     >
       { navigationOrder.map(renderScreen) }
-      <Tab.Screen
-        key={ ACCOUNT_TAB }
-        name={ ACCOUNT_TAB }
-        component={ MobileAccountNavigator }
-        options={ {
-          tabBarLabel: t('Account'),
-        } }
-      />
+      { !newHomeInterface && (
+        <Tab.Screen
+          key={ ACCOUNT_TAB }
+          name={ ACCOUNT_TAB }
+          component={ MobileAccountNavigator }
+          options={ {
+            tabBarLabel: t('Account'),
+          } }
+        />
+      ) }
     </Tab.Group>
   );
 };
@@ -398,6 +435,7 @@ export function TabsNavigator() {
     mobileNavigationOrder,
     hiddenTVNavigationTabs,
     hiddenMobileNavigationTabs,
+    newHomeInterface,
   } = useConfigContext();
   const { theme, scale } = useAppTheme();
   const { isMenuOpen } = useNavigationContext();
@@ -460,7 +498,7 @@ export function TabsNavigator() {
           headerShown: false,
         } }
       >
-        { isTV ? renderTVTabs(theme, scale, isLocalLibrary, tvNavigationOrder, hiddenTVNavigationTabs, layoutMenuOpen, transformX, isSnapping) : renderMobileTabs(theme, mobileNavigationOrder, hiddenMobileNavigationTabs) }
+        { isTV ? renderTVTabs(theme, scale, isLocalLibrary, tvNavigationOrder, hiddenTVNavigationTabs, layoutMenuOpen, transformX, isSnapping) : renderMobileTabs(theme, mobileNavigationOrder, hiddenMobileNavigationTabs, newHomeInterface) }
       </Tab.Navigator>
       { isTV && <SceneMask /> }
     </View>

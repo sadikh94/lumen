@@ -4,6 +4,7 @@ import FolderHeart from 'lucide-react-native/icons/folder-heart';
 import House from 'lucide-react-native/icons/house';
 import History from 'lucide-react-native/icons/rotate-ccw-clock';
 import Search from 'lucide-react-native/icons/search';
+import UserRound from 'lucide-react-native/icons/user-round';
 
 import { t } from 'i18n/translate';
 import {
@@ -13,6 +14,7 @@ import {
   NOTIFICATIONS_TAB,
   RECENT_TAB,
   SEARCH_TAB,
+  ACCOUNT_TAB,
 } from 'Navigation/navigationRoutes';
 import { NavigationOrderItem } from 'Component/NavigationOrderSetting/NavigationOrderSetting.type';
 
@@ -44,7 +46,7 @@ export const getTVNavigationOrderItems = (): NavigationOrderItem[] => [
   },
 ];
 
-export const getMobileNavigationOrderItems = (): NavigationOrderItem[] => [
+export const getMobileNavigationOrderItems = (includeAccount = false): NavigationOrderItem[] => [
   {
     value: HOME_TAB,
     label: t('Home'),
@@ -75,4 +77,9 @@ export const getMobileNavigationOrderItems = (): NavigationOrderItem[] => [
     label: t('Downloads'),
     IconComponent: Download,
   },
+  ...(includeAccount ? [{
+    value: ACCOUNT_TAB,
+    label: t('Account'),
+    IconComponent: UserRound,
+  }] : []),
 ];

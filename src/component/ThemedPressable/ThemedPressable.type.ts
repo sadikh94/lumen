@@ -17,6 +17,7 @@ export type ThemedPressableContainerProps ={
   accessibilityRole?: AccessibilityRole;
   mode?: 'light' | 'dark';
   pressDelay?: number;
+  disableRipple?: boolean;
   topAdditionalElement?: (state: ThemedFocusableNodeState) => ReactElement | null;
   bottomAdditionalElement?: (state: ThemedFocusableNodeState) => ReactElement | null;
   // TV related
