@@ -50,6 +50,12 @@ export interface FilmInterface {
   hasVoices: boolean;
   hasSeasons: boolean;
 
+  externalIds?: {
+    imdb?: string;
+    tmdb?: string;
+    kinopoisk?: string;
+  };
+
   // onlyMovie; // voices[0] = {...video} hasSeasons: false hasVoices: false
   // onlyVoices; // voices[0,1,2] = {...}   hasSeasons: false hasVoices: true
   // onlySeasons; // voices[0] = {...}  hasSeasons: true hasVoices: false

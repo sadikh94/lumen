@@ -43,6 +43,7 @@ import {
   formatDuration,
   getStaticUrl,
   parseActorCard,
+  parseExternalIdsFromUrl,
   parseFilmCard,
   parseFilmsListRoot,
   parseFilmType,
@@ -938,6 +939,30 @@ const RezkaApi: RezkaApiInterface = {
               } as RatingInterface;
             });
 
+            const externalIds = film.ratings.reduce(
+              (ids, rating) => {
+                const parsedIds = parseExternalIdsFromUrl(rating.link);
+
+                if (parsedIds.imdb && !ids.imdb) {
+                  ids.imdb = parsedIds.imdb;
+                }
+
+                if (parsedIds.tmdb && !ids.tmdb) {
+                  ids.tmdb = parsedIds.tmdb;
+                }
+
+                if (parsedIds.kinopoisk && !ids.kinopoisk) {
+                  ids.kinopoisk = parsedIds.kinopoisk;
+                }
+
+                return ids;
+              },
+              {} as NonNullable<FilmInterface['externalIds']>
+            );
+
+            if (externalIds.imdb || externalIds.tmdb || externalIds.kinopoisk) {
+              film.externalIds = externalIds;
+            }
             break;
           case 'Входит в списки':
             film.includedIn = value.childNodes.reduce((acc: InfoListInterface[], node, idx) => {

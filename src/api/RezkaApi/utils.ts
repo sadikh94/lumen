@@ -47,6 +47,50 @@ export const parseHelpLink = (rawLink?: string): string | undefined => {
   }
 };
 
+export const parseExternalIdsFromUrl = (
+  url?: string
+): {
+  imdb?: string;
+  tmdb?: string;
+  kinopoisk?: string;
+} => {
+  if (!url) {
+    return {};
+  }
+
+  const result: {
+    imdb?: string;
+    tmdb?: string;
+    kinopoisk?: string;
+  } = {};
+
+  const imdbMatch = url.match(
+    /(?:^|\/\/)(?:www\.)?imdb\.com\/title\/(tt\d+)(?:[/?#]|$)/i
+  );
+
+  if (imdbMatch) {
+    result.imdb = imdbMatch[1];
+  }
+
+  const tmdbMatch = url.match(
+    /(?:^|\/\/)(?:www\.)?themoviedb\.org\/(?:movie|tv)\/(\d+)(?:[/?#]|$)/i
+  );
+
+  if (tmdbMatch) {
+    result.tmdb = tmdbMatch[1];
+  }
+
+  const kinopoiskMatch = url.match(
+    /(?:^|\/\/)(?:www\.)?kinopoisk\.ru\/(?:film|series)\/(\d+)(?:[/?#]|$)/i
+  );
+
+  if (kinopoiskMatch) {
+    result.kinopoisk = kinopoiskMatch[1];
+  }
+
+  return result;
+};
+
 export const parseFilmType = (type = '') => {
   if (type.includes('films')) {
     return FilmType.FILM;

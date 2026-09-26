@@ -1,4 +1,4 @@
-import { InfoBlock } from 'Component/InfoBlock';
+﻿import { InfoBlock } from 'Component/InfoBlock';
 import { Loader } from 'Component/Loader';
 import { PlayerVideoRating } from 'Component/PlayerVideoRating';
 import { ThemedButton } from 'Component/ThemedButton';
@@ -134,7 +134,7 @@ export function PlayerVideoSelectorComponent({
     return rows;
   };
 
-  const renderSeasonTimeline = (season: SeasonInterface, isFocused: boolean, isSelected: boolean) => {
+  const renderSeasonTimeline = (season: SeasonInterface, isSelected: boolean) => {
     if (!savedTime || !season.episodes.length) {
       return null;
     }
@@ -203,7 +203,7 @@ export function PlayerVideoSelectorComponent({
                   contentStyle={ styles.seasonContent }
                   onPress={ () => setSelectedSeasonId(seasonId) }
                   topAdditionalElement={
-                    (isFocused, isSelected) => renderSeasonTimeline(season, isFocused, isSelected)
+                    () => renderSeasonTimeline(season, selectedSeasonId === seasonId)
                   }
                 >
                   <ThemedText
@@ -285,7 +285,7 @@ export function PlayerVideoSelectorComponent({
                   contentStyle={ styles.episodeContent }
                   onPress={ () => handleSelectEpisode(episodeId) }
                   autofocus={ selectedEpisodeId === episodeId }
-                  topAdditionalElement={ (_, isSelected) => renderEpisodeTimeline(episodeId, isSelected) }
+                  topAdditionalElement={ () => renderEpisodeTimeline(episodeId, selectedEpisodeId === episodeId) }
                 >
                   <ThemedText
                     style={ [
@@ -450,3 +450,5 @@ export function PlayerVideoSelectorComponent({
 }
 
 export default PlayerVideoSelectorComponent;
+
+

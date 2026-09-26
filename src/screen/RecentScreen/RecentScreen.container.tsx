@@ -1,4 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
+﻿import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 import { ThemedOverlayRef } from 'Component/ThemedOverlay/ThemedOverlay.type';
 import { useConfigContext } from 'Context/ConfigContext';
@@ -9,6 +10,7 @@ import { usePaginatedQuery } from 'Hooks/usePaginatedQuery';
 import { getCurrentLanguage } from 'i18n/index';
 import { t } from 'i18n/translate';
 import { NOTIFICATIONS_SCREEN, PLAYER_SCREEN } from 'Navigation/navigationRoutes';
+import { AppStackParamList } from 'Navigation/navigationTypes';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { RecentItemInterface } from 'Type/RecentItem.interface';
 import NotificationStore from 'Store/Notification.store';
@@ -27,7 +29,7 @@ export function RecentScreenContainer() {
   const { isTV, isLocalLibrary, recentDisplayMode } = useConfigContext();
   const { isSignedIn, currentService } = useServiceContext();
   const localHistory = useLocalHistory();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const hideConfirmOverlayRef = useRef<ThemedOverlayRef | null>(null);
   const removeConfirmOverlayRef = useRef<ThemedOverlayRef | null>(null);
   const { isInternetAvailable } = useNetworkContext();
@@ -280,3 +282,4 @@ export function RecentScreenContainer() {
 }
 
 export default RecentScreenContainer;
+

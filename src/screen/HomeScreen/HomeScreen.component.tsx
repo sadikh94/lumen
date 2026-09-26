@@ -1,11 +1,13 @@
-import { FilmPager } from 'Component/FilmPager';
+﻿import { FilmPager } from 'Component/FilmPager';
 import { ThemedButton } from 'Component/ThemedButton';
 import { Page } from 'Component/Page';
 import { useConfigContext } from 'Context/ConfigContext';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import Settings from 'lucide-react-native/icons/settings';
 import { SETTINGS_SCREEN } from 'Navigation/navigationRoutes';
+import { AppStackParamList } from 'Navigation/navigationTypes';
 import { useAppTheme } from 'Theme/context';
 
 import { HomeScreenComponentProps } from './HomeScreen.type';
@@ -15,7 +17,7 @@ export function HomeScreenComponent({
   ...pagerHandlers
 }: HomeScreenComponentProps) {
   const { scale, theme } = useAppTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { newHomeInterface } = useConfigContext();
 
   return (
@@ -50,3 +52,4 @@ export function HomeScreenComponent({
 }
 
 export default HomeScreenComponent;
+
