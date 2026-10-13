@@ -1,2 +1,0 @@
-export const SCROLL_EVENT_END_PADDING = 200;
-export const MINIMUM_SCHEDULE_ITEMS = 5;

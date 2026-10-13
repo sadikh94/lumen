@@ -1,1 +1,0 @@
-export { default as SettingBase } from './SettingBase.container';

@@ -1,1 +1,0 @@
-export { default as SettingText } from './SettingText.container';

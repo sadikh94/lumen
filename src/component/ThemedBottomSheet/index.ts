@@ -1,1 +1,0 @@
-export { default as ThemedBottomSheet } from './ThemedBottomSheet.component';

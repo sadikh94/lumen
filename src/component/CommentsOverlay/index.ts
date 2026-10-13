@@ -1,1 +1,0 @@
-export { default as CommentsOverlay } from './CommentsOverlay.container';

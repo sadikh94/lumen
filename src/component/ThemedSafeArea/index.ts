@@ -1,1 +1,0 @@
-export { default as ThemedSafeArea } from './ThemedSafeArea.component';

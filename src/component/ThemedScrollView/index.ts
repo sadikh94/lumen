@@ -1,1 +1,0 @@
-export { default as ThemedScrollView } from './ThemedScrollView.container';

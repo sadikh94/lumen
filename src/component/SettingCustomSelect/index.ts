@@ -1,1 +1,0 @@
-export { default as SettingCustomSelect } from './SettingCustomSelect.component';

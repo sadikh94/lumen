@@ -1,1 +1,0 @@
-export { default as PlayerVideoRating } from './PlayerVideoRating.container';
