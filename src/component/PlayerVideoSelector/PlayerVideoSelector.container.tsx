@@ -734,7 +734,7 @@ export const PlayerVideoSelectorContainer = forwardRef<PlayerVideoSelectorRef, P
         }
 
         links.push({
-          url: stream.url,
+          url: stream.downloadUrl ?? stream.url,
           quality: stream.quality,
           headers: stream.headers,
           subtitles: video.subtitles,

@@ -145,3 +145,4 @@ windows/google-desktop-client.json
 /*-inspection*
 /*-verification.ts
 *.cloudsync-*
+/windows/torrent-engine/

@@ -46,7 +46,6 @@ import { matchesHistoryFilm } from 'Util/LocalLibrary/history';
 import { resolveEpisodeSelection } from 'Util/Player/episodeSelection';
 import { openActor, openCategory, openFilm } from 'Util/Router';
 import { sourcePlaybackRouter, sourceRouter } from '../../source';
-import { withDeadline } from '../../source/request';
 
 import FilmScreenComponent from './FilmScreen.component';
 import FilmScreenComponentTV from './FilmScreen.component.atv';
@@ -191,10 +190,8 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
     retry: 0,
     queryFn: async () => {
       if (!isSourceEnabled(sourceForLink(link))) throw new Error('Источник отключён в настройках.');
-      const sourceAdapter = sourceRouter.getAdapterForLink(link);
-      const sourceFilm = await withDeadline(sourceAdapter
-        ? sourceAdapter.getFilm(link, { includeRelated: true })
-        : currentService.getFilm(link), 20_000);
+      const sourceFilm = await sourceRouter.loadFilm(link,
+        url => currentService.getFilm(url), { includeRelated: true });
       if (!sourceFilm) throw new Error('Не удалось загрузить данные фильма. Повторите попытку.');
       const baseFilm = {
         ...sourceFilm,
@@ -205,7 +202,8 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
       if (!isSignedIn || isLocalLibrary) await updateFilmVoiceData(baseFilm);
       // Supplemental metadata must not hold the main Zona page behind a spinner.
       queryClient.setQueryData(filmQueryKey, baseFilm);
-      const loadedFilm = await sourceRouter.resolvePreferredFilm(baseFilm);
+      const loadedFilm = baseFilm.link === link
+        ? await sourceRouter.resolvePreferredFilm(baseFilm) : baseFilm;
       const liveFilm = queryClient.getQueryData<FilmInterface>(filmQueryKey);
       if (liveFilm?.link === loadedFilm.link) loadedFilm.voices = liveFilm.voices;
       if (isLocalLibrary && loadedFilm) {

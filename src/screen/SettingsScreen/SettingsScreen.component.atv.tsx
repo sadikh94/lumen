@@ -133,6 +133,7 @@ export function SettingsScreenComponent({
   hiddenBroadcastTabs,
   broadcastDisplayMode,
   zonaShowAdult,
+  zonaTorrentsEnabled,
   showEpisodeUpdateCount,
   homeDisplayMode,
   bookmarksDisplayMode,
@@ -418,6 +419,13 @@ export function SettingsScreenComponent({
         value={ broadcastDisplayMode }
         options={ [{ value: 'grid', label: t('Grid') }, { value: 'list', label: t('List') }] }
         onChange={ value => onConfigUpdate('broadcastDisplayMode', value) }
+      />
+      <SettingSwitch
+        title={ t('Enable Zona torrents') }
+        subtitle={ t('Show torrent-only titles. Playback uses a limited temporary buffer; use Downloads to keep a file.') }
+        IconComponent={ ListVideo }
+        value={ zonaTorrentsEnabled }
+        onChange={ value => onConfigUpdate('zonaTorrentsEnabled', value) }
       />
       <SettingSwitch
         title={ t('Show adult Zona content') }

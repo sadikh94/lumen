@@ -1,3 +1,4 @@
+import { getGlobalConfig } from 'Context/ConfigContext';
 import { BookmarksOverlay } from 'Component/BookmarksOverlay';
 import { Comments } from 'Component/Comments';
 import { POSTER_ASPECT_HEIGHT, POSTER_ASPECT_WIDTH } from 'Component/FilmCard/FilmCard.config';
@@ -330,13 +331,13 @@ export function FilmScreenComponent({
         styles={ styles }
         IconComponent={ Download }
         action={ openVideoDownloader }
-        disabled={ film.catalogOnly && !film.metadataSourceFilm }
+        disabled={ film.catalogOnly && !getGlobalConfig().zonaTorrentsEnabled && !film.metadataSourceFilm }
       />
     </View>
   );
 
   const renderPlay = () => {
-    if (film.catalogOnly && !film.metadataSourceFilm?.voices.length) return <Wrapper><ThemedText>{ t('This title is available as catalog information only.') }</ThemedText></Wrapper>;
+    if (film.catalogOnly && !getGlobalConfig().zonaTorrentsEnabled && !film.metadataSourceFilm?.voices.length) return <Wrapper><ThemedText>{ t('This title is available as catalog information only.') }</ThemedText></Wrapper>;
     const { isPendingRelease, isRestricted } = film;
 
     if (isPendingRelease) {

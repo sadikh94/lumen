@@ -2,6 +2,8 @@ import { Translations } from './en';
 
 /* eslint-disable max-len */
 const ru: Translations = {
+  'Enable Zona torrents': 'Контент Zona через торренты',
+  'Show torrent-only titles. Playback uses a limited temporary buffer; use Downloads to keep a file.': 'Показывать контент, доступный только через торренты. Буфер просмотра ограничен и очищается; для сохранения используйте «Загрузки».',
   'Studio': 'Студия',
   'Author': 'Автор',
   'Content sources': 'Источники контента',

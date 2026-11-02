@@ -1,3 +1,4 @@
+import type { ZonaTorrentRelease } from '../source/torrent/model';
 import { FilmVideoInterface } from './FilmVideo.interface';
 
 export interface EpisodeInterface {
@@ -17,6 +18,7 @@ export interface FilmVoiceInterface {
   id: string;
   playbackSource?: 'REZKA';
   nativeVoiceId?: string;
+  torrentReleases?: ZonaTorrentRelease[];
   seasonNumber?: number;
   identifier: string; // can be voiceId + something else for correct identification
   title: string;

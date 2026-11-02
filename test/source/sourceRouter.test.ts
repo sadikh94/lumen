@@ -231,3 +231,28 @@ test('Unavailable Rezka cannot erase native Zona franchise, schedule or related 
   assert.deepEqual(result.franchise, film.franchise);
   assert.deepEqual(result.schedule, film.schedule);
 });
+test('film details survive a primary outage using only registered matching sources', async () => {
+  clearUnifiedFilmRegistry();
+  const zona = makeFilm(true, '-outage'), rezka = makeFilm(false, '-outage');
+  const z = makeAdapter(ContentSource.ZONA, [zona]), r = makeAdapter(ContentSource.REZKA, [rezka]);
+  registerUnifiedFilm({ ...z.normalizeFilm(zona), sources: [
+    ...z.normalizeFilm(zona).sources, ...r.normalizeFilm(rezka).sources,
+  ] });
+  z.getFilm = async () => { throw new Error('Zona: HTTP 502'); };
+  const router = new SourceRouter([z, r]);
+  assert.equal((await router.loadFilm(zona.link, async () => null))?.link, rezka.link);
+  clearUnifiedFilmRegistry();
+  await assert.rejects(router.loadFilm(zona.link, async () => null), /502/);
+});
+test('detail failover rejects a redirected page with conflicting external identity', async () => {
+  clearUnifiedFilmRegistry();
+  const zona = makeFilm(true, '-redirect'), rezka = makeFilm(false, '-redirect');
+  const z = makeAdapter(ContentSource.ZONA, [zona]), r = makeAdapter(ContentSource.REZKA, [rezka]);
+  registerUnifiedFilm({ ...z.normalizeFilm(zona), sources: [
+    ...z.normalizeFilm(zona).sources, ...r.normalizeFilm(rezka).sources,
+  ] });
+  z.getFilm = async () => { throw new Error('Zona: HTTP 502'); };
+  r.getFilm = async () => ({ ...rezka, externalIds: { kinopoisk: '999' } });
+  await assert.rejects(new SourceRouter([z, r]).loadFilm(zona.link, async () => null), /502/);
+  clearUnifiedFilmRegistry();
+});

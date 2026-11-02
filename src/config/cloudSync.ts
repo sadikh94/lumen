@@ -53,6 +53,7 @@ const LOCAL_ONLY_SETTINGS = new Set<keyof DeviceConfigType>([
   'downloadsPath',
   'downloadsMaxParallel',
   'strictConnectionCheck',
+  'zonaTorrentsEnabled',
 ]);
 
 const MOBILE_SETTINGS = new Set<keyof DeviceConfigType>([

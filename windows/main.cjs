@@ -46,6 +46,10 @@ const loadStore = id => { try { return JSON.parse(fs.readFileSync(storagePath(id
 const assertSender = event => { if (event.sender !== main?.webContents) throw new Error('Untrusted IPC sender'); };
 const remoteURL = value => { const url = new URL(value); if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported URL'); return url.href; };
 const handle = (name, fn) => ipcMain.handle(name, (event, ...args) => { assertSender(event); return fn(...args); });
+const torrentEngine = require('./torrent.cjs').createTorrentEngine(dataRoot);
+handle('torrent:start', () => torrentEngine.start());
+handle('torrent:stop', () => torrentEngine.stop());
+app.on('before-quit', () => torrentEngine.stop());
 const proxyURL = (id, url) => 'lumen-media://' + id + '/?url=' + encodeURIComponent(url);
 app.whenReady().then(async () => {
   require('electron').Menu.setApplicationMenu(null);

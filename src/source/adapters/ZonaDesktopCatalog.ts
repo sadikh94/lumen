@@ -10,12 +10,12 @@ export interface ZonaDesktopFilm {
   year?: number; serial?: boolean; genre2?: string; genre_name?: string; country?: string;
   rating_imdb?: number; rating_kinopoisk?: number; rating_imdb_count?: number; rating_kinopoisk_count?: number;
   serial_ended?: boolean; serial_end_year?: number; description?: string; runtime?: number;
-  persons?: string; country_id?: string; adult?: boolean; poster?: string; tor_count?: number;
+  persons?: string; rels?: string; country_id?: string; adult?: boolean; poster?: string; tor_count?: number;
 }
 const PAGE_SIZE = 60;
 const endpoint = 'http://zsolr3.zonasearch.com/solr/movie/select/';
 const docsByLink = new Map<string, ZonaDesktopFilm>();
-let readOptions = () => ({ enabled: false, adult: false });
+let readOptions: () => { enabled: boolean; adult: boolean; torrents?: boolean } = () => ({ enabled: false, adult: false });
 export const setZonaDesktopOptions = (read: typeof readOptions) => { readOptions = read; };
 export const zonaDesktopOptions = () => readOptions();
 export const zonaDesktopIdForLink = (link: string) => docsByLink.get(link)?.id;
@@ -64,7 +64,29 @@ export const requestZonaDesktopFilms = async (query: string, page: number, sort 
 
   return { films: docs.map(zonaDesktopCard), totalPages: Math.max(1, Math.ceil(data.response.numFound / PAGE_SIZE)) };
 };
-const fetchZonaDesktopDetail = async (link: string, kinopoiskId?: string): Promise<FilmInterface | null> => {
+export const parseZonaRelations = (film: ZonaDesktopFilm): string[] => {
+  let values: unknown;
+  try { values = JSON.parse(film.rels ?? '[]'); } catch { return []; }
+  if (!Array.isArray(values)) return [];
+  return [...new Set(values.filter(item => item && item.r === 0
+    && (String(item.mi) === film.id || String(item.rmi) === film.id))
+    .sort((a, b) => (a.p ?? 0) - (b.p ?? 0))
+    .map(item => String(String(item.mi) === film.id ? item.rmi : item.mi))
+    .filter(id => /^\d+$/.test(id) && id !== film.id))].slice(0, 36);
+};
+const getZonaDesktopRelated = async (film: ZonaDesktopFilm): Promise<FilmCardInterface[]> => {
+  const ids = parseZonaRelations(film);
+  if (!ids.length) return [];
+  const params = new URLSearchParams({ q: `id:(${ids.join(' OR ')})${zonaDesktopOptions().adult ? '' : ' AND adult:false'}`,
+    wt: 'json', rows: String(ids.length), fl: 'id,name_id,name_rus,name_original,serial,year,genre2,country,genre_name,rating_imdb,rating_kinopoisk,adult' });
+  const data = JSON.parse(await fetchZonaText(`${endpoint}?${params}`, 4000));
+  const docs: ZonaDesktopFilm[] = Array.isArray(data.response?.docs) ? data.response.docs : [];
+  return ids.flatMap(id => {
+    const doc = docs.find(item => String(item.id) === id);
+    return doc && (zonaDesktopOptions().adult || !doc.adult) ? [zonaDesktopCard(doc)] : [];
+  });
+};
+const fetchZonaDesktopDetail = async (link: string, kinopoiskId?: string, includeRelated = false): Promise<FilmInterface | null> => {
   const cached = docsByLink.get(link);
   let doc: ZonaDesktopFilm | undefined;
   {
@@ -88,7 +110,8 @@ const fetchZonaDesktopDetail = async (link: string, kinopoiskId?: string): Promi
       photo: zonaDesktopImage(person.i, 'actor'),
       link: category('person', String(person.i)) })) : [];
 
-  return { ...card, link, catalogOnly: true, directors: people(1), actors: people(4),
+  const related = includeRelated ? await getZonaDesktopRelated(doc).catch(() => []) : undefined;
+  return { ...card, link, catalogOnly: true, related, directors: people(1), actors: people(4),
     releaseDate: doc.year ? String(doc.year) : undefined,
     year: doc.year, description: doc.description, age: doc.adult ? '18+' : undefined,
     genres: (doc.genre_name ?? '').split(',').filter(Boolean).map((name, index) => ({
@@ -159,11 +182,11 @@ export const zonaDesktopCatalogForLink = (link: string, page: number) => {
       : path.includes('sort-year') ? 'year desc,id asc' : 'popularity desc,id asc');
 };
 const detailCache = new Map<string, { time: number; value: Promise<FilmInterface | null> }>();
-export const getZonaDesktopDetail = (link: string, kinopoiskId?: string): Promise<FilmInterface | null> => {
-  const key = `${zonaDesktopOptions().adult}:${kinopoiskId ?? link}`;
+export const getZonaDesktopDetail = (link: string, kinopoiskId?: string, includeRelated = false): Promise<FilmInterface | null> => {
+  const key = `${zonaDesktopOptions().adult}:${includeRelated}:${kinopoiskId ?? link}`;
   const cached = detailCache.get(key);
   if (cached && Date.now() - cached.time < 5 * 60_000) return cached.value;
-  const value = fetchZonaDesktopDetail(link, kinopoiskId).catch(error => { detailCache.delete(key); throw error; });
+  const value = fetchZonaDesktopDetail(link, kinopoiskId, includeRelated).catch(error => { detailCache.delete(key); throw error; });
   detailCache.set(key, { time: Date.now(), value });
   while (detailCache.size > 256) detailCache.delete(detailCache.keys().next().value!);
 
@@ -175,13 +198,14 @@ export const supplementZonaDetails = (film: FilmInterface, extra: FilmInterface 
   if (!extra || !id || id !== extra.externalIds?.kinopoisk) return film;
   const people = (primary: FilmInterface['actors'], additional: FilmInterface['actors']) => primary?.length
     ? primary.map(person => {
-      const name = person.name.trim().toLowerCase();
-      const match = additional?.filter(candidate => candidate.name.trim().toLowerCase() === name);
+      const name = person.name.normalize('NFKC').trim().toLowerCase().replace(/ё/g, 'е');
+      const match = additional?.filter(candidate => candidate.name.normalize('NFKC').trim().toLowerCase().replace(/ё/g, 'е') === name);
 
       return match?.length === 1 ? { ...person, link: person.link || match[0].link,
         photo: person.photo || match[0].photo } : person;
     }) : additional;
 
   return { ...film, poster: film.poster || extra.poster, actors: people(film.actors, extra.actors),
-    directors: people(film.directors, extra.directors), description: film.description || extra.description };
+    directors: people(film.directors, extra.directors), description: film.description || extra.description,
+    related: film.related?.length ? film.related : extra.related };
 };

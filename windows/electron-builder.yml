@@ -9,6 +9,8 @@ directories:
 files:
   - windows/*.cjs
   - windows/lumen.ico
+  - windows/torrent-engine/TorrServer.exe
+  - third-party/TorrServer/**/*
   - windows/google-desktop-client.json
   - "!windows/node_modules/**/*"
   - "!node_modules/**/*"

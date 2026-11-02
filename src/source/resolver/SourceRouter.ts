@@ -84,6 +84,39 @@ export class SourceRouter {
     return value;
   }
 
+  async loadFilm(
+    link: string,
+    legacy: (link: string) => Promise<FilmInterface | null>,
+    options?: Parameters<SourceAdapter['getFilm']>[1]
+  ): Promise<FilmInterface | null> {
+    if (!isSourceEnabled(sourceForLink(link))) throw new Error('Источник отключён в настройках.');
+    const load = (url: string) => {
+      const adapter = this.getAdapter(sourceForLink(url));
+
+      return withDeadline(adapter ? adapter.getFilm(url, options) : legacy(url), 20_000);
+    };
+    let failure: unknown;
+    try {
+      const film = await load(link);
+      if (film) return film;
+    } catch (error) { failure = error; }
+    const registered = getRegisteredUnifiedFilm(link);
+    if (registered) {
+      const resolver = new SourceResolver(Array.from(this.adapters.values()));
+      for (const source of registered.sources) {
+        if (source.link === link || !this.getAdapter(source.source)) continue;
+        try {
+          const film = await load(source.link);
+          const adapter = this.getAdapter(source.source)!;
+          const reference = { ...registered, sources: registered.sources.filter(item => item.link !== source.link) };
+          if (film && resolver.isSameFilm(reference, adapter.normalizeFilm(film))) return film;
+        } catch { /* Try another verified source without replacing the original error. */ }
+      }
+    }
+    if (failure) throw failure;
+
+    return null;
+  }
   async getAnixartExternalRatings(releaseId: string) {
     if (!/^\d+$/.test(releaseId)) throw new Error('Invalid Anixart release ID');
     const film = await this.getAdapter(ContentSource.ANIXART)?.getFilm('https://anixart-app.com/release/' + releaseId);

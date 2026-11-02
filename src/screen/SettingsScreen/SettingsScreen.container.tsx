@@ -1,3 +1,4 @@
+import { stopTorrentEngine } from 'Util/TorrentEngine';
 import { useFocusEffect } from '@react-navigation/native';
 import { useConfigContext } from 'Context/ConfigContext';
 import { useServiceContext } from 'Context/ServiceContext';
@@ -109,6 +110,9 @@ export function SettingsScreenContainer() {
 
   const onConfigUpdate = (key: keyof DeviceConfigType, value: unknown) => {
     setConfig(key, value);
+    if (key === 'zonaTorrentsEnabled' && value === false) {
+      void stopTorrentEngine().catch(error => NotificationStore.displayError(String(error)));
+    }
   };
 
   // the app shell remounts the screens off i18next's own event, so there is nothing to

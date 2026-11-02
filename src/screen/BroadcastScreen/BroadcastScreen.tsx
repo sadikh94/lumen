@@ -58,9 +58,9 @@ function BroadcastLogo({ item, compact = false }: { item: ZonaBroadcast; compact
 }
 
 function Shows() {
-  const { broadcastDisplayMode } = useConfigContext();
+  const { broadcastDisplayMode, zonaTorrentsEnabled, zonaShowAdult } = useConfigContext();
   const menuItems = useMemo(() => [{ id: 'zona-shows', title: t('TV shows'), path: '' }], []);
-  const pager = useFilmPager({ queryKey: ['zona-web-shows-v2'], menuItems,
+  const pager = useFilmPager({ queryKey: ['zona-web-shows-v3', zonaTorrentsEnabled, zonaShowAdult], menuItems,
     fetchFilms: async (_item, page) => {
       const result = await getZonaShows(page);
       result.films.forEach(card => {

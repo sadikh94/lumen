@@ -149,7 +149,28 @@ export const BookmarksOverlayContainer = ({
   const postBookmark = (bookmarkId: string, isChecked: boolean) => {
     if (isLocalLibrary) {
       // reactive local-bookmarks consumers (film screen, bookmarks tab) pick this up
-      toggleLocalBookmark(filmToFilmCard(film), bookmarkId, isChecked);
+      const previous = overrides[bookmarkId];
+      setOverrides(value => ({ ...value, [bookmarkId]: { isChecked, title: '' } }));
+      // Paint the checkbox before notifying library subscribers.
+      requestAnimationFrame(() => setTimeout(() => {
+        try {
+          toggleLocalBookmark(filmToFilmCard(film), bookmarkId, isChecked);
+        } catch (error) {
+          NotificationStore.displayMessage(String(error));
+          setOverrides(value => {
+            const next = { ...value };
+            if (previous) next[bookmarkId] = previous;
+            else delete next[bookmarkId];
+            return next;
+          });
+          return;
+        }
+        setOverrides(value => {
+          const next = { ...value };
+          delete next[bookmarkId];
+          return next;
+        });
+      }, 0));
 
       return;
     }
@@ -177,7 +198,7 @@ export const BookmarksOverlayContainer = ({
       return localBookmarks.categories.map((category) => ({
         label: `${category.title} (${category.filmIds.length})`,
         value: category.id,
-        isChecked: memberships.has(category.id),
+        isChecked: overrides[category.id]?.isChecked ?? memberships.has(category.id),
       }));
     }
 

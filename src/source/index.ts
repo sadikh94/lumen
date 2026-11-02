@@ -8,9 +8,11 @@ import AnixartPlaybackAdapter from './playback/AnixartPlaybackAdapter';
 import { createSupplementedPlaybackAdapter } from './playback/createSupplementedPlaybackAdapter';
 import ZonaSourceAdapter from './adapters/ZonaSourceAdapter';
 import { setZonaDesktopOptions } from './adapters/ZonaDesktopCatalog';
-setZonaDesktopOptions(() => ({ enabled: true, adult: getGlobalConfig().zonaShowAdult }));
+setZonaDesktopOptions(() => ({ enabled: true, adult: getGlobalConfig().zonaShowAdult, torrents: getGlobalConfig().zonaTorrentsEnabled }));
 import RezkaSourceAdapter from './adapters/RezkaSourceAdapter';
 import ZonaPlaybackAdapter from './playback/ZonaPlaybackAdapter';
+import { createZonaTorrentPlaybackAdapter } from './playback/ZonaTorrentPlaybackAdapter';
+import { startTorrentEngine } from '../util/TorrentEngine';
 import { SourcePlaybackRouter } from './playback/SourcePlaybackRouter';
 import { SourceResolver } from './resolver/SourceResolver';
 import { SourceRouter } from './resolver/SourceRouter';
@@ -33,7 +35,9 @@ export const unifiedSearchService = createUnifiedSearchService(
 );
 
 export const sourcePlaybackAdapters = [
-  createSupplementedPlaybackAdapter(ZonaPlaybackAdapter, RezkaApi),
+  createSupplementedPlaybackAdapter(createZonaTorrentPlaybackAdapter(ZonaPlaybackAdapter, startTorrentEngine,
+    () => getGlobalConfig().zonaTorrentsEnabled), RezkaApi, 'Zona',
+    () => String(getGlobalConfig().zonaTorrentsEnabled)),
   createSupplementedPlaybackAdapter(AnixartPlaybackAdapter, RezkaApi, 'Anixart'),
 ];
 

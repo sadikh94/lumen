@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const invoke = name => (...args) => ipcRenderer.invoke(name, ...args);
 contextBridge.exposeInMainWorld('lumen', {
   awake: invoke('awake'),
+  torrentStart: invoke('torrent:start'), torrentStop: invoke('torrent:stop'),
   action: invoke('window:action'), fetch: invoke('fetch'), abortFetch: invoke('fetch:abort'), media: invoke('media'),
   downloadComplete: invoke('download:complete'),
   downloadStart: invoke('download:start'), downloadList: invoke('download:list'), downloadAction: invoke('download:action'), downloadConfig: invoke('download:config'),

@@ -1,5 +1,7 @@
 /* eslint-disable max-len */
 const en = {
+  'Enable Zona torrents': 'Enable Zona torrents',
+  'Show torrent-only titles. Playback uses a limited temporary buffer; use Downloads to keep a file.': 'Show torrent-only titles. Playback uses a limited temporary buffer; use Downloads to keep a file.',
   'Studio': 'Studio',
   'Author': 'Author',
   'Content sources': 'Content sources',

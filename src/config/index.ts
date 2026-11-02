@@ -44,6 +44,7 @@ export type DeviceConfigType = {
   hiddenBroadcastTabs: string[];
   broadcastDisplayMode: FilmDisplayMode;
   zonaShowAdult: boolean;
+  zonaTorrentsEnabled: boolean;
   showEpisodeUpdateCount: boolean;
   tabPosition: TabPosition;
   tvTabPosition: TabPosition;
@@ -160,6 +161,7 @@ export const defaultConfig: DeviceConfigType = {
   hiddenBroadcastTabs: [],
   broadcastDisplayMode: 'grid',
   zonaShowAdult: false,
+  zonaTorrentsEnabled: false,
   showEpisodeUpdateCount: true,
   tabPosition: 'bottom',
   tvTabPosition: 'top',
@@ -251,6 +253,7 @@ export const CONFIG_KEY_SECTIONS = {
   hiddenBroadcastTabs: BACKUP_SECTION.SETTINGS_APPEARANCE,
   broadcastDisplayMode: BACKUP_SECTION.SETTINGS_APPEARANCE,
   zonaShowAdult: BACKUP_SECTION.SETTINGS_APPEARANCE,
+  zonaTorrentsEnabled: BACKUP_SECTION.SETTINGS_NETWORK,
   showEpisodeUpdateCount: BACKUP_SECTION.SETTINGS_APPEARANCE,
   tabPosition: BACKUP_SECTION.SETTINGS_APPEARANCE,
   tvTabPosition: BACKUP_SECTION.SETTINGS_APPEARANCE,

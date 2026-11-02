@@ -25,6 +25,7 @@ export const supplementVoices = (zona: FilmVoiceInterface[], rezka: FilmVoiceInt
 
 export const createSupplementedPlaybackAdapter = (
   zona: SourcePlaybackAdapter, rezka: RezkaPlayback, sourceName = 'Zona',
+  cacheVariant: () => string = () => '',
 ): SourcePlaybackAdapter => {
   const discovery = new Map<string, { time: number; value: Promise<FilmVoiceInterface[]> }>();
   const native = (film: FilmInterface, voice: FilmVoiceInterface) => {
@@ -38,18 +39,19 @@ export const createSupplementedPlaybackAdapter = (
   return {
     source: zona.source,
     async getFilmVoices(film) {
-      const key = film.link;
-      const cached = discovery.get(key);
+      const key = film.link + ':' + Boolean(film.metadataSourceFilm?.voices.length) + ':' + cacheVariant();
+      const cached = film.catalogOnly ? undefined : discovery.get(key);
       let value = cached && Date.now() - cached.time < 60_000 ? cached.value : undefined;
+      let nativeError: unknown;
       if (!value) {
-        value = (film.catalogOnly ? Promise.resolve([]) : zona.getFilmVoices(film)).catch(() => []).then((voices) => {
+        value = zona.getFilmVoices(film).catch(error => { nativeError = error; return []; }).then((voices) => {
           if (!voices.length) discovery.delete(key);
           return voices;
         });
         discovery.set(key, { time: Date.now(), value });
       }
       const result = supplementVoices(await value, isSourceEnabled(ContentSource.REZKA) ? film.metadataSourceFilm?.voices ?? [] : [], sourceName);
-      if (!result.length) throw new Error('No playable voices found');
+      if (!result.length) throw nativeError instanceof Error ? nativeError : new Error('No playable voices found');
       return result;
     },    async getFilmSeasons(film, voice) {
       if (voice.playbackSource !== 'REZKA') return zona.getFilmSeasons(film, voice);

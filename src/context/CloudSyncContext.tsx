@@ -1,3 +1,4 @@
+import { equalCloudSyncData } from 'Util/CloudSync/equality';
 import { PLAYER_SCREEN } from 'Navigation/navigationRoutes';
 import { navigationRef } from 'Util/Navigation';
 import {
@@ -15,25 +16,6 @@ import {
   isErrorWithCode,
 } from 'react-native-nitro-google-signin';
 
-const stableSerialize = (value: unknown): string => {
-  if (Array.isArray(value)) {
-    return `[${value.map(stableSerialize).join(',')}]`;
-  }
-
-  if (value && typeof value === 'object') {
-    const object = value as Record<string, unknown>;
-
-    return `{${Object.keys(object)
-      .sort()
-      .map(
-        key =>
-          `${JSON.stringify(key)}:${stableSerialize(object[key])}`,
-      )
-      .join(',')}}`;
-  }
-
-  return JSON.stringify(value) ?? 'undefined';
-};
 GoogleOneTapSignIn.configure({
   webClientId: '735472570565-j9cifmbous56ipdvc0b95v54d1hb23kb.apps.googleusercontent.com',
 });
@@ -245,8 +227,7 @@ export const CloudSyncProvider = ({
         }
 
         const shouldRestoreMergedState =
-          stableSerialize(mergedState) !==
-          stableSerialize(latestLocalState);
+          !equalCloudSyncData(mergedState, latestLocalState);
 
         saveCloudSyncState(mergedState);
 
@@ -341,8 +322,7 @@ export const CloudSyncProvider = ({
         );
 
         if (
-          stableSerialize(convergedState) ===
-          stableSerialize(mergedState)
+          equalCloudSyncData(convergedState, mergedState)
         ) {
           mergedState = convergedState;
           break;
@@ -356,8 +336,7 @@ export const CloudSyncProvider = ({
         // so an in-flight mutation cannot be overwritten by stale data.
 
         const shouldRestoreConvergedState =
-          stableSerialize(convergedState) !==
-          stableSerialize(latestLocalStateAfterVerification);
+          !equalCloudSyncData(convergedState, latestLocalStateAfterVerification);
 
         saveCloudSyncState(mergedState);
 

@@ -149,38 +149,43 @@ export function SearchScreenComponent(props: SearchScreenComponentProps) {
     }
 
     return (
-      <ScrollView keyboardShouldPersistTaps="handled" style={ { maxHeight: Math.min(scale(300), height * 0.4) } }><View style={ styles.suggestionsContainer }>
-        { suggestions.map((suggestion) => (
-          <ThemedPressable
-            key={ suggestion }
-            onPress={ () => { setIsSearchFocused(false); onApplySuggestion(suggestion); } }
-            // Only history entries can be removed -- the service's suggestions
-            // must not bring up the confirmation at all.
-            onLongPress={ isRemovableSuggestion(suggestion)
-              ? () => {
-                Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Gesture_Start);
-                handleRemoveSuggestion(suggestion);
-              }
-              : undefined }
-            style={ styles.suggestion }
-            contentStyle={ styles.suggestionContent }
-          >
-            <History
-              style={ styles.suggestionIcon }
-              size={ scale(20) }
-              color={ theme.colors.icon }
-            />
-            <ThemedText style={ styles.suggestionText }>
-              { suggestion }
-            </ThemedText>
-            <ArrowUpLeft
-              style={ styles.suggestionIcon }
-              size={ scale(20) }
-              color={ theme.colors.icon }
-            />
-          </ThemedPressable>
-        )) }
-      </View></ScrollView>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        style={ { maxHeight: Math.max(0, Math.min(scale(44 * 11 + 12), height - scale(120))), flexShrink: 1 } }
+      >
+        <View style={ styles.suggestionsContainer }>
+          { suggestions.map((suggestion) => (
+            <ThemedPressable
+              key={ suggestion }
+              onPress={ () => { setIsSearchFocused(false); onApplySuggestion(suggestion); } }
+              // Only history entries can be removed -- the service's suggestions
+              // must not bring up the confirmation at all.
+              onLongPress={ isRemovableSuggestion(suggestion)
+                ? () => {
+                  Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Gesture_Start);
+                  handleRemoveSuggestion(suggestion);
+                }
+                : undefined }
+              style={ styles.suggestion }
+              contentStyle={ styles.suggestionContent }
+            >
+              <History
+                style={ styles.suggestionIcon }
+                size={ scale(20) }
+                color={ theme.colors.icon }
+              />
+              <ThemedText style={ styles.suggestionText }>
+                { suggestion }
+              </ThemedText>
+              <ArrowUpLeft
+                style={ styles.suggestionIcon }
+                size={ scale(20) }
+                color={ theme.colors.icon }
+              />
+            </ThemedPressable>
+          )) }
+        </View>
+      </ScrollView>
     );
   };
 

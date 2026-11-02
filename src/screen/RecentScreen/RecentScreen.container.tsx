@@ -14,7 +14,6 @@ import { AppStackParamList } from 'Navigation/navigationTypes';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Platform } from 'react-native';
 import { RecentItemInterface } from 'Type/RecentItem.interface';
-import NotificationStore from 'Store/Notification.store';
 import RouterStore from 'Store/Router.store';
 import { removeLocalHistoryItem, setLocalHistoryWatched } from 'Util/LocalLibrary';
 import { sourcePlaybackRouter, sourceRouter } from '../../source';
@@ -102,8 +101,9 @@ export function RecentScreenContainer() {
 
   const { mutate: continueWatching } = useMutation({
     mutationFn: async (item: RecentItemInterface) => {
-      const adapter = sourceRouter.getAdapterForLink(item.link);
-      const film = adapter ? await adapter.getFilm(item.link) : await currentService.getFilm(item.link);
+      const sourceFilm = await sourceRouter.loadFilm(item.link, url => currentService.getFilm(url));
+      const film = sourceFilm && sourceFilm.link === item.link
+        ? await sourceRouter.resolvePreferredFilm(sourceFilm) : sourceFilm;
 
       if (!film) {
         throw new Error(t('No video available'));
@@ -184,9 +184,10 @@ export function RecentScreenContainer() {
         voice,
       };
     },
-    onSuccess: ({ film, video, voice }) => {
-      if (!video) {
-        NotificationStore.displayMessage(t('No video available'));
+    onSuccess: ({ film, video, voice }, item) => {
+      if (!video?.streams?.some(stream => stream.url)) {
+        openFilm({ link: film.link, poster: item.image }, navigation);
+
         return;
       }
 
@@ -198,8 +199,8 @@ export function RecentScreenContainer() {
 
       navigate(PLAYER_SCREEN);
     },
-    onError: (error) => {
-      NotificationStore.displayError(error as Error);
+    onError: (_error, item) => {
+      openFilm({ link: item.link, poster: item.image }, navigation);
     },
   });
 

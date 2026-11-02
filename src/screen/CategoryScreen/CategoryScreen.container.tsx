@@ -16,11 +16,11 @@ import { CategoryScreenContainerProps } from './CategoryScreen.type';
 export function CategoryScreenContainer({ route }: CategoryScreenContainerProps) {
   const { link } = route.params as { link: string };
   const isTV = useIsTV();
-  const { tabPosition, zonaShowAdult } = useConfigContext();
+  const { tabPosition, zonaShowAdult, zonaTorrentsEnabled } = useConfigContext();
   const { currentService } = useServiceContext();
   const sourceAdapter = sourceRouter.getAdapterForLink(link);
   const queryClient = useQueryClient();
-  const queryKey = [...queryKeys.films.category(link), zonaShowAdult];
+  const queryKey = [...queryKeys.films.category(link), zonaShowAdult, zonaTorrentsEnabled];
   const menuItems = useMemo(() => sourceAdapter?.getFilms
     ? [{ id: 'zona-category', title: sourceAdapter.name, path: link, isHidden: true }]
     : currentService.getCategoryMenu(link), [currentService, link, sourceAdapter]);
@@ -29,7 +29,7 @@ export function CategoryScreenContainer({ route }: CategoryScreenContainerProps)
     queryKey,
     menuItems,
     fetchFilms: (menuItem, page) => sourceAdapter?.source === ContentSource.ZONA && sourceAdapter.getFilms
-      ? unifiedSearchService.search('category:' + link + ':adult:' + zonaShowAdult, page, updates => {
+      ? unifiedSearchService.search('category:' + link + ':adult:' + zonaShowAdult + ':torrents:' + zonaTorrentsEnabled, page, updates => {
         queryClient.setQueryData<FilmPagerQueryData>([...queryKey, menuItem.id, null], previous => previous ? {
           ...previous, films: previous.films.map(card => updates.find(update => update.previousLink === card.link)?.card ?? card),
         } : previous);

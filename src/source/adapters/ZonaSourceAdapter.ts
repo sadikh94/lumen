@@ -837,16 +837,35 @@ const fetchZonaSearch = async (
   };
 };
 
-const metadataCache = new Map<string, { time: number; value: Promise<ZonaRscEntity | null> }>();
+const metadataCache = new Map<string, {
+  time: number; value: Promise<ZonaRscEntity | null>; entity?: ZonaRscEntity; retryAfter?: number;
+}>();
 const getZonaMetadata = (link: string) => {
   const cached = metadataCache.get(link);
-  if (cached && Date.now() - cached.time < 5 * 60 * 1000) return cached.value;
-  const value = fetchZonaEntity(link).catch(() => null).then((entity) => {
+  if (cached && (Date.now() - cached.time < 5 * 60_000 || (cached.retryAfter ?? 0) > Date.now())) {
+    return cached.value;
+  }
+  const entry: NonNullable<typeof cached> = { time: Date.now(), value: Promise.resolve(null) };
+  entry.value = fetchZonaEntity(link).then((entity) => {
     if (!entity) metadataCache.delete(link);
+    else entry.entity = entity;
+
     return entity;
+  }).catch(error => {
+    if (cached?.entity && Date.now() - cached.time < 24 * 60 * 60_000) {
+      entry.entity = cached.entity;
+      entry.time = cached.time;
+      entry.retryAfter = Date.now() + 30_000;
+
+      return cached.entity;
+    }
+    metadataCache.delete(link);
+    throw error;
   });
-  metadataCache.set(link, { time: Date.now(), value });
-  return value;
+  metadataCache.set(link, entry);
+  while (metadataCache.size > 256) metadataCache.delete(metadataCache.keys().next().value!);
+
+  return entry.value;
 };
 
 export const isZonaWebAvailable = (data: Pick<ZonaFilmData,
@@ -932,7 +951,7 @@ export const getZonaCatalogFilms = async (
 const searchZonaWithDesktop = async (
   query: string, page: number, enrich: boolean, onProgress?: (result: FilmListInterface) => void
 ): Promise<FilmListInterface> => {
-  if (!zonaDesktopOptions().enabled) return page === 1 ? fetchZonaSearch(query, enrich, onProgress)
+  if (!zonaDesktopOptions().enabled || zonaDesktopOptions().torrents === false) return page === 1 ? fetchZonaSearch(query, enrich, onProgress)
     : { films: [], totalPages: 1 };
   const website = page === 1 ? fetchZonaSearch(query, enrich, onProgress) : Promise.resolve({ films: [], totalPages: 1 });
   const native = zonaDesktopSearch(query, page);
@@ -947,7 +966,7 @@ const ZonaSourceAdapter: SourceAdapter = {
   getCollections: getZonaCollections,
   async getFilms(link, page, options) {
     if (new URL(link).pathname === '/catalog') return getZonaDesktopCategory(link, page);
-    if (!zonaDesktopOptions().enabled) return getZonaCatalogFilms(link, page, options);
+    if (!zonaDesktopOptions().enabled || zonaDesktopOptions().torrents === false) return getZonaCatalogFilms(link, page, options);
     const web = getZonaCatalogFilms(link, page, options).then(result => {
       options?.onProgress?.(result);
       return result;
@@ -969,12 +988,19 @@ const ZonaSourceAdapter: SourceAdapter = {
   source: ContentSource.ZONA,
   name: 'Zona',
 
-  async getFilm(link: string, options?: { deferSeriesInfo?: boolean; background?: boolean }): Promise<FilmInterface | null> {
-    const entity = await getZonaMetadata(link);
+  async getFilm(link: string, options?: { deferSeriesInfo?: boolean; background?: boolean; includeRelated?: boolean }): Promise<FilmInterface | null> {
+    let entity: ZonaRscEntity | null;
+    try { entity = await getZonaMetadata(link); }
+    catch (error) {
+      const desktop = zonaDesktopOptions().enabled
+        ? await getZonaDesktopDetail(link, undefined, !!options?.includeRelated).catch(() => null) : null;
+      if (desktop) return desktop;
+      throw error;
+    }
 
     if (!entity || (zonaDesktopOptions().enabled && zonaDesktopIdForLink(link) && entity.data.kp_id
       && String(entity.data.kp_id) !== String(zonaDesktopIdForLink(link)))) {
-      return zonaDesktopOptions().enabled ? getZonaDesktopDetail(link) : null;
+      return zonaDesktopOptions().enabled ? getZonaDesktopDetail(link, undefined, !!options?.includeRelated) : null;
     }
 
     const film = parseZonaFilmData(
@@ -1010,8 +1036,11 @@ const ZonaSourceAdapter: SourceAdapter = {
     }
 
     if (zonaDesktopOptions().enabled && !options?.background && film.externalIds?.kinopoisk
-      && (!film.actors?.length || !film.directors?.length || !film.poster)) {
-      const extra = await withDeadline(getZonaDesktopDetail(link, film.externalIds.kinopoisk), 1500)
+      && (!film.actors?.length || !film.directors?.length || !film.poster
+        || (options?.includeRelated && (film.actors.some(person => !person.link)
+          || film.directors.some(person => !person.link) || !film.related?.length)))) {
+      const extra = await withDeadline(getZonaDesktopDetail(link, film.externalIds.kinopoisk, !!options?.includeRelated),
+        options?.includeRelated ? 6000 : 1500)
         .catch(() => null);
       return supplementZonaDetails(film, extra);
     }

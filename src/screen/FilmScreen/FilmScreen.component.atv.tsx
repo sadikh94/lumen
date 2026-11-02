@@ -1,3 +1,4 @@
+import { getGlobalConfig } from 'Context/ConfigContext';
 import { useNavigation } from '@react-navigation/native';
 import { BookmarksOverlay } from 'Component/BookmarksOverlay';
 import { CommentsOverlay } from 'Component/CommentsOverlay';
@@ -128,7 +129,7 @@ export function FilmScreenComponent({
   );
 
   const renderPlayButton = () => {
-    if (film.catalogOnly && !film.metadataSourceFilm?.voices.length) return renderAction(Clock, t('No video available'), undefined, true);
+    if (film.catalogOnly && !getGlobalConfig().zonaTorrentsEnabled && !film.metadataSourceFilm?.voices.length) return renderAction(Clock, t('No video available'), undefined, true);
     const { isPendingRelease, isRestricted } = film;
 
     if (isPendingRelease) {
@@ -176,7 +177,7 @@ export function FilmScreenComponent({
           { renderAction(MessageSquareText, t('Comments'), openComments, film.catalogOnly && !film.metadataSourceFilm) }
           { renderAction(Clapperboard, t('Trailer'), openTrailerOverlay, film.catalogOnly && !film.metadataSourceFilm) }
           { renderAction(isBookmarked(film) ? BookmarkCheck : Bookmark, t('Bookmark'), openBookmarks) }
-          { renderAction(Download, t('Download'), openVideoDownloader, film.catalogOnly && !film.metadataSourceFilm?.voices.length) }
+          { renderAction(Download, t('Download'), openVideoDownloader, film.catalogOnly && !getGlobalConfig().zonaTorrentsEnabled && !film.metadataSourceFilm?.voices.length) }
           { isSignedIn && renderAction(Star, t('Rate'), openRatingOverlay, film.isRatingPosted) }
         </View>
       </ThemedScrollView>

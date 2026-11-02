@@ -1,3 +1,4 @@
+import { rankSearchResults } from './searchRelevance';
 import { loadFilteredPages, FilteredPageCursor } from './FilteredPages';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { FilmListInterface } from 'Type/FilmList.interface';
@@ -122,7 +123,7 @@ export const createUnifiedSearchService = (
         partial.set(adapter.source, result.films.map((card) => normalizeCard(adapter, card)));
         const films = sourceResolver.deduplicate(searchSources.flatMap(source => partial.get(source) ?? []));
         films.forEach(registerUnifiedFilm);
-        onProgress({ films: films.map((film) => toFilmCard(film, sourceResolver)), totalPages: 1 });
+        onProgress({ films: rankSearchResults(films, options ? '' : query).map((film) => toFilmCard(film, sourceResolver)), totalPages: 1 });
         return result;
       };
       const results = await Promise.all(
@@ -222,7 +223,7 @@ export const createUnifiedSearchService = (
       );
 
       return {
-        films: newFilms.map((film) => toFilmCard(film, sourceResolver)),
+        films: rankSearchResults(newFilms, options ? '' : query).map((film) => toFilmCard(film, sourceResolver)),
         totalPages,
       };
     },

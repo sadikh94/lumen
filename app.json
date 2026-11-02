@@ -57,6 +57,7 @@
   },
   "plugins": [
     "./plugins/withAbiSplits.js",
+    "./plugins/withReleaseBuildMemory.js",
     "./plugins/withTrimmedNativeLibs.js",
     "./plugins/withReactNativeKeyevent.js",
     "./plugins/withTvSearchable.js",
@@ -93,7 +94,10 @@
           "enableMinifyInReleaseBuilds": true,
           "enableShrinkResourcesInReleaseBuilds": true,
           "usePrecompiledHeaders": true,
-          "useLegacyPackaging": true
+          "useLegacyPackaging": true,
+          "packagingOptions": {
+            "doNotStrip": ["**/libtorrserver.so"]
+          }
         }
       }
     ],

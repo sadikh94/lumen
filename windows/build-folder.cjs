@@ -13,6 +13,8 @@ const config = fs.readFileSync(path.join(__dirname, 'electron-builder.yml'), 'ut
 if ((config.match(/^  output: .+$/gm) || []).length !== 1) throw new Error('Expected one output directory');
 const stagedConfig = path.join(stage, 'electron-builder.yml');
 fs.writeFileSync(stagedConfig, config.replace(/^  output: .+$/m, '  output: ' + JSON.stringify(stage)));
+const engine = spawnSync(process.execPath, [path.join(root, 'scripts/prepare-torrent-engine.cjs'), 'windows'], { cwd: root, stdio: 'inherit' });
+if (engine.status !== 0) process.exit(engine.status || 1);
 const result = spawnSync(process.execPath, [path.join(__dirname, 'node_modules/electron-builder/cli.js'), '--projectDir', root, '--config', stagedConfig, '--win', '--dir'], { cwd: root, stdio: 'inherit' });
 if (result.status !== 0) process.exit(result.status || 1);
 const unpacked = path.join(stage, 'win-unpacked');

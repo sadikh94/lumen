@@ -110,12 +110,21 @@ const syncBookmarkMembershipDeletion = (
   });
 };
 
-export const getLocalBookmarks = (): LocalBookmarksBlob => (
-  parseBookmarksBlob(getLocalLibraryStorage().loadString(LOCAL_BOOKMARKS_KEY))
-);
+let bookmarkRaw: string | null | undefined;
+let bookmarkSnapshot: LocalBookmarksBlob | undefined;
+export const getLocalBookmarks = (): LocalBookmarksBlob => {
+  const raw = getLocalLibraryStorage().loadString(LOCAL_BOOKMARKS_KEY);
+  if (!bookmarkSnapshot || raw !== bookmarkRaw) {
+    bookmarkRaw = raw;
+    bookmarkSnapshot = parseBookmarksBlob(raw);
+  }
+  return bookmarkSnapshot;
+};
 
 const saveLocalBookmarks = (blob: LocalBookmarksBlob) => {
   getLocalLibraryStorage().save(LOCAL_BOOKMARKS_KEY, blob);
+  bookmarkRaw = getLocalLibraryStorage().loadString(LOCAL_BOOKMARKS_KEY);
+  bookmarkSnapshot = blob;
 };
 
 const createCategoryObject = (blob: LocalBookmarksBlob, title: string): LocalCategoryInterface => {
