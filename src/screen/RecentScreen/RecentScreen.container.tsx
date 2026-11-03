@@ -132,11 +132,22 @@ export function RecentScreenContainer() {
 
       if (film.hasSeasons) {
         const savedEpisode = getLastSavedEpisode(voiceData);
-        const seasons = playback
-          ? await playback.getFilmSeasons(film, voice)
-          : await currentService.getFilmSeasons(film, voice);
-        const position = resolveEpisodeSelection(seasons, historyItem ?? savedEpisode,
-          historyItem ? historyItem.link === film.link && historyItem.voiceId === voice.id : true);
+        const sameVoice = (historyItem?.link ?? item.link) === film.link && voice.id === lastVoiceId;
+        const savedPosition = historyItem ? {
+          seasonId: historyItem.seasonId ?? (sameVoice ? savedEpisode.seasonId : undefined),
+          episodeId: historyItem.episodeId ?? (sameVoice ? savedEpisode.episodeId : undefined),
+          seasonNumber: historyItem.seasonNumber,
+          episodeNumber: historyItem.episodeNumber,
+        } : savedEpisode;
+        const loadSeasons = () => playback
+          ? playback.getFilmSeasons(film, voice)
+          : currentService.getFilmSeasons(film, voice);
+        let seasons = voice.seasons?.some(season => season.episodes.length) ? voice : await loadSeasons();
+        let position = resolveEpisodeSelection(seasons, savedPosition, sameVoice);
+        if (!position && seasons === voice) {
+          seasons = await loadSeasons();
+          position = resolveEpisodeSelection(seasons, savedPosition, sameVoice);
+        }
         if (!position) throw new Error(t('Current season or episode not saved.'));
         const { seasonId, episodeId } = position;
 

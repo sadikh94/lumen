@@ -152,6 +152,7 @@ export const LocalCategoriesOverlayComponent = ({
   categories,
   mode,
   deleteCandidateTitle,
+  newTitle,
   startCreate,
   cancelCreate,
   submitCreate,
@@ -214,6 +215,7 @@ export const LocalCategoriesOverlayComponent = ({
         style={ styles.input }
         placeholder={ t('Category name') }
         onChangeText={ onChangeTitle }
+        value={ newTitle }
         maxLength={ 40 }
       />
 

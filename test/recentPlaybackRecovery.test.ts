@@ -5,6 +5,9 @@ import { runInNewContext } from 'node:vm';
 
 import ts from 'typescript';
 
+import { resolveEpisodeSelection } from '../src/util/Player/episodeSelection';
+import { getLastSavedEpisode } from '../src/util/Player/savedTimeUtil';
+
 function recentActions() {
   const text = readFileSync('src/screen/RecentScreen/RecentScreen.container.tsx', 'utf8');
   const source = ts.createSourceFile('Recent.tsx', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -23,6 +26,8 @@ function recentActions() {
   const context: any = {
     sourceRouter: { loadFilm: async () => base, resolvePreferredFilm: async () => film },
     currentService: {}, isLocalLibrary: false, localHistory: [],
+    resolveEpisodeSelection, getLastSavedEpisode, matchesHistoryFilm: () => true,
+    filmToFilmCard: (value: unknown) => value,
     getSavedTime: () => ({ lastVoiceId: voice.id, voices: { [voice.id]: {} } }),
     sourcePlaybackRouter: { getAdapterForFilmLink: () => ({
       getFilmVoices: async (value: typeof film) => {
@@ -39,7 +44,7 @@ function recentActions() {
   runInNewContext(ts.transpileModule(`globalThis.actions = ${ object.getText(source)}`,
     { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, context);
 
-  return { ...context.actions, calls };
+  return { ...context.actions, calls, context, film, voice };
 }
 
 test('Recent play loads the same supplemental voice metadata as the content page', async () => {
@@ -56,4 +61,49 @@ test('Recent never opens an empty player and retains access to the continuation 
   actions.onSuccess({ film: { link: 'zona' }, video: { streams: [] } }, { image: '' });
   actions.onError(new Error('source failed'), { link: 'zona', image: '' });
   assert.deepEqual(actions.calls, ['details', 'details']);
+});
+for (const partialHistory of [false, true]) {
+  test(`Recent reuses parsed episodes and recovers saved position with partial history=${partialHistory}`, async () => {
+    const actions = recentActions();
+    actions.film.hasSeasons = true;
+    const voice = { ...actions.voice, seasons: [{ seasonId: '2', name: 'Season 2',
+      episodes: [{ episodeId: '7', name: 'Episode 7' }] }] };
+    actions.context.getSavedTime = () => ({ lastVoiceId: voice.id,
+      voices: { [voice.id]: { lastSeasonId: '2', lastEpisodeId: '7', timestamps: {} } } });
+    if (partialHistory) {
+      actions.context.isLocalLibrary = true;
+      actions.context.localHistory = [{ link: 'zona', voiceId: voice.id }];
+    }
+    actions.context.sourcePlaybackRouter.getAdapterForFilmLink = () => ({
+      getFilmVoices: async () => [voice],
+      getFilmSeasons: async () => { throw new Error('Redundant season request failed'); },
+      getFilmStreamsByEpisodeId: async (_film: unknown, _voice: unknown, season: string, episode: string) => {
+        assert.equal(season, '2');
+        assert.equal(episode, '7');
+
+        return { streams: [{ url: 'episode-video' }] };
+      },
+    });
+    const result = await actions.mutationFn({ link: 'zona' });
+    assert.equal(result.video.streams[0].url, 'episode-video');
+  });
+}
+
+test('Recent does not reuse opaque episode IDs after the saved voice disappears', async () => {
+  const actions = recentActions();
+  actions.film.hasSeasons = true;
+  actions.context.getSavedTime = () => ({ lastVoiceId: 'removed', voices: {
+    removed: { lastSeasonId: 'opaque-season', lastEpisodeId: 'opaque-episode', timestamps: {} },
+  } });
+  const voice = { ...actions.voice, seasons: [{ seasonId: 'opaque-season', name: 'Season 3',
+    episodes: [{ episodeId: 'opaque-episode', name: 'Episode 9' }] }] };
+  let played = false;
+  actions.context.sourcePlaybackRouter.getAdapterForFilmLink = () => ({
+    getFilmVoices: async () => [voice], getFilmSeasons: async () => voice,
+    getFilmStreamsByEpisodeId: async () => { played = true;
+
+      return { streams: [{ url: 'wrong' }] }; },
+  });
+  await assert.rejects(actions.mutationFn({ link: 'zona' }), /Current season/);
+  assert.equal(played, false);
 });

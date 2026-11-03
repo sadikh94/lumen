@@ -96,6 +96,7 @@ export const LocalCategoriesOverlayContainer = ({
     startCreate,
     cancelCreate,
     submitCreate,
+    newTitle,
     onChangeTitle: setNewTitle,
     isCreateDisabled: !newTitle.trim(),
     requestDelete,

@@ -253,7 +253,7 @@ test('Both native pagers preload a selected tab before the page animation comple
     const mod = compile('src/component/FilmPager/' + file, name => {
       if (name === 'react') return { memo: (fn: Function) => fn, useCallback: (fn: Function) => fn,
         useMemo: (fn: Function) => fn(), useRef: (current: unknown) => ({ current }),
-        useState: (initial: unknown) => [typeof initial === 'function' ? initial() : initial, () => {}], useId: () => 'pager' };
+        useState: (initial: unknown) => [typeof initial === 'function' ? initial() : initial, () => {}], useId: () => 'pager', useEffect() {} };
       if (name === 'react-native') return { View: 'View', ScrollView: 'ScrollView' };
       if (name === 'react-native-gesture-handler') return { Pressable: 'Pressable' };
       if (name === 'react-native-reanimated') return { __esModule: true, default: { Text: 'Text' } };

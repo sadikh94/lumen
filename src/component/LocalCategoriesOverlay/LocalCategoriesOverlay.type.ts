@@ -18,6 +18,7 @@ export interface LocalCategoriesOverlayComponentProps {
   categories: LocalCategoryRowInterface[];
   mode: LocalCategoriesOverlayMode;
   deleteCandidateTitle: string;
+  newTitle: string;
   startCreate: () => void;
   cancelCreate: () => void;
   submitCreate: () => void;

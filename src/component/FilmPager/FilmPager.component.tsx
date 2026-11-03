@@ -5,7 +5,7 @@ import { DropdownItem } from 'Component/ThemedDropdown/ThemedDropdown.type';
 import { ThemedOverlayRef } from 'Component/ThemedOverlay/ThemedOverlay.type';
 import { Wrapper } from 'Component/Wrapper';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeSyntheticEvent, ScrollView, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
@@ -205,6 +205,19 @@ export const FilmPagerComponent = ({
     });
   }, [tabsKey, preloadTab]);
 
+  const previousTabIds = useRef(pagerItems.map(item => item.menuItem.id));
+  useEffect(() => {
+    const ids = pagerItems.map(item => item.menuItem.id);
+    if (previousTabIds.current.join('|') === tabsKey) return;
+    const selectedId = previousTabIds.current[activeIndex];
+    previousTabIds.current = ids;
+    const survivingIndex = ids.indexOf(selectedId);
+    const nextIndex = survivingIndex >= 0 ? survivingIndex : Math.max(0, Math.min(activeIndex, ids.length - 1));
+    setActiveIndex(nextIndex);
+    pagerViewRef.current?.setPageWithoutAnimation(nextIndex);
+    updateActiveTab(nextIndex);
+  }, [tabsKey, pagerItems, activeIndex, pagerViewRef, updateActiveTab]);
+
   const handleTabPress = useCallback((index: number) => {
     pagerViewRef.current?.setPage(index);
     updateActiveTab(index);
@@ -247,7 +260,7 @@ export const FilmPagerComponent = ({
         } }
       >
         <View style={ styles.tabBarRow }>
-          { pagerItems.length > 1 && (
+          { (pagerItems.length > 1 || Boolean(TabBarActionComponent)) && (
             <ScrollView
               ref={ scrollViewRef }
               horizontal

@@ -7,7 +7,7 @@ import { ThemedPressable } from 'Component/ThemedPressable';
 import { ThemedScrollView } from 'Component/ThemedScrollView';
 import { ThemedText } from 'Component/ThemedText';
 import { useThemedStyles } from 'Hooks/useThemedStyles';
-import { memo, useCallback, useId, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { NativeSyntheticEvent, View } from 'react-native';
 import { usePagerView } from 'react-native-pager-view';
 import {
@@ -263,6 +263,18 @@ export function FilmPagerComponent({
     });
   }, [pagerItems.length, tabsKey, preloadTab]);
 
+  const previousTabIds = useRef(pagerItems.map(item => item.menuItem.id));
+  useEffect(() => {
+    const ids = pagerItems.map(item => item.menuItem.id);
+    if (previousTabIds.current.join('|') === tabsKey) return;
+    const selectedId = previousTabIds.current[activeIndex];
+    previousTabIds.current = ids;
+    const survivingIndex = ids.indexOf(selectedId);
+    const nextIndex = survivingIndex >= 0 ? survivingIndex : Math.max(0, Math.min(activeIndex, ids.length - 1));
+    pagerViewRef.current?.setPageWithoutAnimation(nextIndex);
+    updateActiveTab(nextIndex);
+  }, [tabsKey, pagerItems, activeIndex, pagerViewRef, updateActiveTab]);
+
   const handleTabSelect = useCallback((index: number) => {
     if (index === activeIndex) {
       return;
@@ -363,7 +375,7 @@ export function FilmPagerComponent({
 
   return (
     <View style={ styles.container }>
-      { tabPosition === 'top' && pagerItems.length > 1 && (
+      { tabPosition === 'top' && (pagerItems.length > 1 || Boolean(menuTrailingComponent)) && (
         <TopMenu
           pagerItems={ pagerItems }
           styles={ styles }
@@ -389,7 +401,7 @@ export function FilmPagerComponent({
         { pages }
       </AnimatedPagerView>
 
-      { tabPosition === 'bottom' && pagerItems.length > 1 && (
+      { tabPosition === 'bottom' && (pagerItems.length > 1 || Boolean(menuTrailingComponent)) && (
         <TopMenu
           pagerItems={ pagerItems }
           styles={ styles }
