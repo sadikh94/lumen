@@ -342,13 +342,10 @@ export function FilmScreenContainer({ route }: FilmScreenContainerProps) {
       NotificationStore.displayMessage('Страница этого человека недоступна в подключённых источниках');
       return;
     }
-    if (actorLink.startsWith('https://anixart-app.com/catalog?director=')
-      || actorLink.startsWith('https://w1.zona.im/catalog?')) {
-      openCategory(actorLink, navigation);
-      return;
-    }
-    openActor(actorLink, navigation);
-  }, [navigation]);
+    const person = [...(film?.actors ?? []), ...(film?.directors ?? [])]
+      .find(item => item.link === actorLink);
+    openActor(actorLink, navigation, person);
+  }, [navigation, film]);
 
   const handleSelectCategory = useCallback((categoryLink: string) => {
     openCategory(categoryLink, navigation);

@@ -434,6 +434,8 @@ const en = {
   'Refresh downloads': 'Refresh downloads',
   'Network error': 'Network error',
   'Network request failed. Please check your internet connection and try again.': 'Network request failed. Please check your internet connection and try again.',
+  'Filmography': 'Filmography',
+  'Unable to load person': 'Unable to load person',
   'Retry': 'Retry',
   'Strict connection check': 'Connection check',
   'Toggle strict connection check.': 'Toggle connection check.',

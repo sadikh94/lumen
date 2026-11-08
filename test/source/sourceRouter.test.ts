@@ -256,3 +256,51 @@ test('detail failover rejects a redirected page with conflicting external identi
   await assert.rejects(new SourceRouter([z, r]).loadFilm(zona.link, async () => null), /502/);
   clearUnifiedFilmRegistry();
 });
+test('preferred Zona details retain included lists and collections from a verified supplemental film', async () => {
+  clearUnifiedFilmRegistry();
+  const zona = makeFilm(true, '-lists');
+  const rezka = { ...makeFilm(false, '-lists'),
+    includedIn: [{ name: 'Top films', link: '/lists/top/', position: '12' }],
+    fromCollections: [{ name: 'Adventure films', link: '/collections/adventure/' }] };
+  const router = new SourceRouter([makeAdapter(ContentSource.ZONA, [zona]), makeAdapter(ContentSource.REZKA, [rezka])]);
+  const result = await router.resolvePreferredFilm(zona);
+  assert.deepEqual(result.includedIn, rezka.includedIn);
+  assert.deepEqual(result.fromCollections, rezka.fromCollections);
+  const native = { ...zona, includedIn: [{ name: 'Native list', link: 'https://w1.zona.im/catalog?list=1' }] };
+  const nativeRouter = new SourceRouter([makeAdapter(ContentSource.ZONA, [native]), makeAdapter(ContentSource.REZKA, [rezka])]);
+  assert.deepEqual((await nativeRouter.resolvePreferredFilm(native)).includedIn, native.includedIn);
+});
+test('relative legacy person links retain the existing biography loader', async () => {
+  const router = new SourceRouter([]);
+  const actor = { name: 'Actor', originalName: '', photo: '', roles: [] };
+  let requested = '';
+  const result = await router.getActorDetails('/person/1', async link => {
+    requested = link;
+    return actor;
+  });
+  assert.equal(requested, '/person/1');
+  assert.equal(result, actor);
+});
+
+test('native person pages retain supplied identity and paginated filmography', async () => {
+  for (const source of [ContentSource.ZONA, ContentSource.ANIXART]) {
+    const adapter = makeAdapter(source, []);
+    const film = { ...makeFilm(true), subtitle: '2001' };
+    adapter.getFilms = async (link, page) => {
+      assert.equal(page, 1);
+      assert.ok(link.includes('/catalog?'));
+      return { films: [film], totalPages: 3 };
+    };
+    const router = new SourceRouter([adapter]);
+    const link = source === ContentSource.ZONA
+      ? 'https://w1.zona.im/catalog?person=123'
+      : 'https://anixart-app.com/catalog?director=Director';
+    const person = { name: 'Director', photo: 'https://images.test/person.jpg' };
+    const actor = await router.getActorDetails(link, async () => { throw new Error('Wrong source'); }, person);
+    assert.equal(actor?.name, person.name);
+    assert.equal(actor?.photo, person.photo);
+    assert.equal(actor?.dob, undefined);
+    assert.deepEqual(actor?.roles[0].films, [film]);
+    assert.deepEqual(actor?.filmographyPage, { currentPage: 1, totalPages: 3 });
+  }
+});

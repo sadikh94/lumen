@@ -1,4 +1,6 @@
 import { FilmCardInterface } from 'Type/FilmCard.interface';
+import type { ActorInterface } from 'Type/Actor.interface';
+import type { ActorCardInterface } from 'Type/ActorCard.interface';
 import { ContentCollectionInterface } from 'Type/ContentCollection.interface';
 import { FilmListInterface } from 'Type/FilmList.interface';
 import { FilmInterface } from 'Type/Film.interface';
@@ -10,6 +12,7 @@ import { UnifiedExternalId, UnifiedFilm } from './UnifiedFilm';
 export interface SourceAdapter {
   readonly source: ContentSource;
   readonly name: string;
+  getActorDetails?(link: string, person?: ActorCardInterface): Promise<ActorInterface | null>;
   getCollections?(page: number): Promise<{ items: ContentCollectionInterface[]; totalPages: number }>;
   getFilms?(link: string, page: number, options?: { deferMetadata?: boolean; onProgress?: (result: FilmListInterface) => void }): Promise<FilmListInterface>;
 

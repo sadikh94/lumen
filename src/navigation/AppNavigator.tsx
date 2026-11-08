@@ -4,7 +4,7 @@
  * Generally speaking, it will contain an auth flow (registration, login, forgot password)
  * and a "main" flow which the user will use once logged in.
  */
-import { NavigationContainer } from '@react-navigation/native';
+import { getFocusedRouteNameFromRoute, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DeepLinkHandler } from 'Component/DeepLinkHandler';
 import { ErrorBoundary } from 'Component/ErrorBoundary';
@@ -12,18 +12,20 @@ import { TvSearchHandler } from 'Component/TvSearchHandler';
 import { useConfigContext, useIsTV } from 'Context/ConfigContext';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
-import { ErrorScreen } from 'Screen/ErrorScreen';
-import { FilmTrailerScreen } from 'Screen/FilmTrailerScreen';
-import { PlayerScreen } from 'Screen/PlayerScreen';
+import { Platform } from 'react-native';
 import BroadcastPlayer from 'Screen/BroadcastScreen/BroadcastPlayer';
 import { DownloadsScreen } from 'Screen/DownloadsScreen';
+import { ErrorScreen } from 'Screen/ErrorScreen';
+import { FilmTrailerScreen } from 'Screen/FilmTrailerScreen';
 import { MyCommentsScreen } from 'Screen/MyCommentsScreen';
 import { NotificationsScreen } from 'Screen/NotificationsScreen';
+import { PlayerScreen } from 'Screen/PlayerScreen';
 import { SettingsScreen } from 'Screen/SettingsScreen';
 import { WelcomeScreen } from 'Screen/WelcomeScreen';
 import { useAppTheme } from 'Theme/context';
 import { navigationRef, useBackButtonHandler } from 'Util/Navigation';
 
+import { createFilmNavigator } from './FilmNavigator';
 import {
   DOWNLOADS_SCREEN,
   ERROR_SCREEN,
@@ -41,7 +43,6 @@ import {
 } from './navigationRoutes';
 import type { AppStackParamList, NavigationProps } from './navigationTypes';
 import { TabsNavigator } from './TabsNavigator';
-import { createFilmNavigator } from './FilmNavigator';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -70,11 +71,20 @@ const AppStack = () => {
 
   return (
     <Stack.Navigator
-      screenOptions={ {
-        headerShown: false,
+      screenOptions={ ({ route }) => ({
+        headerShown: Platform.OS === 'web'
+          && [ERROR_SCREEN, SETTINGS_SCREEN, NOTIFICATIONS_SCREEN, DOWNLOADS_SCREEN, MY_COMMENTS_SCREEN]
+            .includes(route.name)
+          && (!getFocusedRouteNameFromRoute(route)
+            || [NOTIFICATIONS_TAB, MY_COMMENTS_TAB].includes(getFocusedRouteNameFromRoute(route)!)),
+        headerTitle: '',
+        headerTintColor: '#fff',
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerShadowVisible: false,
+        headerBackButtonDisplayMode: 'minimal',
         navigationBarColor: theme.colors.background,
         contentStyle: { backgroundColor: theme.colors.background },
-      } }
+      }) }
       initialRouteName={ TABS_SCREEN }
     >
       <Stack.Screen

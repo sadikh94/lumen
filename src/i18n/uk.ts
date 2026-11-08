@@ -435,6 +435,8 @@ const uk: Translations = {
   'Refresh downloads': 'Оновити завантаження',
   'Network error': 'Помилка мережі',
   'Network request failed. Please check your internet connection and try again.': 'Помилка мережі. Відсутнє з\'єднання з інтернетом, або сайт недоступний.',
+  'Filmography': 'Фільмографія',
+  'Unable to load person': 'Не вдалося завантажити інформацію про людину',
   'Retry': 'Спробувати знову',
   'Strict connection check': 'Перевірка з\'єднання',
   'Toggle strict connection check.': 'Перемкнути перевірку наявності інтернет з\'єднання.',

@@ -1,6 +1,8 @@
 import { enqueueBookmarkRequest } from '../search/BookmarkRequests';
 import { seriesStatusLabel, supplementSeriesStatus } from 'Util/Film/posterStatus';
 import { FilmInterface } from 'Type/Film.interface';
+import type { ActorInterface } from 'Type/Actor.interface';
+import type { ActorCardInterface } from 'Type/ActorCard.interface';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
 import { subtitleFromFilm } from 'Util/Film/subtitle';
 import { ContentSource } from '../types/ContentSource';
@@ -117,6 +119,29 @@ export class SourceRouter {
 
     return null;
   }
+  async getActorDetails(
+    link: string, legacy: (link: string) => Promise<ActorInterface>, person?: ActorCardInterface,
+  ): Promise<ActorInterface | null> {
+    if (!isSourceEnabled(sourceForLink(link))) throw new Error('Content source is disabled in settings');
+    const adapter = this.getAdapterForLink(link);
+    if (!adapter) return legacy(link);
+    if (adapter.getActorDetails) return adapter.getActorDetails(link, person);
+    const url = new URL(link);
+    const isNativePerson = adapter?.source === ContentSource.ZONA && /^\d+$/.test(url.searchParams.get('person') ?? '')
+      || adapter?.source === ContentSource.ANIXART && Boolean(url.searchParams.get('director'));
+    if (isNativePerson && adapter?.getFilms) {
+      const name = person?.name || url.searchParams.get('director');
+      if (!name) throw new Error('Имя человека не передано источником. Откройте его из карточки фильма.');
+      const films = await adapter.getFilms(link, 1);
+
+      return { name, originalName: '', photo: person?.photo ?? '',
+        roles: [{ role: 'Filmography', films: films.films }],
+        filmographyPage: { currentPage: 1, totalPages: films.totalPages } };
+    }
+
+    return legacy(link);
+  }
+
   async getAnixartExternalRatings(releaseId: string) {
     if (!/^\d+$/.test(releaseId)) throw new Error('Invalid Anixart release ID');
     const film = await this.getAdapter(ContentSource.ANIXART)?.getFilm('https://anixart-app.com/release/' + releaseId);
@@ -173,6 +198,8 @@ export class SourceRouter {
       metadataSourceName: 'HDRezka',
       additionalInfo: [...(zonaFilm.additionalInfo ?? []), primary === ContentSource.ANIXART ? 'Дополнительные рейтинги, трейлеры и ссылки людей: HDRezka' : 'Комментарии, трейлеры и ссылки людей: HDRezka'],
       bookmarks: rezkaFilm.bookmarks,
+      includedIn: zonaFilm.includedIn?.length ? zonaFilm.includedIn : rezkaFilm.includedIn,
+      fromCollections: zonaFilm.fromCollections?.length ? zonaFilm.fromCollections : rezkaFilm.fromCollections,
       franchise: zonaFilm.franchise?.length ? zonaFilm.franchise : rezkaFilm.franchise,
       schedule: zonaFilm.schedule?.length ? zonaFilm.schedule : rezkaFilm.schedule,
       related: zonaFilm.related?.length ? zonaFilm.related : rezkaFilm.related,

@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform } from 'react-native';
 import { ActorScreen } from 'Screen/ActorScreen';
 import { CategoryScreen } from 'Screen/CategoryScreen';
 import { CollectionScreen } from 'Screen/CollectionScreen';
@@ -28,11 +29,16 @@ export const FilmNavigator = ({
   return (
     <Stack.Navigator initialRouteName={ name }>
       <Stack.Group
-        screenOptions={ {
-          headerShown: false,
+        screenOptions={ ({ route }) => ({
+          headerShown: Platform.OS === 'web' && route.name !== name && route.name !== FILM_SCREEN,
+          headerTitle: '',
+          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerShadowVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
           animation: 'fade',
           contentStyle: { backgroundColor: theme.colors.background },
-        } }
+        }) }
       >
         <Stack.Screen
           name={ name }
@@ -69,7 +75,7 @@ export const FilmNavigator = ({
 export const createFilmNavigator = (
   name: string,
   component: any,
-  additionalScreens: FilmNavigatorScreen[] = [],
+  additionalScreens: FilmNavigatorScreen[] = []
 ) => {
   return () => (
     <FilmNavigator

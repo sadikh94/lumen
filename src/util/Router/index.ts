@@ -1,6 +1,7 @@
 import { ACTOR_SCREEN, CATEGORY_SCREEN, FILM_SCREEN } from 'Navigation/navigationRoutes';
 import NotificationStore from 'Store/Notification.store';
 import { FilmCardInterface } from 'Type/FilmCard.interface';
+import type { ActorCardInterface } from 'Type/ActorCard.interface';
 import { getRegisteredUnifiedFilm, sourceResolver } from '../../source';
 
 type FilmInput = Pick<FilmCardInterface, 'link' | 'poster'> & Partial<Pick<FilmCardInterface, 'id'>>;
@@ -29,10 +30,10 @@ export const openFilm = (film: FilmInput, navigation: any) => {
   );
 };
 
-export const openActor = (link: string, navigation: any) => {
+export const openActor = (link: string, navigation: any, person?: ActorCardInterface) => {
   navigation.push(
     ACTOR_SCREEN,
-    { link } as never
+    { link, person } as never
   );
 };
 

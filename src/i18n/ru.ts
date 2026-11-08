@@ -435,6 +435,8 @@ const ru: Translations = {
   'Refresh downloads': 'Обновить загрузки',
   'Network error': 'Ошибка сети',
   'Network request failed. Please check your internet connection and try again.': 'Сетевая ошибка. Отсутствует соединение с интернетом, либо сайт недоступен.',
+  'Filmography': 'Фильмография',
+  'Unable to load person': 'Не удалось загрузить информацию о человеке',
   'Retry': 'Попробовать снова',
   'Strict connection check': 'Проверка соединения',
   'Toggle strict connection check.': 'Переключить проверку наличия интернет соединения.',
